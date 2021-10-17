@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31727.386
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adelanta.API", "Adelanta.API\Adelanta.API.csproj", "{F53145D4-D302-4901-A4AA-923F0B10602B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{D995A45A-9460-4ACC-9684-C71217510217}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontend", "Frontend", "{8C3335E4-EAC6-41CB-B309-823268961D21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adelanta.Data", "Adelanta.Data\Adelanta.Data.csproj", "{725C3133-3B9E-47F3-A7F2-683D76A1635F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adelanta.Model", "Adelanta.Model\Adelanta.Model.csproj", "{EF6D299B-029B-496B-83D8-E74C1F39C096}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adelanta.Core", "Adelanta.Core\Adelanta.Core.csproj", "{F51EFB0A-74EF-47D0-879A-56A0E14392BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adelanta.Web", "Adelanta.Web\Adelanta.Web.csproj", "{BE8B2A75-D1EC-4433-95E9-C74A78750C99}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F53145D4-D302-4901-A4AA-923F0B10602B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F53145D4-D302-4901-A4AA-923F0B10602B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F53145D4-D302-4901-A4AA-923F0B10602B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F53145D4-D302-4901-A4AA-923F0B10602B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{725C3133-3B9E-47F3-A7F2-683D76A1635F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{725C3133-3B9E-47F3-A7F2-683D76A1635F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{725C3133-3B9E-47F3-A7F2-683D76A1635F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{725C3133-3B9E-47F3-A7F2-683D76A1635F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF6D299B-029B-496B-83D8-E74C1F39C096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF6D299B-029B-496B-83D8-E74C1F39C096}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF6D299B-029B-496B-83D8-E74C1F39C096}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF6D299B-029B-496B-83D8-E74C1F39C096}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F51EFB0A-74EF-47D0-879A-56A0E14392BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F51EFB0A-74EF-47D0-879A-56A0E14392BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F51EFB0A-74EF-47D0-879A-56A0E14392BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F51EFB0A-74EF-47D0-879A-56A0E14392BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE8B2A75-D1EC-4433-95E9-C74A78750C99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE8B2A75-D1EC-4433-95E9-C74A78750C99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE8B2A75-D1EC-4433-95E9-C74A78750C99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE8B2A75-D1EC-4433-95E9-C74A78750C99}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F53145D4-D302-4901-A4AA-923F0B10602B} = {D995A45A-9460-4ACC-9684-C71217510217}
+		{725C3133-3B9E-47F3-A7F2-683D76A1635F} = {D995A45A-9460-4ACC-9684-C71217510217}
+		{EF6D299B-029B-496B-83D8-E74C1F39C096} = {D995A45A-9460-4ACC-9684-C71217510217}
+		{F51EFB0A-74EF-47D0-879A-56A0E14392BE} = {D995A45A-9460-4ACC-9684-C71217510217}
+		{BE8B2A75-D1EC-4433-95E9-C74A78750C99} = {8C3335E4-EAC6-41CB-B309-823268961D21}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C0A67D4E-23B5-4CF8-A534-1B4C5CB57F1E}
+	EndGlobalSection
+EndGlobal

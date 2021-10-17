@@ -1,0 +1,58 @@
+@import "~antd/dist/antd.css";
+
+.trigger {
+	padding: 0 24px;
+	font-size: 18px;
+	line-height: 64px;
+	cursor: pointer;
+	transition: color 0.3s;
+}
+
+.trigger:hover {
+	color: #1890ff;
+}
+
+.logo {
+	height: 32px;
+	margin: 16px;
+}
+
+.logo img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.site-layout .site-layout-background {
+	background: #fff;
+}
+[data-theme="dark"] .site-layout .site-layout-background {
+	background: #141414;
+}
+
+.site-page-header {
+	border: 1px solid rgb(235, 237, 240);
+}
+
+/* TABLA */
+.ant-table-content {
+	overflow-y: auto;
+}
+
+/* Login */
+.title__login {
+	text-align: center;
+	margin-bottom: 30px !important;
+}
+
+.button__login {
+	width: 100%;
+}
+
+.header-slider {
+	width: calc(100% - 256px);
+}
+
+.header-slider-colapse {
+	width: calc(100% - 80px);
+}
