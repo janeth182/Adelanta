@@ -66,12 +66,12 @@ export const UsuariosPage = () => {
 		},
 		{
 			title: "Rol",
-			dataIndex: "documento",
-			...getColumnSearchProps("documento"),
+			dataIndex: "rol",
+			...getColumnSearchProps("rol"),
 		},
 		{
 			title: "Estado",
-			dataIndex: "status",
+			dataIndex: "estado",
 			render: (value) => {
 				return (
 					<Tag color={value === "active" ? "green" : "red"} rou>
@@ -82,11 +82,15 @@ export const UsuariosPage = () => {
 			filters: [
 				{
 					text: "Activo",
-					value: "active",
+					value: "1",
 				},
 				{
 					text: "Inactivo",
-					value: "inactive",
+					value: "3",
+				},
+				{
+					text: "Creado",
+					value: "2",
 				},
 			],
 			onFilter: (value, record) => record.status.indexOf(value) === 0,
@@ -102,14 +106,14 @@ export const UsuariosPage = () => {
 							type="success"
 							icon={<EditOutlined />}
 							onClick={() =>
-								history.push("/editar-usuario/" + record.id)
+								history.push("/editar-usuario/" + record.idUsuario)
 							}
 						></Button>
 						<Divider type="vertical" />
 						<Button
 							danger
 							icon={<DeleteOutlined />}
-							onClick={() => alert(record.id)}
+							onClick={() => alert(record.idUsuario)}
 						></Button>
 					</>
 				);
@@ -192,7 +196,7 @@ export const UsuariosPage = () => {
 				backIcon={null}
 				className="site-page-header"
 				onBack={() => null}
-				title="Listar Usuarios"
+				title=""
 			/>
 			<MessageApi
 				type={messageInfo.type}
@@ -203,7 +207,7 @@ export const UsuariosPage = () => {
 			<Row>
 				<Col span={24}>
 					<Card
-						title="Listar Usuarios"
+						title="Usuarios"
 						actions={[<h1>©2021  Adelanta Factoring</h1>]}
 						extra={
 							<Button
@@ -216,27 +220,7 @@ export const UsuariosPage = () => {
 								Usuario
 							</Button>
 						}
-					>
-						<Row>
-							<Col xs={24} lg={12}>
-								<Row>
-									<Col xs={24} lg={20} style={{ marginBottom: 10 }}>
-										<Input
-											placeholder="Buscar"
-											value={valueSearch}
-											onChange={(e) =>
-												setValueSearch(e.target.value)
-											}
-										/>
-									</Col>
-									<Col xs={24} lg={4} style={{ marginBottom: 10 }}>
-										<Button type="primary" block>
-											Buscar
-										</Button>
-									</Col>
-								</Row>
-							</Col>
-						</Row>
+					>	
 						<Table
 							loading={loadingApi}
 							columns={columns}
@@ -325,19 +309,7 @@ export const UsuariosPage = () => {
 									}}
 								/>
 							</Form.Item>
-						</Col>
-						<Radio.Group
-							onChange={(e) => {
-								console.log(e);
-								formik.setFieldValue("civil", e.target.value);
-							}}
-							value={formik.values.civil}
-						>
-							<Radio value="1">Casado</Radio>
-							<Radio value="2">Soltero</Radio>
-							<Radio value="3">Divoriciado</Radio>
-							<Radio value="4">Viudo</Radio>
-						</Radio.Group>
+						</Col>						
 					</Row>
 				</Form>
 			</ModalComponent>

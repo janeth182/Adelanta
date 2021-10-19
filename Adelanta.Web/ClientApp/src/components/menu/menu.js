@@ -76,9 +76,9 @@ export const MenuComponent = () => {
 	const IconMenu = ({ value = "" }) => {
 		switch (value) {
 			case "home":
-				return <FieldTimeOutlined spin={true}/>;
+				return <FieldTimeOutlined />;
 			case "user":
-				return <UserOutlined />;
+				return <UserOutlined spin={true}/>;
 			case "add":
 				return <FileAddOutlined />;
 			default:

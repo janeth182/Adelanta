@@ -13,8 +13,9 @@
 }
 
 .logo {
-	height: 32px;
-	margin: 16px;
+/*	height: 32px;*/
+	margin: 5px;
+	background-color: #fff;
 }
 
 .logo img {

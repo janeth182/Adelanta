@@ -3,7 +3,7 @@ import { Layout } from "antd";
 import { MenuComponent } from "../menu/menu";
 import { LayoutContext } from "../../context/layoutProvider";
 
-import Logo from "../../images/google.jpg";
+import Logo from "../../images/logo.png";
 
 const { Sider } = Layout;
 

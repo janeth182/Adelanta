@@ -4,6 +4,7 @@ using Dapper;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,16 +27,19 @@ namespace Adelanta.Data.Repository
         public async Task<IEnumerable<UsuarioBE>> ListarUsuarios()
         {
             var db = dbConnection();
-            var sql = @"SELECT IdUsuario,Usuario,Nombres,ApellidoPaterno, ApellidoMaterno,Email,Documento,Telefono,Direccion,IdRol FROM USUARIO";
+            var sql = @"SELECT U.IdUsuario,U.Usuario,Nombres,ApellidoPaterno, ApellidoMaterno,Email,Documento,Telefono,Direccion,U.IdRol, R.Rol, L.IdEstado, E.Estado
+                        FROM USUARIO U INNER JOIN LOGIN L ON U.IdUsuario=L.IdUsuario
+                        INNER JOIN ESTADO E ON L.IdEstado=E.IdEstado 
+                        INNER JOIN ROL R ON R.IdRol=U.IdRol";
             return await db.QueryAsync<UsuarioBE>(sql, new { });
         }
 
         public async Task<bool> AgregarUsuario(UsuarioBE oUsuarioBE)
         {
             var db = dbConnection();
-            var sql = @"INSERT INTO USUARIO (Usuario, Nombres, ApellidoPaterno, ApellidoMaterno, Email, Documento, Telefono, Direccion, IdRol) 
-                        VALUES(@Usuario, @Nombres, @ApellidoPaterno, @ApellidoMaterno, @Email, @Documento, @Telefono, @Direccion, @IdRol)";
-            var result = await db.ExecuteAsync(sql, new { oUsuarioBE.Usuario, oUsuarioBE.Nombres, oUsuarioBE.ApellidoPaterno, oUsuarioBE.ApellidoMaterno, oUsuarioBE.Email, oUsuarioBE.Documento, oUsuarioBE.Telefono, oUsuarioBE.Direccion, oUsuarioBE.IdRol });
+            var sql = "sp_crearUsuario";
+            var values = new { p_Usuario = oUsuarioBE.Usuario, p_Nombres = oUsuarioBE.Nombres, p_ApellidoPaterno = oUsuarioBE.ApellidoPaterno, p_ApellidoMaterno = oUsuarioBE.ApellidoMaterno, p_Email = oUsuarioBE.Email, p_Documento = oUsuarioBE.Documento, p_Telefono = oUsuarioBE.Telefono, p_Direccion = oUsuarioBE.Direccion, p_IdRol = oUsuarioBE.IdRol };
+            var result = await db.ExecuteAsync(sql, values, commandType: CommandType.StoredProcedure);
             return result > 0;
         }
 
