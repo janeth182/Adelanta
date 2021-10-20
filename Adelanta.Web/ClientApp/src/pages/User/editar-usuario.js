@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Button, Switch, Radio, Form, Select, message } from "antd";
+import { PageHeader, Row, Col, Card, Button, Switch, Radio, Form, Select, message} from "antd";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { ContentComponent } from "../../components/layout/content";
@@ -8,37 +8,38 @@ import { useMessageApi } from "../../hooks/useMessage";
 import { MessageApi } from "../../components/message/message";
 import { InputComponent } from "../../components/formControl.js/input";
 import { SelectComponent } from "../../components/formControl.js/select";
-import { crearUsuario } from "../../services/usuariosService";
+import { crearUsuario, obtenerUsuario, actualizarUsuario, ObtenerUsuarioPorUserName } from "../../services/usuariosService";
 import { SaveOutlined, RetweetOutlined  } from "@ant-design/icons";
 const { Option } = Select;
 
 export const EditarUsuariosPage = () => {
-	const { isMessage, addMessage, messageInfo } = useMessageApi();
+	const { isMessage, messageInfo } = useMessageApi();
 	const [loadingApi, setLoadingApi] = useState(false);
-	const history = useHistory();
+	const history = useHistory();	
 	const formik = useFormik({
 		initialValues: {
-			apellidoMaterno: "Herhuay",
-			apellidoPaterno: "Vargas",
+			apellidoMaterno: '',
+			apellidoPaterno: '',
 			direccion: '',
-			documento: "10460111299",
-			email: "jvargas182@gmail.com",
-			idRol: "1",
-			idUsuario: 1,
-			nombres: "Janeth",
-			telefono: "",
-			usuario: "jvargas",
-			idEstado: 1,
+			documento: '',
+			email: '',
+			idRol: '',
+			idUsuario: '0',
+			nombres: '',
+			telefono: '',
+			usuario: '',
+			idEstado: '',
 			rol:'',
 			estado:'',
-			usuario: 'jvargas'		
+			usuario: ''	
 		},
 		validationSchema: Yup.object().shape({
+			usuario: Yup.string().required("El campo es requerido"),
 			nombres: Yup.string().required("El campo es requerido"),
 			apellidoMaterno: Yup.string().required("El campo es requerido"),
 			apellidoPaterno: Yup.string().required("El campo es requerido"),
-			documento: Yup.string().required("El campo es requerido"),
-			estado: Yup.string().required("El campo es requerido"),
+			documento: Yup.number().required("El campo es requerido"),
+			idEstado: Yup.string().required("El campo es requerido"),
 			telefono: Yup.string(),
 			direccion: Yup.string(),
 			email: Yup.string().required("El campo es requerido"),
@@ -54,24 +55,33 @@ export const EditarUsuariosPage = () => {
 		(async () => {
 			setLoadingApi(true);
 			try {
-				const rpta = await crearUsuario(value);
+				let rpta = '';
+				if(history.location.state === 0){
+					rpta = await ObtenerUsuarioPorUserName(value.usuario);
+					if(rpta.data.usuario !== value.usuario){											
+						rpta = await crearUsuario(value);
+					}										
+				} else {
+					rpta = await actualizarUsuario(value);
+				}
 				if (rpta.status === 201) {
 					if (suscribe) {
-						await addMessage({
-							type: "success",
-							text: "Registro Existoso",
-							description: "El usuario se registro correctamente",
-						});
-						console.log(value);
+						message.success('Se registro correctamente el usuario.');
 						setLoadingApi(false);
 					}
+				} else if(rpta.status === 204){
+					message.success('Se actualizo correctamente el usuario.');
+					setLoadingApi(false);
+				} else if (rpta.status === 200){
+					message.info('El usuario ingresado ya existe.');
+					setLoadingApi(false);
 				} else {
-					message.error('This is an error message');
+					message.error('Ocurrio un error al momento de procesar la solicitud.');
+					setLoadingApi(false);
 				}
 			} catch (error) {
 				setLoadingApi(false);
-				console.log(error.response);
-				message.error('This is an error message');
+				message.error('Ocurrio un error al momento de procesar la solicitud.');
 			}
 		})();
 
@@ -80,8 +90,47 @@ export const EditarUsuariosPage = () => {
 		};		
 	};
 
+	useEffect(() => {
+		let suscribe = true;
+		(async () => {
+			setLoadingApi(true);
+			try {
+				if(history.location.state !== 0 ){
+					const rpta = await obtenerUsuario(history.location.state);
+					if (rpta.status === 200) {
+						if (suscribe) {						
+							formik.initialValues.apellidoMaterno = rpta.data.apellidoMaterno;
+							formik.initialValues.apellidoPaterno = rpta.data.apellidoPaterno;
+							formik.initialValues.direccion = rpta.data.direccion;
+							formik.initialValues.documento = rpta.data.documento;
+							formik.initialValues.email = rpta.data.email;
+							formik.initialValues.idRol = rpta.data.idRol;
+							formik.initialValues.idUsuario = rpta.data.idUsuario;
+							formik.initialValues.nombres = rpta.data.nombres;
+							formik.initialValues.telefono = rpta.data.telefono;
+							formik.initialValues.usuario = rpta.data.usuario;
+							formik.initialValues.idEstado = rpta.data.idEstado;
+							formik.initialValues.rol = rpta.data.rol;
+							formik.initialValues.estado = rpta.data.estado;
+							formik.initialValues.usuario = rpta.data.usuario;
+							console.log(rpta.data)
+							setLoadingApi(false);
+						}
+					}
+				} else {
+					setLoadingApi(false);
+				}				
+			} catch (error) {
+				setLoadingApi(false);
+				console.log(error.response);
+			}
+		})();
+		return () => {
+			suscribe = false;
+		};
+	}, []);
 	return (
-		<ContentComponent style={{ padding: '0 24px', minHeight: 280 }}>
+		<ContentComponent style={{ padding: '0 24px', minHeight: 280 }} >
 			<PageHeader
 				backIcon={null}
 				className="site-page-header"
@@ -119,14 +168,25 @@ export const EditarUsuariosPage = () => {
 									padding: `0 16px`,
 								}}
 							>
-							<Button type="primary" onClick={formik.handleSubmit} icon={<SaveOutlined />}>
-								Actualizar
+							<Button type="primary" onClick={formik.handleSubmit} icon={<SaveOutlined />} loading={loadingApi}>
+								Guardar
 							</Button>
 							</div>,
 						]}
 					>
 						<Form layout="vertical">
 							<Row gutter={12}>
+								<Col lg={12} xs={{ span: 24 }}>
+									<InputComponent
+										name="usuario"
+										value={formik.values.usuario}
+										onBlur={formik.handleBlur}
+										onChange={formik.handleChange}
+										error={formik.errors.usuario}
+										touched={formik.touched.usuario}
+										title="Usuario:"
+									/>
+								</Col>
 								<Col lg={12} xs={{ span: 24 }}>
 									<InputComponent
 										name="nombres"
@@ -137,18 +197,7 @@ export const EditarUsuariosPage = () => {
 										touched={formik.touched.nombres}
 										title="Nombres:"
 									/>
-								</Col>
-								<Col lg={12} xs={{ span: 24 }}>
-									<InputComponent
-										name="documento"
-										value={formik.values.documento}
-										onBlur={formik.handleBlur}
-										onChange={formik.handleChange}
-										error={formik.errors.documento}
-										touched={formik.touched.documento}
-										title="Nro RUC:"
-									/>
-								</Col>
+								</Col>																
 							</Row>
 							<Row gutter={12}>
 								<Col lg={12} xs={{ span: 24 }}>
@@ -175,6 +224,18 @@ export const EditarUsuariosPage = () => {
 								</Col>
 							</Row>
 							<Row gutter={12}>
+							    <Col lg={12} xs={{ span: 24 }}>
+									<InputComponent
+										name="documento"
+										value={formik.values.documento}
+										onBlur={formik.handleBlur}
+										onChange={formik.handleChange}
+										error={formik.errors.documento}
+										touched={formik.touched.documento}
+										maxLength={11}
+										title="Nro RUC:"
+									/>
+								</Col>
 								<Col lg={12} xs={{ span: 24 }}>
 									<InputComponent
 										name="email"
@@ -185,6 +246,19 @@ export const EditarUsuariosPage = () => {
 										touched={formik.touched.email}
 										title="Email:"
 									/>
+								</Col>							
+							</Row>
+							<Row gutter={16}>
+								<Col lg={12} xs={{ span: 24 }}>
+								<InputComponent
+									name="direccion"
+									value={formik.values.direccion}
+									onBlur={formik.handleBlur}
+									onChange={formik.handleChange}
+									error={formik.errors.direccion}
+									touched={formik.touched.direccion}
+									title="Direccion:"
+								/>
 								</Col>
 								<Col lg={12} xs={{ span: 24 }}>
 									<InputComponent
@@ -216,15 +290,15 @@ export const EditarUsuariosPage = () => {
 									</SelectComponent>
 								</Col>
 								<Col xs={24} lg={12}>
-								<SelectComponent
+								<SelectComponent 
 										name="idEstado"
-										value={formik.values.estado}
+										value={formik.values.idEstado}
 										onBlur={formik.handleBlur}
 										onChange={(e) => {
-											formik.setFieldValue("estado", e);
+											formik.setFieldValue("idEstado", e);
 										}}
-										error={formik.errors.estado}
-										touched={formik.touched.estado}
+										error={formik.errors.idEstado}
+										touched={formik.touched.idEstado}
 										title="Estado:"
 									>
 										<Option value="1">Creado</Option>
@@ -232,16 +306,7 @@ export const EditarUsuariosPage = () => {
 										<Option value="3">Inactivo</Option>
 									</SelectComponent>
 								</Col>								
-							</Row>
-							<InputComponent
-								name="direccion"
-								value={formik.values.direccion}
-								onBlur={formik.handleBlur}
-								onChange={formik.handleChange}
-								error={formik.errors.direccion}
-								touched={formik.touched.direccion}
-								title="Direccion:"
-							/>
+							</Row>							
 						</Form>
 					</Card>
 				</Col>

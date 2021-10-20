@@ -37,9 +37,9 @@ namespace Adelanta.Data.Repository
         public async Task<bool> AgregarUsuario(UsuarioBE oUsuarioBE)
         {
             var db = dbConnection();
-            var sql = "sp_crearUsuario";
+            var sp = "sp_crearUsuario";
             var values = new { p_Usuario = oUsuarioBE.Usuario, p_Nombres = oUsuarioBE.Nombres, p_ApellidoPaterno = oUsuarioBE.ApellidoPaterno, p_ApellidoMaterno = oUsuarioBE.ApellidoMaterno, p_Email = oUsuarioBE.Email, p_Documento = oUsuarioBE.Documento, p_Telefono = oUsuarioBE.Telefono, p_Direccion = oUsuarioBE.Direccion, p_IdRol = oUsuarioBE.IdRol };
-            var result = await db.ExecuteAsync(sql, values, commandType: CommandType.StoredProcedure);
+            var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
             return result > 0;
         }
 
@@ -65,15 +65,27 @@ namespace Adelanta.Data.Repository
         {
             var db = dbConnection();
             var sql = @"DELETE FROM USUARIO WHERE IdUsuario = @IdUsuario";
-            var result = await db.QueryFirstOrDefaultAsync(sql, new { IdUsuario = IdUsuario });
+            var result = await db.QueryFirstOrDefaultAsync(sql, new { IdUsuario });
             return result > 0;
         }
 
         public async Task<UsuarioBE> ObtenerUsuario(int IdUsuario)
         {
             var db = dbConnection();
-            var sql = @"SELECT IdUsuario,Usuario,Nombres,ApellidoPaterno, ApellidoMaterno,Email,Documento,Telefono,Direccion,IdRol FROM USUARIO WHERE IdUsuario = @IdUsuario";
-            return await db.QueryFirstOrDefaultAsync<UsuarioBE>(sql, new { IdUsuario = IdUsuario });
+            var sql = @"SELECT U.IdUsuario,U.Usuario,Nombres,ApellidoPaterno, ApellidoMaterno,Email,Documento,Telefono,Direccion,U.IdRol, R.Rol, L.IdEstado, E.Estado
+                        FROM USUARIO U INNER JOIN LOGIN L ON U.IdUsuario=L.IdUsuario
+                        INNER JOIN ESTADO E ON L.IdEstado=E.IdEstado 
+                        INNER JOIN ROL R ON R.IdRol=U.IdRol WHERE U.IdUsuario = @IdUsuario";
+            return await db.QueryFirstOrDefaultAsync<UsuarioBE>(sql, new { IdUsuario });
+        }
+        public async Task<UsuarioBE> ObtenerUsuarioPorUserName(string Usuario)
+        {
+            var db = dbConnection();
+            var sql = @"SELECT U.IdUsuario,U.Usuario,Nombres,ApellidoPaterno, ApellidoMaterno,Email,Documento,Telefono,Direccion,U.IdRol, R.Rol, L.IdEstado, E.Estado
+                        FROM USUARIO U INNER JOIN LOGIN L ON U.IdUsuario=L.IdUsuario
+                        INNER JOIN ESTADO E ON L.IdEstado=E.IdEstado 
+                        INNER JOIN ROL R ON R.IdRol=U.IdRol WHERE U.Usuario = @Usuario";
+            return await db.QueryFirstOrDefaultAsync<UsuarioBE>(sql, new { Usuario });
         }
     }
 }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Adelanta.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class UsuarioController : ControllerBase
     {
@@ -25,12 +25,17 @@ namespace Adelanta.API.Controllers
             return Ok(await _usuarioRepository.ListarUsuarios());
         }
 
-        [HttpGet("{IdUsuario}")]
-        public async Task<IActionResult> ObtenerUsuario(int IdUsuario)
+        [HttpGet("/api/Usuario/ObtenerUsuario/{IdUsuario}")]
+        public async Task<IActionResult> ObtenerUsuario([FromRoute] int IdUsuario)
         {
             return Ok(await _usuarioRepository.ObtenerUsuario(IdUsuario));
         }
 
+        [HttpGet("/api/Usuario/ObtenerUsuarioPorUserName/{Usuario}")]
+        public async Task<IActionResult> ObtenerUsuarioPorUserName([FromRoute] string Usuario)
+        {
+            return Ok(await _usuarioRepository.ObtenerUsuarioPorUserName(Usuario));
+        }
         [HttpPost]
         public async Task<IActionResult> AgregarUsuario([FromBody] UsuarioBE oUsuarioBE)
         {
@@ -51,12 +56,12 @@ namespace Adelanta.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _usuarioRepository.AgregarUsuario(oUsuarioBE);
+            await _usuarioRepository.ActualizarUsuario(oUsuarioBE);
             return NoContent();
         }
 
-        [HttpDelete("{IdUsuario}")]
-        public async Task<IActionResult> EliminarUsuario(int IdUsuario)
+        [HttpDelete("/api/Usuario/EliminarUsuario/{IdUsuario}")]
+        public async Task<IActionResult> EliminarUsuario([FromRoute] int IdUsuario)
         {
             await _usuarioRepository.EliminarUsuario(IdUsuario);
             return NoContent();

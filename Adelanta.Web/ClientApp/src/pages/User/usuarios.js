@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Table, Button, Tag, Divider, Switch, Radio, Form, Select, Input } from "antd";
-import { UserAddOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PageHeader, Row, Col, Card, Table, Button, Tag, Divider, Switch, Radio, Form, Select, Input, message, Popconfirm } from "antd";
+import { PlusSquareOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { ContentComponent } from "../../components/layout/content";
-import { listarUsuariosService } from "../../services/usuariosService";
+import { listarUsuarios } from "../../services/usuariosService";
 import { getColumnSearchProps } from "../../components/table/configTable";
 import { useModal } from "../../hooks/useModal";
 import { ModalComponent } from "../../components/modal/modal";
@@ -24,9 +24,18 @@ export const UsuariosPage = () => {
 	const [valueSearch, setValueSearch] = useState("");
 
 	const [dataUsuario, setDataUsuario] = useState([]);
-	const [loadingApi, setLoadingApi] = useState(false);
-
+	const [loadingApi, setLoadingApi] = useState(false);	
 	const history = useHistory();
+
+	function confirm(e) {
+		console.log(e);
+		message.success('Se eliminimo correctamente al usuario.');
+	  }
+	  
+	  function cancel(e) {
+		console.log(e);
+		message.error('No se elimino al usuario.');
+	  }
 
 	const columns = [
 		{
@@ -72,28 +81,14 @@ export const UsuariosPage = () => {
 		{
 			title: "Estado",
 			dataIndex: "estado",
+			...getColumnSearchProps("estado"),
 			render: (value) => {
 				return (
-					<Tag color={value === "active" ? "green" : "red"} rou>
+					<Tag color={value === "Activo" ? "green" : "red"} rou>
 						{value}
 					</Tag>
 				);
-			},
-			filters: [
-				{
-					text: "Activo",
-					value: "1",
-				},
-				{
-					text: "Inactivo",
-					value: "3",
-				},
-				{
-					text: "Creado",
-					value: "2",
-				},
-			],
-			onFilter: (value, record) => record.status.indexOf(value) === 0,
+			}			
 		},
 		{
 			title: "Acción",
@@ -106,15 +101,22 @@ export const UsuariosPage = () => {
 							type="success"
 							icon={<EditOutlined />}
 							onClick={() =>
-								history.push("/editar-usuario/" + record.idUsuario)
+								history.push("/editar-usuario/" + record.idUsuario, record.idUsuario)
 							}
 						></Button>
 						<Divider type="vertical" />
+						<Popconfirm
+							title="Esta seguro que desea eliminar este usuario?"
+							onConfirm={confirm}
+							onCancel={cancel}
+							okText="Sí"
+							cancelText="No"
+						>
 						<Button
 							danger
 							icon={<DeleteOutlined />}
-							onClick={() => alert(record.idUsuario)}
-						></Button>
+						></Button>	
+						</Popconfirm>						
 					</>
 				);
 			},
@@ -126,8 +128,7 @@ export const UsuariosPage = () => {
 		(async () => {
 			setLoadingApi(true);
 			try {
-				const rpta = await listarUsuariosService();
-
+				const rpta = await listarUsuarios();
 				if (rpta.status === 200) {
 					if (suscribe) {
 						console.log(rpta.data)
@@ -140,56 +141,20 @@ export const UsuariosPage = () => {
 				console.log(error.response);
 			}
 		})();
-
 		return () => {
 			suscribe = false;
 		};
 	}, []);
 
-	const formik = useFormik({
-		initialValues: {
-			nombre: "",
-			edad: "",
-			direccion: "",
-			sexo: "",
-			estado: true,
-			civil: "Soltero",
-		},
-		validationSchema: Yup.object().shape({
-			nombre: Yup.string().required("El campo es requerido"),
-			edad: Yup.string().required("El campo es requerido"),
-			direccion: Yup.string().required("El campo es requerido"),
-			sexo: Yup.string().required("El campo es requerido"),
-			estado: Yup.boolean(),
-			civil: Yup.string(),
-		}),
-		onSubmit: (value) => {
-			handleNewUsuario(value);
-		},
-	});
-
 	const handleFormatColumns = (dataArray = []) => {
 		const data = dataArray.reduce((ac, el) => {
 			ac.push({
-				...el,
-				key: el.id,
-				age: Math.floor(Math.random() * (100 - 1)) + 1,
+				...el
 			});
 			return ac;
 		}, []);
 		setDataUsuario(data);
 	};
-
-	const handleNewUsuario = async (value) => {
-		hiddenModal();
-		await addMessage({
-			type: "success",
-			text: "Registro Existoso",
-			description: "El usuario se registro correctamente",
-		});
-		console.log(value);
-	};
-
 	return (
 		<ContentComponent>
 			<PageHeader
@@ -210,14 +175,15 @@ export const UsuariosPage = () => {
 						title="Usuarios"
 						actions={[<h1>©2021  Adelanta Factoring</h1>]}
 						extra={
-							<Button
-								// style={{ backgroundColor: "red" }}
+							<Button								
 								className="primary-b"
 								type="primary"
-								icon={<UserAddOutlined />}
-								onClick={showModal}
+								icon={<PlusSquareOutlined style={{ fontSize: '16px'}}/>}								
+								onClick={() =>
+									history.push("/editar-usuario/0", 0)
+								}
 							>
-								Usuario
+							Crear Usuario
 							</Button>
 						}
 					>	
@@ -237,82 +203,7 @@ export const UsuariosPage = () => {
 						/>
 					</Card>
 				</Col>
-			</Row>
-
-			<ModalComponent
-				title="Registrar Usuario"
-				onClose={hiddenModal}
-				show={isModal}
-				nameButton="Guardar"
-				onPress={formik.handleSubmit}
-			>
-				<Form layout="vertical">
-					<Row gutter={16}>
-						<Col span={12}>
-							<InputComponent
-								name="nombre"
-								value={formik.values.nombre}
-								onBlur={formik.handleBlur}
-								onChange={formik.handleChange}
-								error={formik.errors.nombre}
-								touched={formik.touched.nombre}
-								title="Nombre"
-							/>
-						</Col>
-						<Col span={12}>
-							<InputComponent
-								name="edad"
-								value={formik.values.edad}
-								onBlur={formik.handleBlur}
-								onChange={formik.handleChange}
-								error={formik.errors.edad}
-								touched={formik.touched.edad}
-								title="Edad"
-							/>
-						</Col>
-					</Row>
-					<InputComponent
-						name="direccion"
-						value={formik.values.direccion}
-						onBlur={formik.handleBlur}
-						onChange={formik.handleChange}
-						error={formik.errors.direccion}
-						touched={formik.touched.direccion}
-						title="Direccion"
-					/>
-					<Row gutter={16}>
-						<Col span={12}>
-							<SelectComponent
-								name="sexo"
-								value={formik.values.sexo}
-								onBlur={formik.handleBlur}
-								onChange={(e) => {
-									formik.setFieldValue("sexo", e);
-								}}
-								error={formik.errors.sexo}
-								touched={formik.touched.sexo}
-								title="Sexo"
-							>
-								<Option value="male">Masculino</Option>
-								<Option value="female">Femenino</Option>
-							</SelectComponent>
-						</Col>
-						<Col span={12}>
-							<Form.Item label="Estado:" valuePropName="checked">
-								<Switch
-									name="estado"
-									checked={formik.values.estado}
-									value={formik.values.estado}
-									onBlur={formik.handleBlur}
-									onChange={(e) => {
-										formik.setFieldValue("estado", e);
-									}}
-								/>
-							</Form.Item>
-						</Col>						
-					</Row>
-				</Form>
-			</ModalComponent>
+			</Row>	
 		</ContentComponent>
 	);
 };

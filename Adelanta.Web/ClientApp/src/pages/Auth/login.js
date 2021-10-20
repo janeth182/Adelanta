@@ -91,10 +91,7 @@ export const LoginPage = () => {
 					>
 						Ingresar
 					</Button>
-				</Form.Item>
-				<p>
-					¿No tienes una cuenta? <Link to="/">Registrate !!</Link>
-				</p>
+				</Form.Item>				
 			</Form>
 		</div>
 	);
