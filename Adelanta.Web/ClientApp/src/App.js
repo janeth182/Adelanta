@@ -11,7 +11,8 @@ import { PrivateRouter } from "./router/privateRouter";
 import { PrimerNivelPage } from "./pages/nivel/primerNivel";
 import { SegundoNivelPage } from "./pages/nivel/segundoNivel";
 import { EditarUsuariosPage } from "./pages/User/editar-usuario";
-
+import { FacturasPage } from './pages/Clientes/Facturas/facturas';
+import { SolicitudesPage } from './pages/Clientes/Solicitudes/solicitudes';
 export const App = () => {
 	return (
 		<AuthProvider>
@@ -20,6 +21,16 @@ export const App = () => {
 					<Switch>
 						<PublicRouter exact path="/login" component={LoginPage} />
 						<PrivateRouter exact path="/" component={HomePage} />
+						<PrivateRouter
+							exact
+							path="/clientes/solicitues"
+							component={SolicitudesPage}
+						/>
+						<PrivateRouter
+							exact
+							path="/clientes/facturas"
+							component={FacturasPage}
+						/>
 						<PrivateRouter
 							exact
 							path="/usuarios"

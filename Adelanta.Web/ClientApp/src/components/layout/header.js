@@ -54,10 +54,11 @@ export const HeaderComponent = () => {
 								display: "flex",
 								alignItems: "center",
 								marginRight: 10,
+								background: '#f0f2f552'
 							}}
 						>
 							<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-							<span style={{ marginLeft: 5 }}>{user.email}</span>
+							<span style={{ marginLeft: 5 , }}>{user.email}</span>
 						</div>
 						{React.createElement(LogoutOutlined, {
 							className: "trigger",

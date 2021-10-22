@@ -5,12 +5,12 @@ import { HeaderComponent } from "./header";
 import { SideBarComponent } from "./sidebar";
 import { LayoutContext } from "../../context/layoutProvider";
 
-const { Content } = Layout;
+const { Content, Footer } = Layout;
 
 export const ContentComponent = ({ children }) => {
 	const { isSideBar, isMobil } = useContext(LayoutContext);
 	return (
-		<Layout>
+		<Layout  >
 			<SideBarComponent />
 			<Layout
 				className="site-layout"
@@ -18,15 +18,16 @@ export const ContentComponent = ({ children }) => {
 			>
 				<HeaderComponent />
 				<Content
+					className="site-layout-background"					
 					style={{
-						margin: "24px 16px 0",
-						overflow: "initial",
-						paddingTop: 40,
-						paddingBottom: 60,
+						margin: "70px 16px 0",
+						overflow: "initial",						
+						background: '#f0f2f5'
 					}}
 				>
-					{children}
+				{children}				
 				</Content>
+				<Footer style={{ textAlign: 'center' }}>©2021 Adelanta Factoring</Footer>
 			</Layout>
 		</Layout>
 	);

@@ -57,3 +57,7 @@
 .header-slider-colapse {
 	width: calc(100% - 80px);
 }
+
+.site-layout-background {
+	background: #fff;
+}

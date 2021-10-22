@@ -2,21 +2,15 @@ import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { PageHeader, Row, Col, Card, Table, Button, Tag, Divider, Switch, Radio, Form, Select, Input, message, Popconfirm } from "antd";
 import { PlusSquareOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import { ContentComponent } from "../../components/layout/content";
-import { listarUsuarios } from "../../services/usuariosService";
-import { getColumnSearchProps } from "../../components/table/configTable";
-import { useModal } from "../../hooks/useModal";
-import { ModalComponent } from "../../components/modal/modal";
-import { useMessageApi } from "../../hooks/useMessage";
-import { MessageApi } from "../../components/message/message";
-import { InputComponent } from "../../components/formControl.js/input";
-import { SelectComponent } from "../../components/formControl.js/select";
+import { ContentComponent } from "../../../components/layout/content";
+import { listarUsuarios } from "../../../services/usuariosService";
+import { getColumnSearchProps } from "../../../components/table/configTable";
+import { useModal } from "../../../hooks/useModal";
+import { useMessageApi } from "../../../hooks/useMessage";
+import { MessageApi } from "../../../components/message/message";
+import { solicitudes }from "../../../model/mocks/solicitudes"
 
-const { Option } = Select;
-
-export const UsuariosPage = () => {
+export const SolicitudesPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, addMessage, messageInfo } = useMessageApi();
 	const [page, setPage] = useState(1);
@@ -26,47 +20,31 @@ export const UsuariosPage = () => {
 	const [dataUsuario, setDataUsuario] = useState([]);
 	const [loadingApi, setLoadingApi] = useState(false);	
 	const history = useHistory();
-
-	function confirm(e) {
-		console.log(e);
-		message.success('Se eliminimo correctamente al usuario.');
-	  }
-	  
-	  function cancel(e) {
-		console.log(e);
-		message.error('No se elimino al usuario.');
-	  }
-
 	const columns = [
 		{
-			title: "Nro.",
-			dataIndex: "idUsuario",
-			...getColumnSearchProps("idUsuario"),
+			title: "Nro. Solicitud",
+			dataIndex: "idSolicitud",
+			...getColumnSearchProps("idSolicitud"),
 		},	
 		{
-			title: "Usuario",
-			dataIndex: "usuario",
-			...getColumnSearchProps("usuario"),
+			title: "Fecha Solicitud",
+			dataIndex: "fechaSolicitud",
+			...getColumnSearchProps("fechaSolicitud"),
+		},
+        {
+			title: "Liquidación",
+			dataIndex: "liquidacion",
+			...getColumnSearchProps("liquidacion"),
 		},
 		{
-			title: "Nombres",
-			dataIndex: "nombres",
-			...getColumnSearchProps("nombres"),
-		},
+			title: "Aceptante",
+			dataIndex: "aceptante",
+			...getColumnSearchProps("aceptante"),
+		},		
 		{
-			title: "A. Paterno",
-			dataIndex: "apellidoPaterno",
-			...getColumnSearchProps("apellidoPaterno"),
-		},
-		{
-			title: "A. Materno",
-			dataIndex: "apellidoMaterno",
-			...getColumnSearchProps("apellidoMaterno"),
-		},
-		{
-			title: "Email",
-			dataIndex: "email",
-			...getColumnSearchProps("email"),
+			title: "RUC",
+			dataIndex: "ruc",
+			...getColumnSearchProps("ruc"),
 		},
 		{
 			title: "Documento",
@@ -74,9 +52,14 @@ export const UsuariosPage = () => {
 			...getColumnSearchProps("documento"),
 		},
 		{
-			title: "Rol",
-			dataIndex: "rol",
-			...getColumnSearchProps("rol"),
+			title: "Fecha de Emisión",
+			dataIndex: "fechaEmision",
+			...getColumnSearchProps("fechaEmision"),
+		},
+		{
+			title: "importe",
+			dataIndex: "importe",
+			...getColumnSearchProps("importe"),
 		},
 		{
 			title: "Estado",
@@ -84,43 +67,12 @@ export const UsuariosPage = () => {
 			...getColumnSearchProps("estado"),
 			render: (value) => {
 				return (
-					<Tag color={value === "Activo" ? "green" : "red"} rou>
+					<Tag color={value === "Aprobar liquidación" ? "green" : "red"} rou>
 						{value}
 					</Tag>
 				);
 			}			
-		},
-		{
-			title: "Acción",
-			dataIndex: "actiion",
-			width: 100,
-			render: (_, record) => {
-				return (
-					<>
-						<Button
-							type="success"
-							icon={<EditOutlined />}
-							onClick={() =>
-								history.push("/editar-usuario/" + record.idUsuario, record.idUsuario)
-							}
-						></Button>
-						<Divider type="vertical" />
-						<Popconfirm
-							title="Esta seguro que desea eliminar este usuario?"
-							onConfirm={confirm}
-							onCancel={cancel}
-							okText="Sí"
-							cancelText="No"
-						>
-						<Button
-							danger
-							icon={<DeleteOutlined />}
-						></Button>	
-						</Popconfirm>						
-					</>
-				);
-			},
-		},
+		}		
 	];
 
 	useEffect(() => {
@@ -128,14 +80,12 @@ export const UsuariosPage = () => {
 		(async () => {
 			setLoadingApi(true);
 			try {
-				const rpta = await listarUsuarios();
-				if (rpta.status === 200) {
-					if (suscribe) {
-						console.log(rpta.data)
-						handleFormatColumns(rpta.data);
-						setLoadingApi(false);
-					}
-				}
+				const rpta = solicitudes;
+				if (suscribe) {
+                    console.log(rpta.data)
+                    handleFormatColumns(rpta.data);
+                    setLoadingApi(false);
+                }
 			} catch (error) {
 				setLoadingApi(false);
 				console.log(error.response);
@@ -173,7 +123,7 @@ export const UsuariosPage = () => {
 			<Row>
 				<Col span={24}>
 					<Card
-						title="Usuarios"
+						title="Solicitudes"
 						actions={[]}
 						extra={
 							<Button								
@@ -184,7 +134,7 @@ export const UsuariosPage = () => {
 									history.push("/editar-usuario/0", 0)
 								}
 							>
-							Crear Usuario
+							Nueva Solicitud
 							</Button>
 						}
 					>	
