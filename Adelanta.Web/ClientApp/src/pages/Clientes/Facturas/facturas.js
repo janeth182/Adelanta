@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Table, Button, Tag, Divider, Switch, Radio, Form, Select, Input, message, Popconfirm } from "antd";
-import { FilePdfOutlined , FileExcelOutlined   } from "@ant-design/icons";
+import { PageHeader, Row, Col, Card, Table, Button, Tag, Space} from "antd";
+import { FilePdfOutlined , FileExcelOutlined, FileTextOutlined   } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { listarUsuarios } from "../../../services/usuariosService";
 import { getColumnSearchProps } from "../../../components/table/configTable";
@@ -68,7 +68,16 @@ export const FacturasPage = () => {
 			dataIndex: "archivoFactura",
             render: () => {
 				return (
-                    <FilePdfOutlined style={{ fontSize: '20px', color: 'red'}}/>				                      
+					<>
+					<Space>
+					<Button type="link" danger icon={<FilePdfOutlined style={{ fontSize: '20px', color: 'red'}} />} onClick={showModal}>
+					PDF
+					</Button>
+					<Button type="link" info icon={<FileTextOutlined  style={{ fontSize: '20px', color: 'blue'}}/>} onClick={showModal}>
+					XML
+					</Button>							                      
+					</Space>                    
+					</>
 				);
 			}	
 		},
@@ -104,6 +113,10 @@ export const FacturasPage = () => {
 		}, []);
 		setDataUsuario(data);
 	};
+
+	const exportarExcel = (e) => {
+		alert('export')
+	};
 	return (
 		<ContentComponent>
 			<PageHeader
@@ -127,11 +140,9 @@ export const FacturasPage = () => {
 						extra={
 							<Button																
 								type="primary"
-                                style={{background:'#389e0d'}}
-								icon={<FileExcelOutlined  style={{ fontSize: '16px'}}/>}								
-								onClick={() =>
-									history.push("/editar-usuario/0", 0)
-								}
+                                style={{background:'#389e0d', borderColor: 'white'}}
+								icon={<FileExcelOutlined  style={{ fontSize: '16px'}}/>}																
+								onClick={exportarExcel}		
 							>
 							Exportar
 							</Button>                            

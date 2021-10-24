@@ -13,6 +13,7 @@ import { SegundoNivelPage } from "./pages/nivel/segundoNivel";
 import { EditarUsuariosPage } from "./pages/User/editar-usuario";
 import { FacturasPage } from './pages/Clientes/Facturas/facturas';
 import { SolicitudesPage } from './pages/Clientes/Solicitudes/solicitudes';
+import { NuevaSolicitudPage } from './pages/Clientes/Solicitudes/nuevaSolicitud';
 export const App = () => {
 	return (
 		<AuthProvider>
@@ -23,9 +24,14 @@ export const App = () => {
 						<PrivateRouter exact path="/" component={HomePage} />
 						<PrivateRouter
 							exact
-							path="/clientes/solicitues"
+							path="/clientes/solicitudes"
 							component={SolicitudesPage}
 						/>
+						<PrivateRouter
+							exact
+							path="/clientes/nueva-solicitud"
+							component={NuevaSolicitudPage}
+						/>						
 						<PrivateRouter
 							exact
 							path="/clientes/facturas"
