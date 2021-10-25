@@ -67,8 +67,17 @@
 	border-radius: 6px;
   }
 .ant-layout-sider {
-	background: #28282c !important;
+	background: #f9f9f9 !important;
+	
 }
 .ant-menu.ant-menu-dark, .ant-menu-dark .ant-menu-sub, .ant-menu.ant-menu-dark .ant-menu-sub {
-	background: #28282c !important;
+	background: #f9f9f9 !important;
+	color: #232323 !important;
+}
+.ant-menu-dark.ant-menu-dark:not(.ant-menu-horizontal) .ant-menu-item-selected {
+	background-color: #b70f0a;
+}
+.ant-menu-item-active {
+	background-color: #b70f0a;
+	color: #232323 !important;
 }
