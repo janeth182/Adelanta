@@ -11,13 +11,13 @@ export const LoginPage = () => {
 	const [form] = Form.useForm();
 	const history = useHistory();
 	const [loadingApi, setLoadingApi] = useState(false);
-
+	const { REACT_APP_RUTA_SERVIDOR } = process.env;
 	const onFinish = (values) => {
 		setLoadingApi(true);
 		setTimeout(() => {
 			console.log(values);
 			loginUser(values);
-			history.push("/");
+			history.push(REACT_APP_RUTA_SERVIDOR);
 			setLoadingApi(false);
 		}, 1000);
 	};

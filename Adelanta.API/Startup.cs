@@ -35,7 +35,7 @@ namespace Adelanta.API
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.WithOrigins("https://localhost:3000", "http://localhost:3000")
+                        builder.WithOrigins("https://localhost:3000", "http://localhost:3000", "http://localhost:80", "http://18.117.255.171/Adelanta_Web/")
                                             .AllowAnyHeader()
                                             .AllowAnyMethod();
                     });

@@ -81,3 +81,16 @@
 	background-color: #b70f0a;
 	color: #232323 !important;
 }
+
+.ant-menu-dark .ant-menu-item:hover, .ant-menu-dark .ant-menu-item-active, .ant-menu-dark .ant-menu-submenu-active, .ant-menu-dark .ant-menu-submenu-open, .ant-menu-dark .ant-menu-submenu-selected, .ant-menu-dark .ant-menu-submenu-title:hover {
+    color: #b70f0a;
+    background-color: transparent;
+}
+
+.ant-menu-dark .ant-menu-item, .ant-menu-dark .ant-menu-item-group-title, .ant-menu-dark .ant-menu-item > a, .ant-menu-dark .ant-menu-item > span > a {
+    color: #232323 !important;
+}
+
+.ant-menu-item-selected .ant-menu-title-content{
+	color: #f9f9f9 !important;
+}

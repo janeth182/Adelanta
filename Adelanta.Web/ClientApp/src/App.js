@@ -14,52 +14,51 @@ import { EditarUsuariosPage } from "./pages/User/editar-usuario";
 import { FacturasPage } from './pages/Clientes/Facturas/facturas';
 import { SolicitudesPage } from './pages/Clientes/Solicitudes/solicitudes';
 import { NuevaSolicitudPage } from './pages/Clientes/Solicitudes/nuevaSolicitud';
-export const App = () => {
+export const App = () => {	
+	const {REACT_APP_RUTA_SERVIDOR} = process.env;
 	return (
 		<AuthProvider>
 			<LayoutProvider>
 				<BrowserRouter>
 					<Switch>
-						<PublicRouter exact path="/login" component={LoginPage} />
-						<PrivateRouter exact path="/" component={HomePage} />
+						<PublicRouter exact path= { REACT_APP_RUTA_SERVIDOR + "login"} component={LoginPage} />
+						<PrivateRouter path={ REACT_APP_RUTA_SERVIDOR } component={HomePage} exact/>
 						<PrivateRouter
-							exact
-							path="/clientes/solicitudes"
+							exact path= {REACT_APP_RUTA_SERVIDOR + "clientes/solicitudes"} 
 							component={SolicitudesPage}
 						/>
 						<PrivateRouter
 							exact
-							path="/clientes/nueva-solicitud"
+							path={REACT_APP_RUTA_SERVIDOR + "clientes/nueva-solicitud"}
 							component={NuevaSolicitudPage}
 						/>						
 						<PrivateRouter
 							exact
-							path="/clientes/facturas"
+							path={REACT_APP_RUTA_SERVIDOR + "clientes/facturas"}
 							component={FacturasPage}
 						/>
 						<PrivateRouter
 							exact
-							path="/usuarios"
+							path={REACT_APP_RUTA_SERVIDOR + "usuarios"}
 							component={UsuariosPage}
 						/>
 						<PrivateRouter
 							exact
-							path="/editar-usuario/:id"
 							component={EditarUsuariosPage}
 						/>
 						<PrivateRouter
 							exact
-							path="/listar-post"
+							path={REACT_APP_RUTA_SERVIDOR + "listar-post"}
 							component={ListarPostPage}
 						/>
 						<PrivateRouter
 							exact
-							path="/primer-nivel"
+							path= {REACT_APP_RUTA_SERVIDOR + "primer-nivel"}
 							component={PrimerNivelPage}
 						/>
 						<PrivateRouter
 							exact
-							path="/segundo-nivel"
+							path= { REACT_APP_RUTA_SERVIDOR + "segundo-nivel"}
 							component={SegundoNivelPage}
 						/>
 					</Switch>

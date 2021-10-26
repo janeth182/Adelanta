@@ -70,10 +70,10 @@ export const FacturasPage = () => {
 				return (
 					<>
 					<Space>
-					<Button type="link" danger icon={<FilePdfOutlined style={{ fontSize: '20px', color: 'red'}} />} onClick={showModal}>
+					<Button type="link" danger icon={<FilePdfOutlined style={{ fontSize: '16px', color: 'red'}} />} onClick={showModal}>
 					PDF
 					</Button>
-					<Button type="link" info icon={<FileTextOutlined  style={{ fontSize: '20px', color: 'blue'}}/>} onClick={showModal}>
+					<Button type="link" info icon={<FileTextOutlined  style={{ fontSize: '16px', color: 'blue'}}/>} onClick={showModal}>
 					XML
 					</Button>							                      
 					</Space>                    
@@ -140,7 +140,7 @@ export const FacturasPage = () => {
 						extra={
 							<Button																
 								type="primary"
-                                style={{background:'#389e0d', borderColor: 'white'}}
+                                style={{background:'#1DA57A', borderColor: 'white'}}
 								icon={<FileExcelOutlined  style={{ fontSize: '16px'}}/>}																
 								onClick={exportarExcel}		
 							>

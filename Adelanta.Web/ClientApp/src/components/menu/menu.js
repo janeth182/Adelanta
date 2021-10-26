@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Menu } from "antd";
 import { HomeOutlined, UserOutlined, FileAddOutlined, FieldTimeOutlined  } from "@ant-design/icons";
-import { useContext } from "react/cjs/react.development";
+import { useContext } from "react";
 import { LayoutContext } from "antd/lib/layout/layout";
 import { listarMenu } from "../../services/menuService";
 
@@ -16,6 +16,7 @@ export const MenuComponent = () => {
 		let suscribe = true;
 		(async () => {			
 			try {
+				const rutaServidor = process.env.REACT_APP_RUTA_SERVIDOR;
 				const rpta = await listarMenu();
 				const menu = [];
 				if (rpta.status === 200) {
@@ -27,27 +28,40 @@ export const MenuComponent = () => {
 								rpta.data.forEach( hijo => {
 									if(item.idMenu === hijo.idMenuPadre){
 										subMenu.push({
-											id: hijo.idMenu,
+											id: `${rutaServidor}${hijo.rutaPagina}`,
 											title: hijo.menu,
-											ruta: hijo.rutaPagina,
+											ruta: `${rutaServidor}${hijo.rutaPagina}`,											
 											icon: "",
 										})
 									}
-								});
-								menu.push({
-									id: item.idMenu,
-									type: 'menu',
-									title: item.menu,
-									ruta: item.rutaPagina,
-									icon: 'home',
-									rutas: [
-										...subMenu							
-									],																								
 								});							
+								if(subMenu.length === 0){
+									menu.push({
+										id: `${rutaServidor}${item.rutaPagina}`,
+										type: subMenu.length === 0 ? 'menu':'submenu',
+										title: item.menu,
+										ruta : `${rutaServidor}${item.rutaPagina}`,
+										icon: 'home',
+										rutas: [
+											...subMenu							
+										],																								
+									});
+								} else {
+									menu.push({
+										id: `${rutaServidor}${item.rutaPagina}`,
+										type: subMenu.length === 0 ? 'menu':'submenu',
+										title: item.menu,
+										icon: 'home',
+										rutas: [
+											...subMenu							
+										],																								
+									});
+								}		
 							}	
 						});
 						rutas = menu;
 						let id = "";
+						debugger
 						rutas.forEach((el) => {
 							if (el.type === "menu") {
 								if (el.ruta === location.pathname) {
@@ -69,7 +83,7 @@ export const MenuComponent = () => {
 			}
 		})();
 		return () => {
-			suscribe = false;
+			suscribe = true;
 		};
 	}, [location.pathname]);
 
