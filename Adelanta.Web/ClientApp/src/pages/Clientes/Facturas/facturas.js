@@ -3,7 +3,6 @@ import { useHistory } from "react-router-dom";
 import { PageHeader, Row, Col, Card, Table, Button, Tag, Space} from "antd";
 import { FilePdfOutlined , FileExcelOutlined, FileTextOutlined   } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
-import { listarUsuarios } from "../../../services/usuariosService";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";

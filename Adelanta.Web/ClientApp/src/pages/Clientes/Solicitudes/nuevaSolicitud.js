@@ -1,16 +1,13 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Button, Switch, Radio, Form, Select, message, Descriptions} from "antd";
+import { PageHeader, Row, Col, Card, Button, Radio, Form, Select, message, Descriptions} from "antd";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { ContentComponent } from "../../../components/layout/content";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { InputComponent } from "../../../components/formControl.js/input";
-import { SelectComponent } from "../../../components/formControl.js/select";
 import { crearUsuario, obtenerUsuario, actualizarUsuario, ObtenerUsuarioPorUserName } from "../../../services/usuariosService";
 import { SaveOutlined, RetweetOutlined  } from "@ant-design/icons";
-const { Option } = Select;
 
 export const NuevaSolicitudPage = () => {
 	const { isMessage, messageInfo } = useMessageApi();

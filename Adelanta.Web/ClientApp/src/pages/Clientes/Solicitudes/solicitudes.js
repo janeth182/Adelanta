@@ -12,7 +12,7 @@ import { desembolsado }from "../../../model/mocks/desembolsado";
 import { ModalComponent } from "../../../components/modal/modal";
 export const SolicitudesPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
-	const { isMessage, addMessage, messageInfo } = useMessageApi();
+	const { isMessage, messageInfo } = useMessageApi();
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);	
 	const [dataUsuario, setDataUsuario] = useState([]);

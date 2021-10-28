@@ -2,15 +2,14 @@ import "./App.css";
 import { BrowserRouter, Switch } from "react-router-dom";
 import { LayoutProvider } from "./context/layoutProvider";
 import { HomePage } from "./pages/home";
-import { UsuariosPage } from "./pages/User/usuarios";
-import { ListarPostPage } from "./pages/Post/listar-post";
+import { UsuariosPage } from "./pages/Usuarios/usuarios";
 import { LoginPage } from "./pages/Auth/login";
 import { AuthProvider } from "./context/authProvider";
 import { PublicRouter } from "./router/publicRouter";
 import { PrivateRouter } from "./router/privateRouter";
 import { PrimerNivelPage } from "./pages/nivel/primerNivel";
 import { SegundoNivelPage } from "./pages/nivel/segundoNivel";
-import { EditarUsuariosPage } from "./pages/User/editar-usuario";
+import { EditarUsuariosPage } from "./pages/Usuarios/editar-usuario";
 import { FacturasPage } from './pages/Clientes/Facturas/facturas';
 import { SolicitudesPage } from './pages/Clientes/Solicitudes/solicitudes';
 import { NuevaSolicitudPage } from './pages/Clientes/Solicitudes/nuevaSolicitud';
@@ -45,11 +44,6 @@ export const App = () => {
 						<PrivateRouter
 							exact
 							component={EditarUsuariosPage}
-						/>
-						<PrivateRouter
-							exact
-							path={REACT_APP_RUTA_SERVIDOR + "listar-post"}
-							component={ListarPostPage}
 						/>
 						<PrivateRouter
 							exact
