@@ -55,7 +55,7 @@ namespace Adelanta.Data.Repository
                         Documento = @Documento, 
                         Telefono = @Telefono, 
                         Direccion = @Direccion, 
-                        IdRol = IdRol
+                        IdRol = @IdRol
                         WHERE IdUsuario = @IdUsuario";
             var result = await db.ExecuteAsync(sql, new { oUsuarioBE.Nombres, oUsuarioBE.ApellidoPaterno, oUsuarioBE.ApellidoMaterno, oUsuarioBE.Email, oUsuarioBE.Documento, oUsuarioBE.Telefono, oUsuarioBE.Direccion, oUsuarioBE.IdRol, oUsuarioBE.IdUsuario });
             return result > 0;
@@ -64,8 +64,9 @@ namespace Adelanta.Data.Repository
         public async Task<bool> EliminarUsuario(int IdUsuario)
         {
             var db = dbConnection();
-            var sql = @"DELETE FROM USUARIO WHERE IdUsuario = @IdUsuario";
-            var result = await db.QueryFirstOrDefaultAsync(sql, new { IdUsuario });
+            var sp = "SP_USUARIO_ELIMINAR";
+            var values = new { p_IdUsuario = IdUsuario };
+            var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
             return result > 0;
         }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Button, Switch, Radio, Form, Select, message} from "antd";
+import { PageHeader, Row, Col, Card, Button, Form, Select, message} from "antd";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { ContentComponent } from "../../components/layout/content";
@@ -23,14 +23,14 @@ export const EditarUsuariosPage = () => {
 			direccion: '',
 			documento: '',
 			email: '',
-			idRol: '',
+			idRol: 1,
 			idUsuario: '0',
 			nombres: '',
 			telefono: '',
 			usuario: '',
-			idEstado: '',
+			idEstado: 1,
 			rol:'',
-			estado:'',
+			estado: '',
 			usuario: ''	
 		},
 		validationSchema: Yup.object().shape({
@@ -43,7 +43,7 @@ export const EditarUsuariosPage = () => {
 			telefono: Yup.string(),
 			direccion: Yup.string(),
 			email: Yup.string().required("El campo es requerido"),
-			idRol: Yup.string().required("El campo es requerido")
+			idRol: Yup.number().required("El campo es requerido")
 		}),
 		onSubmit: (value) => {
 			handleNewUsuario(value);
@@ -185,6 +185,7 @@ export const EditarUsuariosPage = () => {
 										error={formik.errors.usuario}
 										touched={formik.touched.usuario}
 										title="Usuario:"
+										disabled= {history.location.state === 0 ? false: true}
 									/>
 								</Col>
 								<Col lg={12} xs={{ span: 24 }}>
@@ -275,38 +276,29 @@ export const EditarUsuariosPage = () => {
 							<Row gutter={16}>
 								<Col xs={24} lg={12}>
 									<SelectComponent
-										name="idRol"
 										value={formik.values.idRol}
 										onBlur={formik.handleBlur}
-										onChange={(e) => {
-											formik.setFieldValue("idRol", e);
-										}}
-										error={formik.errors.idRol}
-										touched={formik.touched.idRol}
+										onChange={value => formik.setFieldValue("idRol", value.value)}
+										error={formik.errors.idEstado}
+										touched={formik.touched.idEstado}
 										title="Rol:"
+										options={[{value: 1, label:'Administrador'}, {value:2 , label:'Comercial'}]}
 									>
-										<Option value="1">Administrador</Option>
-										<Option value="2">Comercial</Option>
 									</SelectComponent>
 								</Col>
 								<Col xs={24} lg={12}>
-								<SelectComponent 
-										name="idEstado"
+									<SelectComponent 
 										value={formik.values.idEstado}
 										onBlur={formik.handleBlur}
-										onChange={(e) => {
-											formik.setFieldValue("idEstado", e);
-										}}
+										onChange={value => formik.setFieldValue("idEstado", value.value)}
 										error={formik.errors.idEstado}
 										touched={formik.touched.idEstado}
 										title="Estado:"
+										options={[{value: 1, label:'Creado'},{value: 2, label:'Activo'},{value: 3, label:'Inactivo'}]}
 									>
-										<Option value="1">Creado</Option>
-										<Option value="2">Activo</Option>
-										<Option value="3">Inactivo</Option>
 									</SelectComponent>
 								</Col>								
-							</Row>							
+							</Row>																			
 						</Form>
 					</Card>
 				</Col>

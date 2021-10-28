@@ -61,7 +61,6 @@ export const MenuComponent = () => {
 						});
 						rutas = menu;
 						let id = "";
-						debugger
 						rutas.forEach((el) => {
 							if (el.type === "menu") {
 								if (el.ruta === location.pathname) {

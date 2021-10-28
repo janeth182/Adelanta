@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Table, Button, Tag, Divider, Switch, Radio, Form, Select, Descriptions  } from "antd";
-import { PlusSquareOutlined, RetweetOutlined } from "@ant-design/icons";
+import { PageHeader, Row, Col, Card, Table, Button, Tag, Form, Descriptions  } from "antd";
+import { PlusSquareOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
@@ -9,19 +9,12 @@ import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
 import { solicitudes }from "../../../model/mocks/solicitudes";
 import { desembolsado }from "../../../model/mocks/desembolsado";
-import { InputComponent } from "../../../components/formControl.js/input";
-import { SelectComponent } from "../../../components/formControl.js/select";
-import { useFormik } from "formik";
 import { ModalComponent } from "../../../components/modal/modal";
-import * as Yup from "yup";
-const { Option } = Select;
 export const SolicitudesPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, addMessage, messageInfo } = useMessageApi();
 	const [page, setPage] = useState(1);
-	const [pageSize, setPageSize] = useState(10);
-	const [valueSearch, setValueSearch] = useState("");
-
+	const [pageSize, setPageSize] = useState(10);	
 	const [dataUsuario, setDataUsuario] = useState([]);
 	const [loadingApi, setLoadingApi] = useState(false);	
 	const history = useHistory();
@@ -40,12 +33,18 @@ export const SolicitudesPage = () => {
 			title: "Liquidación",
 			dataIndex: "liquidacion",
 			...getColumnSearchProps("liquidacion"),
-            render: (value) => {
-				return (
-					<a type="primary" onClick={showModal}>
-                    {value}
-                    </a>
-				);
+            render: (_, record) => {
+				if(record.estado ==='Desembolso'){
+					return (
+						<a type="primary" onClick={showModal}>
+						{record.liquidacion}
+						</a>
+					);
+				} else {
+					return(
+						record.liquidacion
+					)					
+				}				
 			}	
 		},
 		{
@@ -156,28 +155,6 @@ export const SolicitudesPage = () => {
 		};
 	}, []);
 
-    const formik = useFormik({
-		initialValues: {
-			nombre: "",
-			edad: "",
-			direccion: "",
-			sexo: "",
-			estado: true,
-			civil: "Soltero",
-		},
-		validationSchema: Yup.object().shape({
-			nombre: Yup.string().required("El campo es requerido"),
-			edad: Yup.string().required("El campo es requerido"),
-			direccion: Yup.string().required("El campo es requerido"),
-			sexo: Yup.string().required("El campo es requerido"),
-			estado: Yup.boolean(),
-			civil: Yup.string(),
-		}),
-		onSubmit: (value) => {
-			handleNewUsuario(value);
-		},
-	});
-
 	const handleFormatColumns = (dataArray = []) => {
 		const data = dataArray.reduce((ac, el) => {
 			ac.push({
@@ -186,15 +163,6 @@ export const SolicitudesPage = () => {
 			return ac;
 		}, []);
 		setDataUsuario(data);
-	};
-    const handleNewUsuario = async (value) => {
-		hiddenModal();
-		await addMessage({
-			type: "success",
-			text: "Registro Existoso",
-			description: "El usuario se registro correctamente",
-		});
-		console.log(value);
 	};
 	return (
 		<ContentComponent>
@@ -222,7 +190,7 @@ export const SolicitudesPage = () => {
 								type="primary"
 								icon={<PlusSquareOutlined style={{ fontSize: '16px'}}/>}								
 								onClick={() =>
-									history.push("/clientes/nueva-solicitud")
+									history.push({pathname: `${process.env.REACT_APP_RUTA_SERVIDOR}clientes/nueva-solicitud`, state: 0})
 								}
 							>
 							Nueva Solicitud
@@ -282,19 +250,19 @@ export const SolicitudesPage = () => {
                         <Descriptions.Item label="Fecha desembolso" span={1}>26/09/2021</Descriptions.Item>                        
                     </Descriptions>                    
                     <Table
-							loading={loadingApi}
-							columns={columsLiquidacion}
-							dataSource={desembolsado.data}
-							size="small"
-							pagination={{
-								current: page,
-								pageSize: pageSize,
-								onChange: (page, pageSize) => {
-									setPage(page);
-									setPageSize(pageSize);
-								},
-							}}
-						/>
+						loading={loadingApi}
+						columns={columsLiquidacion}
+						dataSource={desembolsado.data}
+						size="small"
+						pagination={{
+							current: page,
+							pageSize: pageSize,
+							onChange: (page, pageSize) => {
+								setPage(page);
+								setPageSize(pageSize);
+							},
+						}}
+					/>
 				</Form>
 			</ModalComponent>
 		</ContentComponent>

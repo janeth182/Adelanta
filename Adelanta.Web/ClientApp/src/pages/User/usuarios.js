@@ -1,41 +1,53 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Table, Button, Tag, Divider, Switch, Radio, Form, Select, Input, message, Popconfirm } from "antd";
+import { PageHeader, Row, Col, Card, Table, Button, Tag, Divider, message, Popconfirm } from "antd";
 import { PlusSquareOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { useFormik } from "formik";
-import * as Yup from "yup";
 import { ContentComponent } from "../../components/layout/content";
-import { listarUsuarios } from "../../services/usuariosService";
+import { listarUsuarios, eliminarUsuario } from "../../services/usuariosService";
 import { getColumnSearchProps } from "../../components/table/configTable";
-import { useModal } from "../../hooks/useModal";
-import { ModalComponent } from "../../components/modal/modal";
 import { useMessageApi } from "../../hooks/useMessage";
 import { MessageApi } from "../../components/message/message";
-import { InputComponent } from "../../components/formControl.js/input";
-import { SelectComponent } from "../../components/formControl.js/select";
-
-const { Option } = Select;
 
 export const UsuariosPage = () => {
-	const { isModal, showModal, hiddenModal } = useModal();
-	const { isMessage, addMessage, messageInfo } = useMessageApi();
+	const { isMessage, messageInfo } = useMessageApi();
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [valueSearch, setValueSearch] = useState("");
-
 	const [dataUsuario, setDataUsuario] = useState([]);
 	const [loadingApi, setLoadingApi] = useState(false);	
 	const history = useHistory();
-
-	function confirm(e) {
-		console.log(e);
-		message.success('Se eliminimo correctamente al usuario.');
-	  }
+	const urlEdicion = `${process.env.REACT_APP_RUTA_SERVIDOR}editar-usuario/`;
+	const confirm = async (id) => {
+		let suscribe = true;
+		(async () => {
+			setLoadingApi(true);
+			try {
+				debugger
+				const rpta = await eliminarUsuario(id);
+				if (rpta.status === 204) {
+					if (suscribe) {
+						message.success('Se eliminimo correctamente al usuario.');
+						cargarUsuarios();
+						setLoadingApi(false);
+					}
+				} else {
+					message.error('Ocurrio un error al momento de procesar la solicitud.');
+					setLoadingApi(false);
+				}
+			} catch (error) {
+				message.error('Ocurrio un error al momento de procesar la solicitud.');
+				console.log(error.response);
+				setLoadingApi(false);
+			}
+		})();
+		return () => {
+			suscribe = false;
+		};		
+	}
 	  
-	  function cancel(e) {
-		console.log(e);
+	const cancel = async (e) => {
 		message.error('No se elimino al usuario.');
-	  }
+	}
 
 	const columns = [
 		{
@@ -101,14 +113,18 @@ export const UsuariosPage = () => {
 							type="success"
 							icon={<EditOutlined />}
 							onClick={() =>
-								history.push("/editar-usuario/" + record.idUsuario, record.idUsuario)
+								history.push({pathname: `${urlEdicion}${record.idUsuario}`, state: record.idUsuario})
 							}
 						></Button>
 						<Divider type="vertical" />
 						<Popconfirm
 							title="Esta seguro que desea eliminar este usuario?"
-							onConfirm={confirm}
-							onCancel={cancel}
+							onConfirm={() => {
+								confirm(record.idUsuario);
+							}}
+							onCancel={() => {
+								cancel(record.idUsuario);
+							}}				
 							okText="Sí"
 							cancelText="No"
 						>
@@ -124,6 +140,10 @@ export const UsuariosPage = () => {
 	];
 
 	useEffect(() => {
+		cargarUsuarios();
+	}, []);
+
+	const cargarUsuarios = async () => {
 		let suscribe = true;
 		(async () => {
 			setLoadingApi(true);
@@ -144,7 +164,7 @@ export const UsuariosPage = () => {
 		return () => {
 			suscribe = false;
 		};
-	}, []);
+	}
 
 	const handleFormatColumns = (dataArray = []) => {
 		const data = dataArray.reduce((ac, el) => {
@@ -181,7 +201,7 @@ export const UsuariosPage = () => {
 								type="primary"
 								icon={<PlusSquareOutlined style={{ fontSize: '16px'}}/>}								
 								onClick={() =>
-									history.push("/editar-usuario/0", 0)
+									history.push({pathname: `${urlEdicion}0`, state: 0})
 								}
 							>
 							Crear Usuario

@@ -10,7 +10,7 @@ export const crearUsuario = async (data) => {
 	return await api.post(`Usuario/AgregarUsuario`, data);
 };
 export const eliminarUsuario = async (idUsuario) => {
-	return await api.delete(`Usuario​/EliminarUsuario`, idUsuario);
+	return await api.delete(`Usuario/EliminarUsuario/${idUsuario}`);
 };
 export const obtenerUsuario = async (id) => {
 	return await api.get(`Usuario/ObtenerUsuario/${id}`);

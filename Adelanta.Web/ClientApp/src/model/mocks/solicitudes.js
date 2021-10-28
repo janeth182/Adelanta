@@ -10,7 +10,7 @@ module.exports.solicitudes ={
             fechaEmision: "22/09/2021",
             importe: "50,000",
             moneda: "Soles",
-            estado: "Registrado",
+            estado: "Desembolso",
         },
         {
             idSolicitud: "005",
@@ -33,7 +33,7 @@ module.exports.solicitudes ={
             fechaEmision: "22/09/2021",
             importe: "50,000",
             moneda: "Soles",
-            estado: "Registrado",
+            estado: "Desembolso",
         },   {
             idSolicitud: "005",
             fechaSolicitud: "22/10/2021",
