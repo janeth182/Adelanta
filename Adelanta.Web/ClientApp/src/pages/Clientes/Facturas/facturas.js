@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { PageHeader, Row, Col, Card, Table, Button, Tag, Space} from "antd";
-import { FilePdfOutlined , FileExcelOutlined, FileTextOutlined   } from "@ant-design/icons";
+import { FilePdfOutlined , FileTextOutlined   } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
 import { facturas }from "../../../model/mocks/facturas"
-
+import { ExportCSV } from '../../../utils/excel';
+import MyPDF from '../../../file/FACTURAE001-32.pdf';
+import MyXML from '../../../file/20514535222-01-F001-00004348.xml';
 export const FacturasPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, addMessage, messageInfo } = useMessageApi();
@@ -69,10 +71,10 @@ export const FacturasPage = () => {
 				return (
 					<>
 					<Space>
-					<Button type="link" danger icon={<FilePdfOutlined style={{ fontSize: '16px', color: 'red'}} />} onClick={showModal}>
+					<Button type="link" href={MyPDF}  download="FACTURAE001-32.pdf" danger icon={<FilePdfOutlined style={{ fontSize: '16px', color: 'red'}} />}>
 					PDF
 					</Button>
-					<Button type="link" info icon={<FileTextOutlined  style={{ fontSize: '16px', color: 'blue'}}/>} onClick={showModal}>
+					<Button type="link" href={MyXML} download="20514535222-01-F001-00004348.xml" info icon={<FileTextOutlined  style={{ fontSize: '16px', color: 'blue'}}/>} >
 					XML
 					</Button>							                      
 					</Space>                    
@@ -137,14 +139,7 @@ export const FacturasPage = () => {
 						title="Facturas"
 						actions={[]}
 						extra={
-							<Button																
-								type="primary"
-                                style={{background:'#1DA57A', borderColor: 'white'}}
-								icon={<FileExcelOutlined  style={{ fontSize: '16px'}}/>}																
-								onClick={exportarExcel}		
-							>
-							Exportar
-							</Button>                            
+							<ExportCSV csvData={dataUsuario} fileName={'Facturas'} />                           
 						}
 					>	
 						<Table

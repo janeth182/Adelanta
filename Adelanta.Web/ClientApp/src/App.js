@@ -13,6 +13,7 @@ import { EditarUsuariosPage } from "./pages/Usuarios/editar-usuario";
 import { FacturasPage } from './pages/Clientes/Facturas/facturas';
 import { SolicitudesPage } from './pages/Clientes/Solicitudes/solicitudes';
 import { NuevaSolicitudPage } from './pages/Clientes/Solicitudes/nuevaSolicitud';
+import { RespuestaPagadorPage } from './pages/Operaciones/RespuestaPagadpr/respuestaPagador';
 export const App = () => {	
 	const {REACT_APP_RUTA_SERVIDOR} = process.env;
 	return (
@@ -38,6 +39,11 @@ export const App = () => {
 						/>
 						<PrivateRouter
 							exact
+							path= { REACT_APP_RUTA_SERVIDOR + "operaciones/respuesta-pagador"}
+							component={RespuestaPagadorPage}
+						/>
+						<PrivateRouter
+							exact
 							path={REACT_APP_RUTA_SERVIDOR + "usuarios"}
 							component={UsuariosPage}
 						/>
@@ -55,6 +61,7 @@ export const App = () => {
 							path= { REACT_APP_RUTA_SERVIDOR + "segundo-nivel"}
 							component={SegundoNivelPage}
 						/>
+
 					</Switch>
 				</BrowserRouter>
 			</LayoutProvider>

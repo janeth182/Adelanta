@@ -12,7 +12,7 @@ import { desembolsado }from "../../../model/mocks/desembolsado";
 import { ModalComponent } from "../../../components/modal/modal";
 export const SolicitudesPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
-	const { isMessage, messageInfo } = useMessageApi();
+	const { isMessage, addMessage, messageInfo } = useMessageApi();
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);	
 	const [dataUsuario, setDataUsuario] = useState([]);
@@ -43,8 +43,8 @@ export const SolicitudesPage = () => {
 				} else {
 					return(
 						record.liquidacion
-					)					
-				}				
+					)				
+				}
 			}	
 		},
 		{
@@ -232,23 +232,7 @@ export const SolicitudesPage = () => {
                         <Descriptions.Item label="Cedente" span={1}>ISI Group S.A.C</Descriptions.Item>
                         <Descriptions.Item label="Pagador" span={1}>Rimac</Descriptions.Item>
                         <Descriptions.Item label="Tipo de Operación" span={1}>Factoring</Descriptions.Item>                                                                                                                 
-                    </Descriptions>             
-                    <Descriptions title="Datos Adicionales">
-                        <Descriptions.Item label="Fecha de Operacion" span={1}>22/09/2021</Descriptions.Item>
-                        <Descriptions.Item label="TNM Op" span={1}>2.000%</Descriptions.Item>
-                        <Descriptions.Item label="TNA Op" span={1}>24.00%</Descriptions.Item>
-                        <Descriptions.Item label="Ejecutivo" span={1}>Gabriel Arredondo</Descriptions.Item>
-                        <Descriptions.Item label="Financiamiento" span={1}>90%</Descriptions.Item>
-						<Descriptions.Item label="F. Resguardo" span={1}>10%</Descriptions.Item>
-						<Descriptions.Item label="Tipo de Cliente" span={1}>Recurrente</Descriptions.Item>
-						<Descriptions.Item label="Com. Estructura" span={1}>0</Descriptions.Item>
-						<Descriptions.Item label="Cant. Doc." span={1}>0</Descriptions.Item>
-                    </Descriptions>
-                    <Descriptions title="Desembolsado">
-                    	<Descriptions.Item label="Banco" span={1}>Interbak</Descriptions.Item>
-                        <Descriptions.Item label="Nro Cuenta" span={1}>19707814852122</Descriptions.Item>
-                        <Descriptions.Item label="Fecha desembolso" span={1}>26/09/2021</Descriptions.Item>                        
-                    </Descriptions>                    
+                    </Descriptions>                                                 
                     <Table
 						loading={loadingApi}
 						columns={columsLiquidacion}
