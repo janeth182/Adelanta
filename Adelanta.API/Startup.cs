@@ -30,12 +30,13 @@ namespace Adelanta.API
             services.AddSingleton(mySQLConnectionConfig);
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<IMenuRepository, MenuRepository>();
+            services.AddScoped<ILoginRepository, LoginRepository>();
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.WithOrigins("https://localhost:3000", "http://localhost:3000", "http://localhost:80", "http://18.117.255.171/Adelanta_Web/")
+                        builder.WithOrigins("https://localhost:3000", "http://localhost:3000", "http://localhost:80", "http://18.117.255.171")
                                             .AllowAnyHeader()
                                             .AllowAnyMethod();
                     });

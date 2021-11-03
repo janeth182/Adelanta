@@ -13,7 +13,7 @@ import { EditarUsuariosPage } from "./pages/Usuarios/editar-usuario";
 import { FacturasPage } from './pages/Clientes/Facturas/facturas';
 import { SolicitudesPage } from './pages/Clientes/Solicitudes/solicitudes';
 import { NuevaSolicitudPage } from './pages/Clientes/Solicitudes/nuevaSolicitud';
-import { RespuestaPagadorPage } from './pages/Operaciones/RespuestaPagadpr/respuestaPagador';
+import { RespuestaPagadorPage } from './pages/Operaciones/RespuestaPagador/respuestaPagador';
 export const App = () => {	
 	const {REACT_APP_RUTA_SERVIDOR} = process.env;
 	return (

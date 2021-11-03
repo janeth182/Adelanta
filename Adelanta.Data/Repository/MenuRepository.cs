@@ -29,9 +29,16 @@ namespace Adelanta.Data.Repository
             return await db.QueryAsync<MenuBE>(sql, new { });
         }
 
-        public Task<IEnumerable<MenuBE>> ObtenerMenuPorUsuario()
+        public async Task<IEnumerable<MenuBE>> ObtenerMenuPorSesion(string gSesion)
         {
-            throw new NotImplementedException();
+            var db = dbConnection();
+            var sql = @"SELECT m.IdMenu,m.IdMenuPadre, m.Menu, m.Descripcion, m.Css, m.RutaPagina 
+                        FROM MENU m JOIN MENU_ROL mr
+                        ON m.IdMenu=mr.IdMenu JOIN USUARIO u
+                        ON u.IdRol=mr.IdRol JOIN SESION s
+                        ON u.IdUsuario=s.IdUsuario
+                        WHERE GSesion=@gSesion";
+            return await db.QueryAsync<MenuBE>(sql, new { gSesion });
         }
     }
 }

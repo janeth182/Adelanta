@@ -1,10 +1,6 @@
 import React, { useContext } from "react";
 import { Col, Layout, Row, Avatar } from "antd";
-import {
-	ArrowRightOutlined,
-	ArrowLeftOutlined,
-	LogoutOutlined,
-} from "@ant-design/icons";
+import { ArrowRightOutlined, ArrowLeftOutlined, LogoutOutlined } from "@ant-design/icons";
 import { LayoutContext } from "../../context/layoutProvider";
 import { AuthContext } from "../../context/authProvider";
 
@@ -58,7 +54,7 @@ export const HeaderComponent = () => {
 							}}
 						>
 							<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-							<span style={{ marginLeft: 5 , }}>{user.email}</span>
+							<span style={{ marginLeft: 5 , }}>{user.usuario}</span>
 						</div>
 						{React.createElement(LogoutOutlined, {
 							className: "trigger",

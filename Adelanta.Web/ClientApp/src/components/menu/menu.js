@@ -4,20 +4,22 @@ import { Menu } from "antd";
 import { HomeOutlined, UserOutlined, FileAddOutlined, FieldTimeOutlined  } from "@ant-design/icons";
 import { useContext } from "react";
 import { LayoutContext } from "antd/lib/layout/layout";
-import { listarMenu } from "../../services/menuService";
-
+import { listarMenu, obtenerMenuPorSesion} from "../../services/menuService";
+import { useHistory } from "react-router-dom";
+import { AuthContext } from "../../context/authProvider";
 const { SubMenu } = Menu;
 let rutas = [];
 export const MenuComponent = () => {
 	const location = useLocation();
+	const { user } = useContext(AuthContext);
 	const { isMobil } = useContext(LayoutContext);
-	const [openKeys, setOpenKeys] = useState([""]);	
+	const [openKeys, setOpenKeys] = useState([""]);		
 	useEffect(() => {
 		let suscribe = true;
 		(async () => {			
 			try {
 				const rutaServidor = process.env.REACT_APP_RUTA_SERVIDOR;
-				const rpta = await listarMenu();
+				const rpta = await obtenerMenuPorSesion(user.token);
 				const menu = [];
 				if (rpta.status === 200) {
 					if (suscribe) {

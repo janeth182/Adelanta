@@ -10,6 +10,7 @@ import { InputComponent } from "../../components/formControl.js/input";
 import { SelectComponent } from "../../components/formControl.js/select";
 import { crearUsuario, obtenerUsuario, actualizarUsuario, ObtenerUsuarioPorUserName } from "../../services/usuariosService";
 import { SaveOutlined, RetweetOutlined  } from "@ant-design/icons";
+
 const { Option } = Select;
 
 export const EditarUsuariosPage = () => {
@@ -49,7 +50,7 @@ export const EditarUsuariosPage = () => {
 			handleNewUsuario(value);
 		},
 	});
-
+	const urlUsuarios = `${process.env.REACT_APP_RUTA_SERVIDOR}usuarios`;
 	const handleNewUsuario = async (value) => {
 		let suscribe = true;
 		(async () => {
@@ -157,8 +158,8 @@ export const EditarUsuariosPage = () => {
 							>
 							<Button type="secondary"
 								icon={<RetweetOutlined />}
-								onClick={() =>
-								history.push("/usuarios")}
+								onClick={() =>									
+								history.push({pathname: `${urlUsuarios}`})}
 							>Regresar</Button>
 							</div>,
 							<div

@@ -6,10 +6,8 @@ import * as Yup from "yup";
 import { ContentComponent } from "../../../components/layout/content";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { crearUsuario, obtenerUsuario, actualizarUsuario, ObtenerUsuarioPorUserName } from "../../../services/usuariosService";
 import { SaveOutlined, RetweetOutlined, UploadOutlined } from "@ant-design/icons";
 import { useModal } from "../../../hooks/useModal";
-import { ModalComponent } from "../../../components/modal/modal";
 export const NuevaSolicitudPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, messageInfo } = useMessageApi();
@@ -33,6 +31,13 @@ export const NuevaSolicitudPage = () => {
 		message.success('Solicitud registrada correctamente.');		
 	}
 
+	const ocultarUpload = async(e) => {
+		if(e.target.value === 'f'){			
+			document.getElementsByClassName('ant-space-item')[2].style.display = 'none';
+		} else {
+			document.getElementsByClassName('ant-space-item')[2].removeAttribute('style');
+		}
+	}
 	return (
 		<ContentComponent style={{ padding: '0 24px', minHeight: 280 }} >
 			<MessageApi
@@ -55,8 +60,9 @@ export const NuevaSolicitudPage = () => {
 							>
 							<Button type="secondary"
 								icon={<RetweetOutlined />}
-								onClick={() =>
-								history.push("/clientes/solicitudes")}
+								onClick={() =>								
+								history.push({pathname: `${process.env.REACT_APP_RUTA_SERVIDOR}clientes/solicitudes`, state: 0})
+							}
 							>Regresar</Button>
 							</div>,
 							<div
@@ -84,9 +90,9 @@ export const NuevaSolicitudPage = () => {
                             </Descriptions>
 							<Row gutter={12}>
 								<Col lg={12} xs={{ span: 24 }}>
-                                <Radio.Group defaultValue="f" buttonStyle="solid">
-                                    <Radio.Button value="f" onClick={showModal}>Factoring</Radio.Button>
-                                    <Radio.Button value="c" onClick={showModal}>Confirming</Radio.Button>                                
+                                <Radio.Group defaultValue="c" buttonStyle="solid">
+                                    <Radio.Button value="f" onClick={ocultarUpload}>Factoring</Radio.Button>
+                                    <Radio.Button value="c" onClick={ocultarUpload}>Confirming</Radio.Button>                                
                                 </Radio.Group>
 								</Col>																	
 							</Row>						
@@ -114,6 +120,7 @@ export const NuevaSolicitudPage = () => {
 									listType="picture"
 									maxCount={1}
 									multiple
+									id='btnXLS'
 									>
 									<Button icon={<UploadOutlined />}>Adjuntar XLSX</Button>
 									</Upload>

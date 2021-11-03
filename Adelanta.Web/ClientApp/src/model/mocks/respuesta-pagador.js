@@ -1,4 +1,4 @@
-module.exports.respuestaPagador = {
+export const respuesta = {
     data :[
         {
             idSolicitud: "005",
@@ -9,7 +9,6 @@ module.exports.respuestaPagador = {
             nroDocumento: "00022555",
             fechaPago: "22/10/2021", 
             netoConfirmado: "",
-            fechaComunicacion: "22/10/2021", 
             cavali: true
         },
         {
@@ -21,7 +20,6 @@ module.exports.respuestaPagador = {
             nroDocumento: "00022555",
             fechaPago: "22/10/2021", 
             netoConfirmado: "",
-            fechaComunicacion: "22/10/2021", 
             cavali: true
         },
         {
@@ -33,8 +31,7 @@ module.exports.respuestaPagador = {
             nroDocumento: "00022555",
             fechaPago: "22/10/2021", 
             netoConfirmado: "",
-            fechaComunicacion: "22/10/2021", 
             cavali: true
-        },
+        }
     ]
 }

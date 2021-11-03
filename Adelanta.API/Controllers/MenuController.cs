@@ -23,5 +23,10 @@ namespace Adelanta.API.Controllers
         {
             return Ok(await _menuRepository.ListarMenu());
         }
+        [HttpGet("/api/Menu/ObtenerMenuPorSesion/{gSesion}")]
+        public async Task<IActionResult> ObtenerMenuPorSesion(string gSesion)
+        {
+            return Ok(await _menuRepository.ObtenerMenuPorSesion(gSesion));
+        }
     }
 }

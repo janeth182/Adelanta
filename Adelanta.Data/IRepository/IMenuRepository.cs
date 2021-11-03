@@ -10,6 +10,6 @@ namespace Adelanta.Data.IRepository
     public interface IMenuRepository
     {
         Task<IEnumerable<MenuBE>> ListarMenu();
-        Task<IEnumerable<MenuBE>> ObtenerMenuPorUsuario();
+        Task<IEnumerable<MenuBE>> ObtenerMenuPorSesion(string gSesion);
     }
 }

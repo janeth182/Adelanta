@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Table, Button, Tag, Space} from "antd";
-import { FilePdfOutlined , FileTextOutlined   } from "@ant-design/icons";
+import { PageHeader, Row, Col, Card, Table, Button, Tag, Space, Descriptions, Form } from "antd";
+import { FilePdfOutlined , FileTextOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { facturas }from "../../../model/mocks/facturas"
+import { facturas }from "../../../model/mocks/facturas";
 import { ExportCSV } from '../../../utils/excel';
+import { ModalComponent } from "../../../components/modal/modal";
+import { detalleFacturas }from "../../../model/mocks/detalleFactura";
 import MyPDF from '../../../file/FACTURAE001-32.pdf';
 import MyXML from '../../../file/20514535222-01-F001-00004348.xml';
 export const FacturasPage = () => {
@@ -21,24 +23,24 @@ export const FacturasPage = () => {
 	const [dataUsuario, setDataUsuario] = useState([]);
 	const [loadingApi, setLoadingApi] = useState(false);	
 	const history = useHistory();
-	const columns = [
-		{
-			title: "Nro. Factura",
-			dataIndex: "idFactura",
-			...getColumnSearchProps("idFactura"),
-		},
+	const columns = [		
         {
 			title: "Nro. Liquidación",
 			dataIndex: "nroLiquidacion",
 			...getColumnSearchProps("nroLiquidacion"),
 		},
         {
-			title: "Fecha de Emisión",
-			dataIndex: "fechaEmision",
-			...getColumnSearchProps("fechaEmision"),
-		},       
+			title: "Fecha de Liquidación",
+			dataIndex: "fechaLiquidacion",
+			...getColumnSearchProps("fechaLiquidacion"),
+		},   
 		{
-			title: "Importe Sin IGV",
+			title: "Nro. Facturas",
+			dataIndex: "cantidadFacturas",
+			...getColumnSearchProps("cantidadFacturas"),
+		},
+		{
+			title: "Importe",
 			dataIndex: "importeSinIGV",
 			...getColumnSearchProps("importeSinIGV"),
 		},		
@@ -46,6 +48,39 @@ export const FacturasPage = () => {
 			title: "IGV",
 			dataIndex: "igv",
 			...getColumnSearchProps("igv"),
+		},
+		{
+			title: "Total",
+			dataIndex: "total",
+			...getColumnSearchProps("total"),
+		},
+		{
+			title: "Detalle",
+			render: (_, record) => {
+				return (
+					<a type="primary" onClick={showModal}>
+					{'Ver Detalle'}
+					</a>
+				);
+			}	
+		},	
+	];
+
+	const columsDetalle = [
+		{
+			title: "Nro. Factura",
+			dataIndex: "idFactura",
+			...getColumnSearchProps("idFactura"),
+		},
+		{
+			title: "Fecha Emisión",
+			dataIndex: "fechaEmision",
+			...getColumnSearchProps("fechaEmision"),
+		},
+		{
+			title: "Monto sin IGV",
+			dataIndex: "montoSinIGV",
+			...getColumnSearchProps("montoSinIGV"),
 		},
 		{
 			title: "Total",
@@ -66,7 +101,7 @@ export const FacturasPage = () => {
 		},
         {
 			title: "Descargar Factura",
-			dataIndex: "archivoFactura",
+			dataIndex: "archivos",
             render: () => {
 				return (
 					<>
@@ -81,9 +116,8 @@ export const FacturasPage = () => {
 					</>
 				);
 			}	
-		},
-	];
-
+		}
+	]
 	useEffect(() => {
 		let suscribe = true;
 		(async () => {
@@ -159,6 +193,41 @@ export const FacturasPage = () => {
 					</Card>
 				</Col>
 			</Row>	
+			<ModalComponent
+				title="Detalle de Factura"
+				onClose={hiddenModal}
+				show={isModal}				
+                width={1000}	
+				footer={[
+					<Button	className="primary-b" type="primary" onClick={hiddenModal} > 
+					Salir
+					</Button>
+				]}			 
+			>
+				<Form layout="vertical"  className="ant-advanced-search-form">
+                    <Descriptions title="Datos Principales">
+                        <Descriptions.Item label="Liquidacion" span={2}>LIQ-0004-2021</Descriptions.Item>
+                        <Descriptions.Item label="Fecha" span={2}>22/10/2021</Descriptions.Item>
+                        <Descriptions.Item label="Cedente" span={2}>ISI Group S.A.C</Descriptions.Item>
+                        <Descriptions.Item label="Pagador" span={2}>Rimac</Descriptions.Item>
+                        <Descriptions.Item label="Tipo de Operación" span={2}>Factoring</Descriptions.Item>                                                                                                                 
+                    </Descriptions>                                                 
+					<Table
+						loading={loadingApi}
+						columns={columsDetalle}
+						dataSource={ detalleFacturas.data }
+						size="small"
+						pagination={{
+							current: page,
+							pageSize: pageSize,
+							onChange: (page, pageSize) => {
+								setPage(page);
+								setPageSize(pageSize);
+							},
+						}}
+					/>
+				</Form>
+			</ModalComponent>
 		</ContentComponent>
 	);
 };

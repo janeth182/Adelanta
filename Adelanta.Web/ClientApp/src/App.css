@@ -95,3 +95,16 @@
 .ant-menu-item-selected .ant-menu-title-content{
 	color: #f9f9f9 !important;
 }
+
+.ant-btn-primary {
+    color: #fff;
+    border-color: #b70f0a;
+    background: #b70f0a;
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 12%);
+    box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
+}
+.ant-btn-primary:hover, .ant-btn-primary:focus {
+    color: #fff;
+    border-color: #af2420;
+    background: #8f1a16;
+}

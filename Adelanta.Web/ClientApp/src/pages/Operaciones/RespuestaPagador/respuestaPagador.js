@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Table, Button, Space, Checkbox, message, Calendar  } from "antd";
+import { PageHeader, Row, Col, Card, Table, Button, Space, Checkbox, message, Input  } from "antd";
 import { SaveOutlined, SendOutlined, EditOutlined  } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { respuestaPagador }from "../../../model/mocks/respuestaPagador";
+import { respuesta }from "../../../model/mocks/respuesta-pagador";
 export const RespuestaPagadorPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, addMessage, messageInfo } = useMessageApi();
@@ -56,7 +56,9 @@ export const RespuestaPagadorPage = () => {
 			title: "Neto Confirmado",
 			dataIndex: "netoConfirmado",
 			...getColumnSearchProps("netoConfirmado"),
-		},
+			render: (record) =>
+				<Input type="text"/>
+			},
         {
 			title: "Fecha Confirmación",
 			dataIndex: "fechaComunicacion",
@@ -95,7 +97,7 @@ export const RespuestaPagadorPage = () => {
 		(async () => {
 			setLoadingApi(true);
 			try {
-				const rpta = respuestaPagador;
+				const rpta = respuesta;
 				if (suscribe) {
                     console.log(rpta.data)
                     handleFormatColumns(rpta.data);
