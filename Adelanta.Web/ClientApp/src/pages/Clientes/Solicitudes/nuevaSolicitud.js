@@ -41,8 +41,12 @@ export const NuevaSolicitudPage = () => {
 		}
 	}
 	const fileList = [
-		
-	  ];
+	
+	];
+
+	const handleupload = async (file, fileList) =>{
+		this.setState({ 'selectedFiles': fileList });
+	}
 	return (
 		<ContentComponent style={{ padding: '0 24px', minHeight: 280 }} >
 			<MessageApi
@@ -106,11 +110,11 @@ export const NuevaSolicitudPage = () => {
                             </Descriptions>
 								<Space direction="vertical" style={{ width: '100%' }} size="large">
 									<Upload
-									action=""
+									 action=""
 									listType="picture"
 									maxCount={20}
 									multiple
-									defaultFileList={[...fileList]}											
+									beforeUpload={handleupload} 											
 									>
 									<Button icon={<UploadOutlined />}>Adjuntar PDF</Button>
 									</Upload>
@@ -118,6 +122,7 @@ export const NuevaSolicitudPage = () => {
 									action=""
 									listType="picture"
 									maxCount={20}
+									beforeUpload={handleupload}
 									multiple
 									>
 									<Button icon={<UploadOutlined />}>Adjuntar XML</Button>
@@ -126,6 +131,7 @@ export const NuevaSolicitudPage = () => {
 									action=""
 									listType="picture"
 									maxCount={20}
+									beforeUpload={handleupload}
 									multiple
 									id='btnXLS'
 									>
