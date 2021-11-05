@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Table, Button, Tag, Form, Descriptions  } from "antd";
+import { PageHeader, Row, Col, Card, Table, Button, Tag, Form, Descriptions,Space  } from "antd";
 import { PlusSquareOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
@@ -10,6 +10,7 @@ import { MessageApi } from "../../../components/message/message";
 import { solicitudes }from "../../../model/mocks/solicitudes";
 import { desembolsado }from "../../../model/mocks/desembolsado";
 import { ModalComponent } from "../../../components/modal/modal";
+import { ExportCSV } from '../../../utils/excel';
 export const SolicitudesPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, addMessage, messageInfo } = useMessageApi();
@@ -185,6 +186,7 @@ export const SolicitudesPage = () => {
 						title="Solicitudes"
 						actions={[]}
 						extra={
+							<Space>
 							<Button								
 								className="primary-b"
 								type="primary"
@@ -195,6 +197,8 @@ export const SolicitudesPage = () => {
 							>
 							Nueva Solicitud
 							</Button>
+							<ExportCSV csvData={solicitudes.data} fileName={'solicitudes'} />  
+							</Space>
 						}
 					>	
 						<Table

@@ -11,6 +11,7 @@ import { aprobacionDeselmbolso } from "../../../model/mocks/aprobacionDesembolso
 import { ExportCSV } from '../../../utils/excel';
 import { ModalComponent } from "../../../components/modal/modal";
 import { desembolsado }from "../../../model/mocks/desembolsado";
+
 export const AprobacionDesembolsoPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, addMessage, messageInfo } = useMessageApi();
@@ -19,9 +20,6 @@ export const AprobacionDesembolsoPage = () => {
 	const [dataUsuario, setDataUsuario] = useState([]);
 	const [loadingApi, setLoadingApi] = useState(false);	
 	const history = useHistory();	
-	function onChange(date, dateString) {
-		console.log(date, dateString);
-	}
 	const columns = [
 		{
 			title: "Nro. Liquidación",
@@ -193,7 +191,7 @@ export const AprobacionDesembolsoPage = () => {
 								>
 								Aprobar
 								</Button>
-                                <ExportCSV csvData={aprobacionDeselmbolso} fileName={'AprobacionDesembolso'} />  
+                                <ExportCSV csvData={aprobacionDeselmbolso.data} fileName={'AprobacionDesembolso'} />  
 							 </Space>							
 							</>						
 						}

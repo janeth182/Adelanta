@@ -139,7 +139,7 @@ export const GeneracionArchivoPage = () => {
 								>
 								Generar Archivo
 								</Button>
-                                <ExportCSV csvData={generacionArchivo} fileName={'GeneracionArchivo'} />  
+                                <ExportCSV csvData={generacionArchivo.data} fileName={'GeneracionArchivo'} />  
 							 </Space>							
 							</>						
 						}
