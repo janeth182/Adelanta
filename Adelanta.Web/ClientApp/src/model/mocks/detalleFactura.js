@@ -7,7 +7,7 @@ module.exports.detalleFacturas = {
             igv: 180,
             total: 1180.00,
             estado: "Por Pagar",
-            archivos:''            
+            archivos:''
         },
         {
             idFactura: "F005-0001",

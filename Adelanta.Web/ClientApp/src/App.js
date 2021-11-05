@@ -14,6 +14,8 @@ import { FacturasPage } from './pages/Clientes/Facturas/facturas';
 import { SolicitudesPage } from './pages/Clientes/Solicitudes/solicitudes';
 import { NuevaSolicitudPage } from './pages/Clientes/Solicitudes/nuevaSolicitud';
 import { RespuestaPagadorPage } from './pages/Operaciones/RespuestaPagador/respuestaPagador';
+import { AprobacionDesembolsoPage } from './pages/Desembolso/AprobacionDesembolso/aprobacionDesembolso';
+import { GeneracionArchivoPage } from './pages/Desembolso/GeneracionArchivo/generacionArchivo';
 export const App = () => {	
 	const {REACT_APP_RUTA_SERVIDOR} = process.env;
 	return (
@@ -44,11 +46,21 @@ export const App = () => {
 						/>
 						<PrivateRouter
 							exact
+							path= { REACT_APP_RUTA_SERVIDOR + "desembolso/aprobacion-desembolso"}
+							component={AprobacionDesembolsoPage}
+						/>
+						<PrivateRouter
+							exact
+							path= { REACT_APP_RUTA_SERVIDOR + "desembolso/generacion-archivos"}
+							component={GeneracionArchivoPage}
+						/>
+						<PrivateRouter
+							exact
 							path={REACT_APP_RUTA_SERVIDOR + "usuarios"}
 							component={UsuariosPage}
 						/>
 						<PrivateRouter
-							exact
+							exact path={REACT_APP_RUTA_SERVIDOR + "editar-usuario"}
 							component={EditarUsuariosPage}
 						/>
 						<PrivateRouter

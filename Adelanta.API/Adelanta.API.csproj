@@ -13,4 +13,8 @@
     <ProjectReference Include="..\Adelanta.Data\Adelanta.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Documentos\" />
+  </ItemGroup>
+
 </Project>

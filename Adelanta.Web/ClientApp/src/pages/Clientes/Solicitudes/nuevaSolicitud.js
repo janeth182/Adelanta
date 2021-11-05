@@ -8,6 +8,7 @@ import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
 import { SaveOutlined, RetweetOutlined, UploadOutlined } from "@ant-design/icons";
 import { useModal } from "../../../hooks/useModal";
+import { fileUpload } from "../../../model/api";
 export const NuevaSolicitudPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, messageInfo } = useMessageApi();
@@ -25,9 +26,10 @@ export const NuevaSolicitudPage = () => {
 		onSubmit: (value) => {
 			//handleNewUsuario(value);
 		},
-	});
-
-	const confirm = async () => {
+	});	
+	
+	const enviarDocumentos = async () => {
+		console.log(JSON.stringify(fileList));
 		message.success('Solicitud registrada correctamente.');		
 	}
 
@@ -38,6 +40,9 @@ export const NuevaSolicitudPage = () => {
 			document.getElementsByClassName('ant-space-item')[2].removeAttribute('style');
 		}
 	}
+	const fileList = [
+		
+	  ];
 	return (
 		<ContentComponent style={{ padding: '0 24px', minHeight: 280 }} >
 			<MessageApi
@@ -72,7 +77,7 @@ export const NuevaSolicitudPage = () => {
 									padding: `0 16px`,
 								}}
 							>
-							<Button type="primary" onClick={confirm} icon={<SaveOutlined />} loading={loadingApi}>
+							<Button type="primary" onClick={enviarDocumentos} icon={<SaveOutlined />} loading={loadingApi}>
 								Guardar
 							</Button>
 							</div>,
@@ -103,14 +108,16 @@ export const NuevaSolicitudPage = () => {
 									<Upload
 									action=""
 									listType="picture"
-									maxCount={1}
+									maxCount={20}
+									multiple
+									defaultFileList={[...fileList]}											
 									>
 									<Button icon={<UploadOutlined />}>Adjuntar PDF</Button>
 									</Upload>
 									<Upload
 									action=""
 									listType="picture"
-									maxCount={1}
+									maxCount={20}
 									multiple
 									>
 									<Button icon={<UploadOutlined />}>Adjuntar XML</Button>
@@ -118,7 +125,7 @@ export const NuevaSolicitudPage = () => {
 									<Upload
 									action=""
 									listType="picture"
-									maxCount={1}
+									maxCount={20}
 									multiple
 									id='btnXLS'
 									>

@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { PageHeader, Row, Col, Card, Table, Button, Space, Checkbox, message, Input, DatePicker } from "antd";
-import { SaveOutlined, SendOutlined, EditOutlined  } from "@ant-design/icons";
+import { FileExcelOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { respuesta }from "../../../model/mocks/respuesta-pagador";
+import { generacionArchivo }from "../../../model/mocks/generacionArchivo";
 import moment from 'moment';
-export const RespuestaPagadorPage = () => {
+import { ExportCSV } from '../../../utils/excel';
+export const GeneracionArchivoPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, addMessage, messageInfo } = useMessageApi();
 	const [page, setPage] = useState(1);
@@ -22,58 +23,47 @@ export const RespuestaPagadorPage = () => {
 	}
 	const columns = [
 		{
-			title: "Nro. Solicitud",
-			dataIndex: "idSolicitud",
-			...getColumnSearchProps("idSolicitud"),
+			title: "Nro. Liquidación",
+			dataIndex: "nroLiquidacion",
+			...getColumnSearchProps("nroLiquidacion"),
 		},	
-		{
-			title: "Cliente",
-			dataIndex: "cliente",
-			...getColumnSearchProps("cliente"),
-		},
+        {
+			title: "Aceptante",
+			dataIndex: "aceptante",
+			...getColumnSearchProps("aceptante"),
+		},	
         {
 			title: "RUC",
 			dataIndex: "ruc",
 			...getColumnSearchProps("ruc"),   	
-		},
-		{
-			title: "Aceptante",
-			dataIndex: "aceptante",
-			...getColumnSearchProps("aceptante"),
 		},		
 		{
-			title: "RUC",
-			dataIndex: "rucAceptante",
-			...getColumnSearchProps("rucAceptante"),
+			title: "Monto desembolsado",
+			dataIndex: "montoDesembolso",
+			...getColumnSearchProps("montoDesembolso"),
 		},
 		{
-			title: "Nro. Documento",
-			dataIndex: "nroDocumento",
-			...getColumnSearchProps("nroDocumento"),
+			title: "Banco",
+			dataIndex: "banco",
+			...getColumnSearchProps("banco"),
 		},
-		{
-			title: "Fecha de Pago",
-			dataIndex: "fechaPago",
-			...getColumnSearchProps("fechaPago"),
-			render: (_, record) => {
-				return (
-					<>
-						<DatePicker 
-						defaultValue={moment(record.fechaPago, 'DD/MM/YYYY')}
-						onChange={onChange} format={'DD/MM/YYYY'}/>							
-					</>
-				);
-			},
+        {
+			title: "Moneda",
+			dataIndex: "moneda",
+			...getColumnSearchProps("moneda"),
+		},	
+        {
+			title: "Nro Cuenta",
+			dataIndex: "nroCuenta",
+			...getColumnSearchProps("moneda"),
 		},
+        {
+			title: "CCI",
+			dataIndex: "cci",
+			...getColumnSearchProps("cci"),
+		},	
 		{
-			title: "Neto Confirmado",
-			dataIndex: "netoConfirmado",
-			...getColumnSearchProps("netoConfirmado"),
-			render: (record) =>
-				<Input type="text" value={record.netoConfirmado}/>
-		},
-		{
-			title: "Cavali",
+			title: "Generar Archivo",
 			dataIndex: "cavali",
 			...getColumnSearchProps("cavali"),
             render: (value) => {
@@ -90,7 +80,7 @@ export const RespuestaPagadorPage = () => {
 		(async () => {
 			setLoadingApi(true);
 			try {
-				const rpta = respuesta;
+				const rpta = generacionArchivo;
 				if (suscribe) {
                     console.log(rpta.data)
                     handleFormatColumns(rpta.data);
@@ -118,9 +108,6 @@ export const RespuestaPagadorPage = () => {
 	const confirm = async () => {
 		message.success('Se proceso correctamente.');		
 	}
-	function onPanelChange(value, mode) {
-		console.log(value, mode);
-	}
 	return (
 		<ContentComponent>
 			<PageHeader
@@ -139,7 +126,7 @@ export const RespuestaPagadorPage = () => {
 			<Row>
 				<Col span={24}>
 					<Card
-						title="Respuesta Pagador"
+						title="Generación Archivos"
 						actions={[]}
 						extra={
 							<>
@@ -147,19 +134,12 @@ export const RespuestaPagadorPage = () => {
 								<Button								
 									className="primary-b"
 									type="primary"
-									icon={<SaveOutlined  style={{ fontSize: '16px'}}/>}								
+									icon={<FileExcelOutlined style={{ fontSize: '16px'}}/>}								
 									onClick={confirm}
 								>
-								Guardar
+								Generar Archivo
 								</Button>
-								<Button								
-									className="primary-b"
-									type="primary"
-									icon={<SendOutlined  style={{ fontSize: '16px'}}/>}								
-									onClick={confirm}
-								>
-								Cavali
-								</Button>
+                                <ExportCSV csvData={generacionArchivo} fileName={'GeneracionArchivo'} />  
 							 </Space>							
 							</>						
 						}
