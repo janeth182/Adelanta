@@ -14,8 +14,13 @@ import { FacturasPage } from './pages/Clientes/Facturas/facturas';
 import { SolicitudesPage } from './pages/Clientes/Solicitudes/solicitudes';
 import { NuevaSolicitudPage } from './pages/Clientes/Solicitudes/nuevaSolicitud';
 import { RespuestaPagadorPage } from './pages/Operaciones/RespuestaPagador/respuestaPagador';
+import { RegistroFactrackPage } from './pages/Operaciones/RegistroFactrack/registroFactrack';
+import { LiquidacionesPage } from './pages/Operaciones/Liquidaciones/liquidaciones';
 import { AprobacionDesembolsoPage } from './pages/Desembolso/AprobacionDesembolso/aprobacionDesembolso';
 import { GeneracionArchivoPage } from './pages/Desembolso/GeneracionArchivo/generacionArchivo';
+import { ConsultaFacturasPage } from './pages/Facturacion/ConsultaFacturas/consultaFacturas';
+import { EmitirFacturasPage } from './pages/Facturacion/EmitirFacturas/emitirFacturas';
+import { ClientesPage } from './pages/Comercial/Clientes/clientes';
 export const App = () => {	
 	const {REACT_APP_RUTA_SERVIDOR} = process.env;
 	return (
@@ -46,6 +51,16 @@ export const App = () => {
 						/>
 						<PrivateRouter
 							exact
+							path= { REACT_APP_RUTA_SERVIDOR + "operaciones/registro-factrack"}
+							component={RegistroFactrackPage}
+						/>
+						<PrivateRouter
+							exact
+							path= { REACT_APP_RUTA_SERVIDOR + "operaciones/liquidaciones"}
+							component={LiquidacionesPage}
+						/>
+						<PrivateRouter
+							exact
 							path= { REACT_APP_RUTA_SERVIDOR + "desembolso/aprobacion-desembolso"}
 							component={AprobacionDesembolsoPage}
 						/>
@@ -53,6 +68,21 @@ export const App = () => {
 							exact
 							path= { REACT_APP_RUTA_SERVIDOR + "desembolso/generacion-archivos"}
 							component={GeneracionArchivoPage}
+						/>
+						<PrivateRouter
+							exact
+							path= { REACT_APP_RUTA_SERVIDOR + "facturacion/consulta-facturas"}
+							component={ConsultaFacturasPage}
+						/>
+						<PrivateRouter
+							exact
+							path= { REACT_APP_RUTA_SERVIDOR + "facturacion/emitir-facturas"}
+							component={EmitirFacturasPage}
+						/>
+						<PrivateRouter
+							exact
+							path= { REACT_APP_RUTA_SERVIDOR + "comercial/clientes"}
+							component={ClientesPage}
 						/>
 						<PrivateRouter
 							exact

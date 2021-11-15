@@ -1,5 +1,5 @@
 import { fileUpload } from "../model/api";
 
-export const listarUsuarios = async (formData) => {
+export const cargarDocumentos = async (formData) => {
 	return await fileUpload.post(`Solicitud/CargaDocumentos`, formData);
 };

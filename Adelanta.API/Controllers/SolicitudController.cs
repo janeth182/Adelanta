@@ -1,12 +1,18 @@
 ﻿using Adelanta.Data.IRepository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Adelanta.API.Controllers
 {
@@ -27,6 +33,8 @@ namespace Adelanta.API.Controllers
                 var files = Request.Form.Files;
                 var folderName = Path.Combine("Documentos");
                 var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+                string [] JsonFiles = new string[files.Count];
+                int indice = 0;                
                 if (files.Any(f => f.Length == 0))
                 {
                     return BadRequest();
@@ -35,11 +43,26 @@ namespace Adelanta.API.Controllers
                 {
                     var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
                     var fullPath = Path.Combine(pathToSave, fileName);
-                    var dbPath = Path.Combine(folderName, fileName); //you can add this path to a list and then return all dbPaths to the client if require
+                    var dbPath = Path.Combine(folderName, fileName);
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
                     }
+
+                    if (file.ContentType == "text/xml")
+                    {
+                        string xml = fullPath;
+                        XmlDocument doc = new XmlDocument();
+                        using (var sr = new StreamReader(xml))
+                        {
+                            doc.Load(sr);
+                            string json = JsonConvert.SerializeXmlNode(doc);
+                            dynamic documentoXML = JsonConvert.DeserializeObject<ExpandoObject>(json);
+                            JsonFiles[indice] = documentoXML;
+                            indice++;
+                        }
+                    }
+
                 }
                 return Ok("All the files are successfully uploaded.");
             }

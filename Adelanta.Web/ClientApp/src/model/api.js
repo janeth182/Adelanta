@@ -12,6 +12,5 @@ export const fileUpload = axios.create({
 	baseURL: process.env.REACT_APP_URL_API,
 	headers: {
 		Accept: "application/json",
-		"Content-Type": "multipart/form-data",		
 	},
 });

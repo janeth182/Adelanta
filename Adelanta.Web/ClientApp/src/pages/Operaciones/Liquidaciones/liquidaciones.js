@@ -1,77 +1,52 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Table, Button, Tag, Form, Descriptions, Space } from "antd";
-import { PlusSquareOutlined } from "@ant-design/icons";
+import { PageHeader, Row, Col, Card, Table, Button, Space, Checkbox, message, Descriptions, Form } from "antd";
+import { CheckCircleOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { solicitudes }from "../../../model/mocks/solicitudes";
-import { desembolsado }from "../../../model/mocks/desembolsado";
-import { ModalComponent } from "../../../components/modal/modal";
+import { respuesta } from "../../../model/mocks/liquidaciones";
 import { ExportCSV } from '../../../utils/excel';
-export const SolicitudesPage = () => {
+import { ModalComponent } from "../../../components/modal/modal";
+import { desembolsado }from "../../../model/mocks/desembolsado";
+
+export const LiquidacionesPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, addMessage, messageInfo } = useMessageApi();
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);	
 	const [dataUsuario, setDataUsuario] = useState([]);
 	const [loadingApi, setLoadingApi] = useState(false);	
-	const history = useHistory();
+	const history = useHistory();	
 	const columns = [
 		{
-			title: "Nro. Solicitud",
-			dataIndex: "idSolicitud",
-			...getColumnSearchProps("idSolicitud"),
-		},	
-		{
-			title: "Fecha Solicitud",
-			dataIndex: "fechaSolicitud",
-			...getColumnSearchProps("fechaSolicitud"),
+			title: "Nro. Liquidación",
+			dataIndex: "nroLiquidacion",
+			...getColumnSearchProps("nroLiquidacion"),
+            render: (_, record) => {
+				return (
+                    <a type="primary" onClick={showModal}>
+                    {record.nroLiquidacion}
+                    </a>
+                );
+			}	
 		},
         {
-			title: "Liquidación",
-			dataIndex: "liquidacion",
-			...getColumnSearchProps("liquidacion"),
-            render: (_, record) => {
-				if(record.estado ==='Desembolso'){
-					return (
-						<a type="primary" onClick={showModal}>
-						{record.liquidacion}
-						</a>
-					);
-				} else {
-					return(
-						record.liquidacion
-					)				
-				}
-			}	
+			title: "Nro. Solicitud",
+			dataIndex: "nroSolicitud",
+			...getColumnSearchProps("nroSolicitud"),
 		},
 		{
 			title: "Aceptante",
 			dataIndex: "aceptante",
 			...getColumnSearchProps("aceptante"),
-		},		
-		{
-			title: "RUC",
-			dataIndex: "ruc",
-			...getColumnSearchProps("ruc"),
 		},
-		{
-			title: "Documento",
-			dataIndex: "documento",
-			...getColumnSearchProps("documento"),
-		},
-		{
-			title: "Fecha de Emisión",
-			dataIndex: "fechaEmision",
-			...getColumnSearchProps("fechaEmision"),
-		},
-		{
-			title: "Importe",
-			dataIndex: "importe",
-			...getColumnSearchProps("importe"),
+        {
+			title: "Nro. Documento",
+			dataIndex: "nroDocumento",
+			...getColumnSearchProps("nroDocumento"),   	
 		},
         {
 			title: "Moneda",
@@ -79,19 +54,61 @@ export const SolicitudesPage = () => {
 			...getColumnSearchProps("moneda"),
 		},
 		{
-			title: "Estado",
-			dataIndex: "estado",
-			...getColumnSearchProps("estado"),
+			title: "Fecha de Pago",
+			dataIndex: "fechaPago",
+			...getColumnSearchProps("fechaPago"),
+		},
+        {
+			title: "% Tasa",
+			dataIndex: "tasa",
+			...getColumnSearchProps("tasa"),
+		},
+        {
+			title: "Pendiente Pago",
+			dataIndex: "pendientePago",
+			...getColumnSearchProps("pendientePago"),
+		},
+        {
+			title: "% F. Resguardo",
+			dataIndex: "fResguardo",
+			...getColumnSearchProps("fResguardo"),
+		},
+        {
+			title: "Fondo Resguardo",
+			dataIndex: "fondoResguardo",
+			...getColumnSearchProps("fondoResguardo"),
+		},
+		{
+			title: "Monto Neto",
+			dataIndex: "montoNeto",
+			...getColumnSearchProps("montoNeto"),
+		},
+		{
+			title: "Intereses Inc. IGV",
+			dataIndex: "interesIGV",
+			...getColumnSearchProps("interesIGV"),
+		},
+        {
+			title: "Gatos Inc. IGV",
+			dataIndex: "gatosIGV",
+			...getColumnSearchProps("gatosIGV"),
+		},
+        {
+			title: "Monto desembolsado",
+			dataIndex: "montoDesembolso",
+			...getColumnSearchProps("montoDesembolso"),
+		},
+		{
+			title: "Aprobado",
+			dataIndex: "Aprobado",
+			...getColumnSearchProps("Aprobado"),
             render: (value) => {
                 return (
-                    <Tag color={value === "Desembolso" ? "blue" : "red"} rou>
-                        {value}
-                    </Tag>
+					<Checkbox></Checkbox>                    
                 );
             }		
 		}		
 	];
-
 	const columsLiquidacion = [
 		{
 			title: "Documento",
@@ -134,13 +151,13 @@ export const SolicitudesPage = () => {
 			...getColumnSearchProps("desembolso"),
 		},
 	]
-		
+			
 	useEffect(() => {
 		let suscribe = true;
 		(async () => {
 			setLoadingApi(true);
 			try {
-				const rpta = solicitudes;
+				const rpta = respuesta;
 				if (suscribe) {
                     console.log(rpta.data)
                     handleFormatColumns(rpta.data);
@@ -165,6 +182,9 @@ export const SolicitudesPage = () => {
 		}, []);
 		setDataUsuario(data);
 	};
+	const confirm = async () => {
+		message.success('Se proceso correctamente.');		
+	}
 	return (
 		<ContentComponent>
 			<PageHeader
@@ -183,22 +203,22 @@ export const SolicitudesPage = () => {
 			<Row>
 				<Col span={24}>
 					<Card
-						title="Solicitudes"
+						title="Liquidaciones"
 						actions={[]}
 						extra={
-							<Space>
-							<Button								
-								className="primary-b"
-								type="primary"
-								icon={<PlusSquareOutlined style={{ fontSize: '16px'}}/>}								
-								onClick={() =>
-									history.push({pathname: `${process.env.REACT_APP_RUTA_SERVIDOR}clientes/nueva-solicitud`, state: 0})
-								}
-							>
-							Nueva Solicitud
-							</Button>
-							<ExportCSV csvData={solicitudes.data} fileName={'solicitudes'} />  
-							</Space>
+							<>
+							 <Space>
+								<Button								
+									className="primary-b"
+									type="primary"
+									icon={<CheckCircleOutlined style={{ fontSize: '16px'}}/>}								
+									onClick={confirm}
+								>
+								Enviar a Cliente
+								</Button>
+                                <ExportCSV csvData={respuesta.data} fileName={'AprobacionDesembolso'} />  
+							 </Space>							
+							</>						
 						}
 					>	
 						<Table
@@ -217,7 +237,7 @@ export const SolicitudesPage = () => {
 						/>
 					</Card>
 				</Col>
-			</Row>
+			</Row>  
             <ModalComponent
 				title="Liquidación"
 				onClose={hiddenModal}
@@ -234,8 +254,12 @@ export const SolicitudesPage = () => {
                         <Descriptions.Item label="Liquidacion" span={1}>LIQ-0004-2021</Descriptions.Item>
                         <Descriptions.Item label="Moneda" span={1}>Soles</Descriptions.Item>
                         <Descriptions.Item label="Cedente" span={1}>ISI Group S.A.C</Descriptions.Item>
-                        <Descriptions.Item label="Pagador" span={1}>Rimac</Descriptions.Item>
-                        <Descriptions.Item label="Tipo de Operación" span={1}>Factoring</Descriptions.Item>                                                                                                                 
+                        <Descriptions.Item label="Aceptante" span={1}>Rimac</Descriptions.Item>                                                                                                                        
+                    </Descriptions>     
+                    <Descriptions title="Desembolsado">   
+                        <Descriptions.Item label="Banco" span={1}>BBVA</Descriptions.Item>
+                        <Descriptions.Item label="Nro Cuenta" span={1}>190078147852122</Descriptions.Item>
+                        <Descriptions.Item label="Fecha desembolso" span={1}>15/11/2021</Descriptions.Item>                                                                                                             
                     </Descriptions>                                                 
                     <Table
 						loading={loadingApi}
@@ -252,7 +276,7 @@ export const SolicitudesPage = () => {
 						}}
 					/>
 				</Form>
-			</ModalComponent>
+			</ModalComponent>          
 		</ContentComponent>
 	);
 };

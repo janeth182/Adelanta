@@ -1,7 +1,10 @@
 ﻿using Adelanta.Data.IRepository;
+using Adelanta.Model;
+using Dapper;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,10 +18,17 @@ namespace Adelanta.Data.Repository
         {
             _connectionString = connectionString;
         }
-
         protected MySqlConnection dbConnection()
         {
             return new MySqlConnection(_connectionString.ConnectionString);
+        }
+        public async Task<int> CrearSolicitud(SolicitudBE oSolicitudBE)
+        {
+            var db = dbConnection();
+            var sp = "SP_SOLICITUD_INSERTAR";
+            var values = new { p_TipoOperacion = oSolicitudBE.TipoOperacion, p_ruc = oSolicitudBE.Ruc, p_moneda = oSolicitudBE.Moneda };
+            var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
+            return result;
         }
     }
 }

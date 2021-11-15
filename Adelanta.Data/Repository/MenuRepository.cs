@@ -37,7 +37,8 @@ namespace Adelanta.Data.Repository
                         ON m.IdMenu=mr.IdMenu JOIN USUARIO u
                         ON u.IdRol=mr.IdRol JOIN SESION s
                         ON u.IdUsuario=s.IdUsuario
-                        WHERE GSesion=@gSesion";
+                        WHERE GSesion=@gSesion
+                        ORDER BY m.IdMenu";
             return await db.QueryAsync<MenuBE>(sql, new { gSesion });
         }
     }
