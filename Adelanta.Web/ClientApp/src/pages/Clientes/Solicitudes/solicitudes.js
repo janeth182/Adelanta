@@ -192,7 +192,7 @@ export const SolicitudesPage = () => {
 								type="primary"
 								icon={<PlusSquareOutlined style={{ fontSize: '16px'}}/>}								
 								onClick={() =>
-									history.push({pathname: `${process.env.REACT_APP_RUTA_SERVIDOR}clientes/nueva-solicitud`, state: 0})
+									history.push({pathname: `${process.env.REACT_APP_RUTA_SERVIDOR}clientes/solicitudes/nueva-solicitud`, state: 0})
 								}
 							>
 							Nueva Solicitud

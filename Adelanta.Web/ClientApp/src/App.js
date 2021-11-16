@@ -21,6 +21,8 @@ import { GeneracionArchivoPage } from './pages/Desembolso/GeneracionArchivo/gene
 import { ConsultaFacturasPage } from './pages/Facturacion/ConsultaFacturas/consultaFacturas';
 import { EmitirFacturasPage } from './pages/Facturacion/EmitirFacturas/emitirFacturas';
 import { ClientesPage } from './pages/Comercial/Clientes/clientes';
+import { CheckListPage } from './pages/Comercial/CheckList/checkList';
+import { PagadorPage } from './pages/Comercial/Pagador/pagador';
 export const App = () => {	
 	const {REACT_APP_RUTA_SERVIDOR} = process.env;
 	return (
@@ -36,7 +38,7 @@ export const App = () => {
 						/>
 						<PrivateRouter
 							exact
-							path={REACT_APP_RUTA_SERVIDOR + "clientes/nueva-solicitud"}
+							path={REACT_APP_RUTA_SERVIDOR + "clientes/solicitudes/nueva-solicitud"}
 							component={NuevaSolicitudPage}
 						/>						
 						<PrivateRouter
@@ -83,6 +85,16 @@ export const App = () => {
 							exact
 							path= { REACT_APP_RUTA_SERVIDOR + "comercial/clientes"}
 							component={ClientesPage}
+						/>
+						<PrivateRouter
+							exact
+							path= { REACT_APP_RUTA_SERVIDOR + "comercial/pagador"}
+							component={PagadorPage}
+						/>
+						<PrivateRouter
+							exact
+							path= { REACT_APP_RUTA_SERVIDOR + "comercial/check-list"}
+							component={CheckListPage}
 						/>
 						<PrivateRouter
 							exact
