@@ -1,16 +1,11 @@
 ﻿using Adelanta.Data.IRepository;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
-using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using System.Xml;
 
