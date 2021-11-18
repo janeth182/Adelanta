@@ -1,11 +1,15 @@
 ﻿using Adelanta.Data.IRepository;
+<<<<<<< HEAD
 using Adelanta.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+=======
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+>>>>>>> 0f6876028ead625b3d2c3dd0086f7b3abed1a80f
 using System;
-using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Linq;

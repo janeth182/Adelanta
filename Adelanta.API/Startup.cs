@@ -3,16 +3,10 @@ using Adelanta.Data.IRepository;
 using Adelanta.Data.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Adelanta.API
 {
@@ -37,7 +31,7 @@ namespace Adelanta.API
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.WithOrigins("https://localhost:3000", "http://localhost:3000", "http://localhost:80", "http://18.117.255.171")
+                        builder.WithOrigins("https://localhost:3000", "http://localhost:3001", "http://localhost:80", "http://18.117.255.171")
                                             .AllowAnyHeader()
                                             .AllowAnyMethod();
                     });
