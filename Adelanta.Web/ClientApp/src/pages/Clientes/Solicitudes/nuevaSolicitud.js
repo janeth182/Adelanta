@@ -5,7 +5,6 @@ import {
   Col,
   Card,
   Button,
-  Radio,
   Form,
   Upload,
   Space,
@@ -57,7 +56,6 @@ export const NuevaSolicitudPage = () => {
         let reader = new FileReader();
         reader.fileName = file.name;
         reader.onload = (file) => {
-          debugger;
           const xml = file.target.result;
           const jsonDataFromXml = new XMLParser().parseFromString(
             xml,
@@ -129,6 +127,7 @@ export const NuevaSolicitudPage = () => {
       return true;
     }
   };
+  const removeFile = async (file) => {};
   const enviarDocumentos = async () => {
     debugger;
     console.log(documentoDetalle);
@@ -281,6 +280,7 @@ export const NuevaSolicitudPage = () => {
                         multiple
                         className="upload-list-inline"
                         directory
+                        onRemove={removeFile}
                       >
                         <Button icon={<UploadOutlined />}>
                           Adjuntar Carpeta
@@ -301,6 +301,7 @@ export const NuevaSolicitudPage = () => {
                         action=""
                         listType="picture"
                         maxCount={100}
+                        className="upload-list-inline"
                         multiple
                         beforeUpload={handleupload}
                         directory

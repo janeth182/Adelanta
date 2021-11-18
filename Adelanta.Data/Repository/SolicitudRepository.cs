@@ -3,6 +3,7 @@ using Adelanta.Model;
 using Dapper;
 using MySql.Data.MySqlClient;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Adelanta.Data.Repository

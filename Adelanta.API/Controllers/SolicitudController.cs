@@ -1,22 +1,11 @@
 ﻿using Adelanta.Data.IRepository;
-<<<<<<< HEAD
 using Adelanta.Model;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-=======
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
->>>>>>> 0f6876028ead625b3d2c3dd0086f7b3abed1a80f
 using System;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Text.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Adelanta.API.Controllers
@@ -26,9 +15,9 @@ namespace Adelanta.API.Controllers
     public class SolicitudController : ControllerBase
     {
         private readonly ISolicitudRepository _solicitudRepository;
-        public SolicitudController(ISolicitudRepository loginRepository)
+        public SolicitudController(ISolicitudRepository solicitudRepository)
         {
-            _solicitudRepository = loginRepository;
+            _solicitudRepository = solicitudRepository;
         }
         [HttpPost("/api/Solicitud/CargaDocumentos")]
         public async Task<IActionResult> CargaDocumentos()

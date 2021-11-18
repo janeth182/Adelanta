@@ -26,12 +26,13 @@ namespace Adelanta.API
             services.AddScoped<IMenuRepository, MenuRepository>();
             services.AddScoped<ILoginRepository, LoginRepository>();
             services.AddScoped<ISolicitudRepository, SolicitudRepository>();
+            services.AddScoped<IDocumentoRepository, DocumentoRepository>();
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.WithOrigins("https://localhost:3000", "http://localhost:3001", "http://localhost:80", "http://18.117.255.171")
+                        builder.WithOrigins("https://localhost:3000", "http://localhost:3000", "http://localhost:80", "http://18.117.255.171")
                                             .AllowAnyHeader()
                                             .AllowAnyMethod();
                     });
