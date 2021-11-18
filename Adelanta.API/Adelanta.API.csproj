@@ -14,7 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Documentos\" />
+    <Folder Include="Documentos\DOLARES\" />
+    <Folder Include="Documentos\SOLES\" />
   </ItemGroup>
 
 </Project>

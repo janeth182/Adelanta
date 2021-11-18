@@ -108,3 +108,12 @@
     border-color: #af2420;
     background: #8f1a16;
 }
+.upload-list-inline .ant-upload-list-item {
+	float: left;
+	width: 200px;
+	margin-right: 8px;
+  }
+  
+  .upload-list-inline [class*='-upload-list-rtl'] .ant-upload-list-item {
+	float: right;
+  }

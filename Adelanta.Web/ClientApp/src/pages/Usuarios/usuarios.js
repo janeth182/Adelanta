@@ -16,7 +16,7 @@ export const UsuariosPage = () => {
 	const [dataUsuario, setDataUsuario] = useState([]);
 	const [loadingApi, setLoadingApi] = useState(false);	
 	const history = useHistory();
-	const urlEdicion = `${process.env.REACT_APP_RUTA_SERVIDOR}editar-usuario/`;
+	const urlEdicion = `${process.env.REACT_APP_RUTA_SERVIDOR}usuario/editar-usuario/`;
 	const confirm = async (id) => {
 		let suscribe = true;
 		(async () => {

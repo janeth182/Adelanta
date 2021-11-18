@@ -96,20 +96,7 @@ export const RegistroFactrackPage = () => {
 					<Checkbox></Checkbox>                    
                 );
             }		
-		},
-        {
-			title: "FacTrack",
-			dataIndex: "netoConfirmado",
-            render: (value) =>{
-                return (
-                    <Select defaultValue="-1" style={{ width: 120 }}>
-                        <Option value="-1">Seleccione ...</Option>
-                        <Option value="0">No</Option>
-                        <Option value="1">Si</Option>
-                    </Select>
-                );
-            }
-		}	
+		}
 	];
 
 			

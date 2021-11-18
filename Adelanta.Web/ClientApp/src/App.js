@@ -90,7 +90,7 @@ export const App = () => {
 							component={UsuariosPage}
 						/>
 						<PrivateRouter
-							exact path={REACT_APP_RUTA_SERVIDOR + "editar-usuario"}
+							exact path={REACT_APP_RUTA_SERVIDOR + "usuario/editar-usuario"}
 							component={EditarUsuariosPage}
 						/>
 						<PrivateRouter

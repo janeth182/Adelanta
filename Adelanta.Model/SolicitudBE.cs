@@ -10,6 +10,7 @@ namespace Adelanta.Model
     {
         public int? IdSolicitud { get; set; }
         public string Ruc { get; set; }
+        public string RazonSocial { get; set; }
         public decimal Importe { get; set; }
         public string Moneda { get; set; }
         public string TipoDocumento { get; set; }
