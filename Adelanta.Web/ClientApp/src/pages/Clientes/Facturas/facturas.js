@@ -30,10 +30,10 @@ export const FacturasPage = () => {
   const { isMessage, addMessage, messageInfo } = useMessageApi();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [valueSearch, setValueSearch] = useState("");
-
   const [data, setData] = useState([]);
   const [loadingApi, setLoadingApi] = useState(false);
+  const [listaError, setListaError] = useState([]);
+  const [listaRespuesta, setListaRespuesta] = useState([]);
   const history = useHistory();
   const columns = [
     {

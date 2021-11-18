@@ -11,6 +11,7 @@ import {
   message,
   Descriptions,
   Tabs,
+  Table,
 } from "antd";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -25,6 +26,8 @@ import {
 import { useModal } from "../../../hooks/useModal";
 import { cargarDocumentos } from "../../../services/solicitudService";
 import XMLParser from "react-xml-parser";
+import { ModalComponent } from "../../../components/modal/modal";
+
 export const NuevaSolicitudPage = () => {
   const { isModal, showModal, hiddenModal } = useModal();
   const { isMessage, messageInfo } = useMessageApi();
@@ -35,21 +38,34 @@ export const NuevaSolicitudPage = () => {
   const [tipoOperacion, setTipoOperacion] = useState("F");
   const [documentoCabecera, setDocumentoCabecera] = useState([]);
   const [documentoDetalle, setDocumentoDetalle] = useState([]);
+  const [listaError, setListaError] = useState([]);
+  const [listaRespuesta, setListaRespuesta] = useState([]);
   const history = useHistory();
-  const formik = useFormik({
-    initialValues: {
-      tipoFactoring: 0,
-      tipoConfirming: 0,
-    },
-    validationSchema: Yup.object().shape({
-      tipoFactoring: Yup.string().required("El campo es requerido"),
-      tipoConfirming: Yup.string().required("El campo es requerido"),
-    }),
-    onSubmit: (value) => {
-      //handleNewUsuario(value);
-    },
-  });
   const { TabPane } = Tabs;
+  const urlSolicitud = `${process.env.REACT_APP_RUTA_SERVIDOR}clientes/Solicitudes`;
+  const columsRespuesta = [
+    {
+      title: "Nro Solicitud",
+      dataIndex: "idSolicitud",
+    },
+    {
+      title: "Aceptante",
+      dataIndex: "aceptante",
+    },
+    {
+      title: "Ruc",
+      dataIndex: "ruc",
+    },
+    {
+      title: "Importe Total",
+      dataIndex: "importeTotal",
+    },
+    {
+      title: "Nro Documentos",
+      dataIndex: "cantidadDoc",
+    },
+  ];
+
   const handleupload = async (file) => {
     try {
       if (file.type === "text/xml") {
@@ -64,17 +80,36 @@ export const NuevaSolicitudPage = () => {
           const detalle = {};
           jsonDataFromXml.children.forEach((nodo) => {
             if (nodo.name === "cac:AccountingCustomerParty") {
-              detalle.pagador = nodo.children[0].children[1].children[0].value;
-              detalle.rucPagador =
-                nodo.children[0].children[0].children[0].value;
+              nodo.children.forEach((child) => {
+                if (child.name === "cac:Party") {
+                  child.children.forEach((det) => {
+                    if (det.name === "cac:PartyIdentification") {
+                      detalle.rucPagador = det.children[0].value;
+                    } else if (det.name === "cac:PartyLegalEntity") {
+                      det.children.forEach((legal) => {
+                        if (legal.name === "cbc:RegistrationName") {
+                          detalle.pagador = legal.value;
+                        }
+                      });
+                    }
+                  });
+                }
+              });
             } else if (nodo.name === "cac:SellerSupplierParty") {
               detalle.direccionPagador =
                 nodo.children[0].children[0].children[0].children[0].value;
             } else if (nodo.name === "cac:AccountingSupplierParty") {
-              detalle.proveedor =
-                nodo.children[0].children[2].children[0].value;
-              detalle.rucProveedor =
-                nodo.children[0].children[0].children[0].value;
+              nodo.children.forEach((child) => {
+                if (child.name === "cac:Party") {
+                  child.children.forEach((det) => {
+                    if (det.name === "cac:PartyName") {
+                      detalle.proveedor = det.children[0].value;
+                    } else if (det.name === "cac:PartyIdentification") {
+                      detalle.rucProveedor = det.children[0].value;
+                    }
+                  });
+                }
+              });
             } else if (nodo.name === "cbc:ID") {
               detalle.serie = nodo.value;
             } else if (nodo.name === "cbc:DocumentCurrencyCode") {
@@ -90,20 +125,38 @@ export const NuevaSolicitudPage = () => {
                 detalle.formaPago = nodo.children[1].value;
               }
             } else if (nodo.name === "cac:TaxTotal") {
-              detalle.montoTotalImpuesto = nodo.children[0].value;
-              detalle.codigoTributo =
-                nodo.children[1].children[2].children[1].children[0].value;
-              detalle.nombreTributo =
-                nodo.children[1].children[2].children[1].children[1].value;
-              detalle.codigoInternacionalTributo =
-                nodo.children[1].children[2].children[1].children[2].value;
+              nodo.children.forEach((child) => {
+                if (child.name === "cbc:TaxAmount") {
+                  detalle.montoTotalImpuesto = child.value;
+                } else if (child.name === "cbc:TaxSubtotal") {
+                  child.children.forEach((det) => {
+                    if (det.name === "cac:TaxCategory") {
+                      detalle.codigoTributo = det.children[0].children[0].value;
+                      detalle.nombreTributo = det.children[0].children[1].value;
+                      detalle.codigoInternacionalTributo =
+                        det.children[0].children[2].value;
+                    }
+                  });
+                }
+              });
             } else if (nodo.name === "cac:LegalMonetaryTotal") {
-              detalle.montoOperacion = nodo.children[0].value;
-              detalle.montoTotalVenta = nodo.children[1].value;
+              debugger;
+              nodo.children.forEach((child) => {
+                if (child.name === "cbc:PayableAmount") {
+                  detalle.montoTotalVenta = child.value;
+                } else if (child.name === "cbc:LineExtensionAmount") {
+                  detalle.montoOperacion = child.value;
+                }
+              });
             }
           });
           detalle.xml = file.target.result;
           detalle.nombreArchivo = file.target.fileName;
+          detalle.archivoPdf = `${file.target.fileName.split(".")[0]}.pdf`;
+          detalle.archivoExcel =
+            tipoOperacion === "C"
+              ? `${file.target.fileName.split(".")[0]}.xlsx`
+              : "";
           setDocumentoDetalle((documentoDetalle) => [
             ...documentoDetalle,
             detalle,
@@ -127,77 +180,126 @@ export const NuevaSolicitudPage = () => {
       return true;
     }
   };
-  const removeFile = async (file) => {};
-  const enviarDocumentos = async () => {
-    debugger;
-    console.log(documentoDetalle);
-    const cabecera = documentoDetalle.filter(
-      (detalleP, index, documentoDetalle) =>
-        index ===
-        documentoDetalle.findIndex(
-          (p) =>
-            p.rucPagador === detalleP.rucPagador && p.moneda === detalleP.moneda
-        )
-    );
-    for (let c = 0; c < cabecera.length; c++) {
-      let detalle = [];
-      if (
-        cabecera[c].rucPagador !== undefined &&
-        cabecera[c].moneda !== undefined
+  const removeFile = async (file) => {
+    try {
+      debugger;
+      if (file.type === "text/xml") {
+        const indice = fileList.indexOf(file);
+        const nuevaLista = fileList.slice();
+        nuevaLista.slice(indice, 1);
+        setFileList(nuevaLista);
+      } else if (file.type === "application/pdf") {
+        setFileListPDF((fileListPDF) => [...fileListPDF, file]);
+      } else if (
+        file.type ===
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       ) {
-        for (let d = 0; d < documentoDetalle.length; d++) {
-          if (tipoOperacion === "F") {
-            if (
-              cabecera[c].rucPagador === documentoDetalle[d].rucPagador &&
-              cabecera[c].moneda === documentoDetalle[d].moneda
-            ) {
-              detalle.push(documentoDetalle[d]);
-            }
-          } else {
-            if (
-              cabecera[c].rucProveedor === documentoDetalle[d].rucProveedor &&
-              cabecera[c].moneda === documentoDetalle[d].moneda
-            ) {
-              detalle.push(documentoDetalle[d]);
-            }
-          }
-        }
-        if (fileListPDF.length > 0) {
-          let data = new FormData();
-          for (let i = 0; i < fileList.length; i++) {
-            data.append("file[]", fileListPDF[i]);
-          }
-          data.append("tipoOperacion", tipoOperacion);
-          if (tipoOperacion === "F") {
-            data.append("ruc", cabecera[c].rucPagador);
-            data.append("razonSocial", cabecera[c].pagador);
-          } else {
-            data.append("ruc", cabecera[c].rucProveedor);
-            data.append("razonSocial", cabecera[c].proveedor);
-          }
-          data.append("moneda", cabecera[c].moneda);
-          data.append("detalle", JSON.stringify(detalle));
-          const rpta = await cargarDocumentos(data);
-          if (rpta.status === 200) {
-            message.success("Solicitud registrada correctamente.");
-            detalle = [];
-          } else {
-            message.error(
-              "Ocurrio un error al momento de procesar la solicitud."
-            );
-          }
-        } else {
-          message.info("Usted no ha cargado archivos.");
-        }
+        setFileListXLSX((fileListXLSX) => [...fileListXLSX, file]);
       } else {
-        message.info("No se pudo procesar el archivo.");
+        message.error("Formato de archivo no permitido.");
       }
+      return true;
+    } catch (error) {
+      message.error("Formato de archivo no permitido.");
+      return false;
     }
+  };
+  const enviarDocumentos = async () => {
+    let suscribe = true;
+    let listaRespuesta = [];
+    let listaError = [];
+    (async () => {
+      setLoadingApi(true);
+      try {
+        console.log(documentoDetalle);
+        const cabecera = documentoDetalle.filter(
+          (detalleP, index, documentoDetalle) =>
+            index ===
+            documentoDetalle.findIndex(
+              (p) =>
+                p.rucPagador === detalleP.rucPagador &&
+                p.moneda === detalleP.moneda
+            )
+        );
+        for (let c = 0; c < cabecera.length; c++) {
+          let detalle = [];
+          if (
+            cabecera[c].rucPagador !== undefined &&
+            cabecera[c].moneda !== undefined
+          ) {
+            for (let d = 0; d < documentoDetalle.length; d++) {
+              if (tipoOperacion === "F") {
+                if (
+                  cabecera[c].rucPagador === documentoDetalle[d].rucPagador &&
+                  cabecera[c].moneda === documentoDetalle[d].moneda
+                ) {
+                  detalle.push(documentoDetalle[d]);
+                }
+              } else {
+                if (
+                  cabecera[c].rucProveedor ===
+                    documentoDetalle[d].rucProveedor &&
+                  cabecera[c].moneda === documentoDetalle[d].moneda
+                ) {
+                  detalle.push(documentoDetalle[d]);
+                }
+              }
+            }
+            if (fileListPDF.length > 0) {
+              let data = new FormData();
+              for (let i = 0; i < fileList.length; i++) {
+                data.append("file[]", fileListPDF[i]);
+              }
+
+              if (tipoOperacion === "F") {
+                data.append("ruc", cabecera[c].rucPagador);
+                data.append("razonSocial", cabecera[c].pagador);
+              } else {
+                data.append("ruc", cabecera[c].rucProveedor);
+                data.append("razonSocial", cabecera[c].proveedor);
+              }
+              data.append("tipoOperacion", tipoOperacion);
+              data.append("moneda", cabecera[c].moneda);
+              data.append("detalle", JSON.stringify(detalle));
+              const rpta = await cargarDocumentos(data);
+              if (rpta.status === 200) {
+                setListaRespuesta((listaRespuesta) => [
+                  ...listaRespuesta,
+                  rpta.data,
+                ]);
+                //message.success("Solicitud registrada correctamente.");
+                detalle = [];
+              } else {
+                listaError.push(cabecera);
+                /*message.error(
+                  "Ocurrio un error al momento de procesar la solicitud."
+                );*/
+                setLoadingApi(false);
+              }
+            } else {
+              message.info("Usted no ha cargado archivos.");
+              setLoadingApi(false);
+            }
+          } else {
+            message.info("No se pudo procesar el archivo.");
+            setLoadingApi(false);
+          }
+        }
+        showModal();
+      } catch (error) {
+        setLoadingApi(false);
+        message.error("Ocurrio un error al momento de procesar la solicitud.");
+      }
+    })();
+
+    return () => {
+      suscribe = false;
+    };
   };
   const obtenerTipoOperacion = async (e) => {
     setTipoOperacion(e);
   };
-
+  const regresarPaginaSolicitud = () => {};
   return (
     <ContentComponent style={{ padding: "0 24px", minHeight: 280 }}>
       <MessageApi
@@ -223,8 +325,7 @@ export const NuevaSolicitudPage = () => {
                   icon={<RetweetOutlined />}
                   onClick={() =>
                     history.push({
-                      pathname: `${process.env.REACT_APP_RUTA_SERVIDOR}clientes/solicitudes`,
-                      state: 0,
+                      pathname: `${urlSolicitud}`,
                     })
                   }
                 >
@@ -244,7 +345,7 @@ export const NuevaSolicitudPage = () => {
                   icon={<SaveOutlined />}
                   loading={loadingApi}
                 >
-                  Guardar
+                  Procesar
                 </Button>
               </div>,
             ]}
@@ -253,10 +354,8 @@ export const NuevaSolicitudPage = () => {
               <Descriptions title="Información">
                 <Descriptions.Item label="">
                   Para registrar una nueva solicitud, haga click en el boton
-                  "Cargar Documentos", y seleccione los documentos que desea
-                  ceder a Adelanta Factoring.
-                  <br />
-                  Para los casos de factoring, cargue los archivos PDF y XML.
+                  "Adjuntar Carpeta", y seleccione la carpeta que desea ceder a
+                  Adelanta Factoring.
                   <br />
                   Luego de que los documentos hayan sido cargados, hacer click
                   en el botón procesar, para registrarlos en el sistema.
@@ -318,6 +417,39 @@ export const NuevaSolicitudPage = () => {
           </Card>
         </Col>
       </Row>
+      <ModalComponent
+        title="Resumen de la Operación"
+        onClose={() =>
+          history.push({
+            pathname: `${urlSolicitud}`,
+          })
+        }
+        show={isModal}
+        width={1000}
+        footer={[
+          <Button
+            className="primary-b"
+            type="primary"
+            onClick={() =>
+              history.push({
+                pathname: `${urlSolicitud}`,
+              })
+            }
+          >
+            Finalizar
+          </Button>,
+        ]}
+      >
+        <Form layout="vertical" className="ant-advanced-search-form">
+          <Descriptions title="Solicitudes Generadas"></Descriptions>
+          <Table
+            loading={loadingApi}
+            columns={columsRespuesta}
+            dataSource={listaRespuesta}
+            size="small"
+          />
+        </Form>
+      </ModalComponent>
     </ContentComponent>
   );
 };
