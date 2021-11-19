@@ -13,8 +13,6 @@ import {
   Tabs,
   Table,
 } from "antd";
-import { useFormik } from "formik";
-import * as Yup from "yup";
 import { ContentComponent } from "../../../components/layout/content";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
@@ -184,17 +182,18 @@ export const NuevaSolicitudPage = () => {
     try {
       debugger;
       if (file.type === "text/xml") {
-        const indice = fileList.indexOf(file);
-        const nuevaLista = fileList.slice();
-        nuevaLista.slice(indice, 1);
-        setFileList(nuevaLista);
+        setFileList(nuevaLista(fileList, file));
+        const detalle = documentoDetalle.filter(function (el) {
+          return el.nombreArchivo != file.name;
+        });
+        setDocumentoDetalle(detalle);
       } else if (file.type === "application/pdf") {
-        setFileListPDF((fileListPDF) => [...fileListPDF, file]);
+        setFileListPDF(nuevaLista(fileListPDF, file));
       } else if (
         file.type ===
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       ) {
-        setFileListXLSX((fileListXLSX) => [...fileListXLSX, file]);
+        setFileListXLSX(nuevaLista(fileListXLSX, file));
       } else {
         message.error("Formato de archivo no permitido.");
       }
@@ -204,9 +203,13 @@ export const NuevaSolicitudPage = () => {
       return false;
     }
   };
+  const nuevaLista = (array, file) => {
+    return array.filter(function (el) {
+      return el.name != file.name;
+    });
+  };
   const enviarDocumentos = async () => {
     let suscribe = true;
-    let listaRespuesta = [];
     let listaError = [];
     (async () => {
       setLoadingApi(true);
@@ -267,13 +270,9 @@ export const NuevaSolicitudPage = () => {
                   ...listaRespuesta,
                   rpta.data,
                 ]);
-                //message.success("Solicitud registrada correctamente.");
                 detalle = [];
               } else {
                 listaError.push(cabecera);
-                /*message.error(
-                  "Ocurrio un error al momento de procesar la solicitud."
-                );*/
                 setLoadingApi(false);
               }
             } else {
@@ -281,7 +280,7 @@ export const NuevaSolicitudPage = () => {
               setLoadingApi(false);
             }
           } else {
-            message.info("No se pudo procesar el archivo.");
+            //message.info("No se pudo procesar el archivo.");
             setLoadingApi(false);
           }
         }
@@ -299,7 +298,6 @@ export const NuevaSolicitudPage = () => {
   const obtenerTipoOperacion = async (e) => {
     setTipoOperacion(e);
   };
-  const regresarPaginaSolicitud = () => {};
   return (
     <ContentComponent style={{ padding: "0 24px", minHeight: 280 }}>
       <MessageApi

@@ -83,15 +83,23 @@ export const RespuestaPagadorPage = () => {
     {
       title: "Neto Confirmado",
       dataIndex: "netoConfirmado",
-      ...getColumnSearchProps("netoConfirmado"),
-      render: (record) => <Input type="text" value={record.netoConfirmado} />,
+      render: (_, record) => {
+        return (
+          <>
+            <Input type="text" value={record.netoConfirmado} />
+          </>
+        );
+      },
     },
     {
       title: "Cavali",
-      dataIndex: "cavali",
-      ...getColumnSearchProps("cavali"),
-      render: (value) => {
-        return <Checkbox></Checkbox>;
+      dataIndex: "enviadoCavali",
+      render: (_, value) => {
+        return (
+          <>
+            <Checkbox></Checkbox>
+          </>
+        );
       },
     },
   ];
