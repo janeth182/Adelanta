@@ -174,11 +174,10 @@ export const RespuestaPagadorPage = () => {
           }
         }
         debugger;
-        const Json = { Json: (lista) };
         let data = new FormData();
         data.append("json", JSON.stringify(lista));
         const rpta = await documentosActualizarEstado(data);
-        if (rpta.status === 200) {
+        if (rpta.status === 201) {
           message.success("Se proceso correctamente.");
           setLoadingApi(false);
         } else {
