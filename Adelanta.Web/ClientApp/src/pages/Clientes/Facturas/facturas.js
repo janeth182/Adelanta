@@ -158,6 +158,7 @@ export const FacturasPage = () => {
       },
     },
   ];
+
   useEffect(() => {
     let suscribe = true;
     (async () => {

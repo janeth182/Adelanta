@@ -19,11 +19,19 @@ namespace Adelanta.API.Controllers
             _documentoRepository = documentoRepository;
         }
 
-        [HttpGet("/api/Documento/ListarDocumentos")]
-        public async Task<IActionResult> ListarDocumentos()
+        [HttpGet("/api/Documento/ListarDocumentos/{IdEstado}")]
+        public async Task<IActionResult> ListarDocumentos([FromRoute]int IdEstado)
         {
-            var resultado = await _documentoRepository.ListarDocumentos();
+            var resultado = await _documentoRepository.ListarDocumentos(IdEstado);
             return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DocumentosActualizarEstado()
+        {
+            string Json = Request.Form["json"];
+            await _documentoRepository.DocumentosActualizarEstado(Json);
+            return NoContent();
         }
     }
 }

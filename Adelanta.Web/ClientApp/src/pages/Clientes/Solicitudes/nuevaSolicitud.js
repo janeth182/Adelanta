@@ -218,10 +218,12 @@ export const NuevaSolicitudPage = () => {
         const cabecera = documentoDetalle.filter(
           (detalleP, index, documentoDetalle) =>
             index ===
-            documentoDetalle.findIndex(
-              (p) =>
-                p.rucPagador === detalleP.rucPagador &&
-                p.moneda === detalleP.moneda
+            documentoDetalle.findIndex((p) =>
+              tipoOperacion === "F"
+                ? p.rucPagador === detalleP.rucPagador &&
+                  p.moneda === detalleP.moneda
+                : p.rucProveedor === detalleP.rucProveedor &&
+                  p.moneda === detalleP.moneda
             )
         );
         for (let c = 0; c < cabecera.length; c++) {
@@ -271,6 +273,7 @@ export const NuevaSolicitudPage = () => {
                   rpta.data,
                 ]);
                 detalle = [];
+                setLoadingApi(false);
               } else {
                 listaError.push(cabecera);
                 setLoadingApi(false);

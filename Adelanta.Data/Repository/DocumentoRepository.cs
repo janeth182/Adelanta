@@ -22,11 +22,19 @@ namespace Adelanta.Data.Repository
         {
             return new MySqlConnection(_connectionString.ConnectionString);
         }
-        public async Task<string> ListarDocumentos()
+        public async Task<string> ListarDocumentos(int IdEstado)
         {
             var db = dbConnection();
             var sp = "SP_DOCUMENTO_LISTAR";
-            var values = new { };
+            var values = new { p_idEstado = IdEstado };
+            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
+            return result.ToList()[0];
+        }
+        public async Task<string> DocumentosActualizarEstado(string Json)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_ACTUALIZAR";
+            var values = new { p_dataJSON = Json };
             var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
             return result.ToList()[0];
         }

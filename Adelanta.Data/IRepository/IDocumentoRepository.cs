@@ -8,6 +8,7 @@ namespace Adelanta.Data.IRepository
 {
     public interface IDocumentoRepository
     {
-        Task<string> ListarDocumentos();
+        Task<string> ListarDocumentos(int IdEstado);
+        Task<string> DocumentosActualizarEstado(string Json);
     }
 }
