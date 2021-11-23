@@ -17,7 +17,6 @@ namespace Adelanta.Data.Repository
         {
             _connectionString = connectionString;
         }
-
         protected MySqlConnection dbConnection()
         {
             return new MySqlConnection(_connectionString.ConnectionString);
@@ -30,13 +29,13 @@ namespace Adelanta.Data.Repository
             var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
             return result.ToList()[0];
         }
-        public async Task<string> DocumentosActualizarEstado(string Json)
+        public async Task<bool> DocumentosActualizarEstado(string Json)
         {
             var db = dbConnection();
             var sp = "SP_DOCUMENTO_ACTUALIZAR";
             var values = new { p_dataJSON = Json };
-            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
-            return result.ToList()[0];
+            var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
+            return result > 0;
         }
     }
 }

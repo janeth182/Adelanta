@@ -29,9 +29,22 @@ namespace Adelanta.API.Controllers
         [HttpPost]
         public async Task<IActionResult> DocumentosActualizarEstado()
         {
-            string Json = Request.Form["json"];
-            await _documentoRepository.DocumentosActualizarEstado(Json);
-            return NoContent();
+            try
+            {
+                string Json = Request.Form["json"];
+                if (Json == null)
+                    return BadRequest();
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                await _documentoRepository.DocumentosActualizarEstado(Json);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex}");
+            }
+        
         }
     }
 }

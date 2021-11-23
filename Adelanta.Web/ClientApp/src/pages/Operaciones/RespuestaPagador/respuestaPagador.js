@@ -14,7 +14,8 @@ import {
   DatePicker,
   Form,
   Descriptions,
-  Tag,
+  notification,
+  Input
 } from "antd";
 import { SaveOutlined, SendOutlined, EditOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
@@ -22,7 +23,6 @@ import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { respuesta } from "../../../model/mocks/respuesta-pagador";
 import {
   listarDocumentos,
   documentosActualizarEstado,
@@ -30,12 +30,13 @@ import {
 import { ModalComponent } from "../../../components/modal/modal";
 import { detalleFacturas } from "../../../model/mocks/detalleFactura";
 import moment from "moment";
+import { isEqual } from "lodash";
 export const RespuestaPagadorPage = () => {
   const { isModal, showModal, hiddenModal } = useModal();
   const { isMessage, addMessage, messageInfo } = useMessageApi();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [dataUsuario, setDataUsuario] = useState([]);
+  const [data, setData] = useState([]);
   const [loadingApi, setLoadingApi] = useState(false);
   const [documento, setDocumento] = useState([]);
   const history = useHistory();
@@ -76,44 +77,61 @@ export const RespuestaPagadorPage = () => {
     {
       title: "Nro. Documento",
       dataIndex: "serie",
+      key: "serie",
       ...getColumnSearchProps("serie"),
+      //render: (text, _, index) => <Input value={text} onChange={(v) => onChangeDataCell(v, index)} />,
+    },
+    {
+      title: "Total Factura",
+      dataIndex: "montoTotalVenta",
+      ...getColumnSearchProps("montoTotalVenta"),
     },
     {
       title: "Moneda",
       dataIndex: "moneda",
+      editable: true,
       ...getColumnSearchProps("moneda"),
     },
     {
       title: "F. Pago Confirmado",
       dataIndex: "fechaPago",
-      render: (_, record) => {
-        return (
-          <>
+      render: (text, _, index) => {
+        if (text !== null) {
+          return (
             <DatePicker
-              //defaultValue={moment('record.fechaVencimiento', "DD/MM/YYYY")}
+              value={moment(text, "DD/MM/YYYY")}
+              onChange={(v) => onChange(v, index)}
+              name={"fecha"}
+              format={"DD/MM/YYYY"}
+            />
+          );
+        } else {
+          return (
+            <DatePicker
               name={"fecha"}
               onChange={onChange}
               format={"DD/MM/YYYY"}
             />
-          </>
-        );
+          )
+        }
       },
     },
     {
       title: "Neto Confirmado",
       dataIndex: "netoConfirmado",
-      render: (_, record) => {
+      key: "netoConfirmado",
+      render: (text, _, index) => {
         return (
           <>
             <InputNumber
-              defaultValue={record.netoConfirmado}
+              value={text}
               formatter={(value) =>
                 `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
               }
               parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-              onChange={onChangeInput}
+              onChange={(v) => onChangeNetoConfirmado(v, index)}
               name={"neto"}
-              data={record.idDocumento}
+              data={_.idDocumento}
             />
           </>
         );
@@ -131,7 +149,7 @@ export const RespuestaPagadorPage = () => {
         return (
           <>
             <Checkbox
-              onChange={onChangeChecked}
+              onChange={onChangeChecked}              
               name={"cavali"}
               defaultValue={`${JSON.stringify(record)}`}
             ></Checkbox>
@@ -140,15 +158,50 @@ export const RespuestaPagadorPage = () => {
       },
     },
   ];
-
   function onChangeChecked(e) {
     console.log(`checked = ${JSON.stringify(e.target)}`);
   }
-  function onChange(e, dateString) {
-    console.log(e, dateString);
+  function onChange(e, index, dateString) {
+    console.log(e, index);
+    if (page > 1) {
+      index = ((page - 1) * pageSize) + index;
+    }
+    const newData = [...data];
+    const newItem = { ...newData[index] };
+    newItem.fechaPago = dateString;
+    newData[index] = newItem;
+    setData(newData);
   }
-  function onChangeInput(e) {
-    console.log(e);
+  const onChangeNetoConfirmado = (e, index) => {
+    debugger
+    if (page > 1) {
+      index = ((page - 1) * pageSize) + index;
+    }
+    const newData = [...data];
+    const newItem = { ...newData[index] };
+    newItem.netoConfirmado = e;
+    newData[index] = newItem;
+    setData(newData);
+  };
+  const cargarDatos = async () => {
+    let suscribe = true;
+    (async () => {
+      setLoadingApi(true);
+      try {
+        const rpta = await listarDocumentos(0);
+        if (suscribe) {
+          console.log(rpta.data);
+          setData(rpta.data);
+          setLoadingApi(false);
+        }
+      } catch (error) {
+        setLoadingApi(false);
+        console.log(error.response);
+      }
+    })();
+    return () => {
+      suscribe = false;
+    };
   }
   const guardarDocumento = async (e) => {
     let suscribe = true;
@@ -173,19 +226,27 @@ export const RespuestaPagadorPage = () => {
             lista.push(documento);
           }
         }
-        debugger;
         let data = new FormData();
         data.append("json", JSON.stringify(lista));
         const rpta = await documentosActualizarEstado(data);
-        if (rpta.status === 201) {
-          message.success("Se proceso correctamente.");
+        if (rpta.status === 204) {
+          notification['success']({
+            message: 'Se proceso correctamente',
+            description:
+              'Los documentos enviados han si actualizados correctamente.',
+          });
           setLoadingApi(false);
+          cargarDatos();
         } else {
           setLoadingApi(false);
         }
       } catch (error) {
         setLoadingApi(false);
-        message.error("Ocurrio un error al momento de procesar la solicitud.");
+        notification['error']({
+          message: 'Error en el proceso',
+          description:
+            'Ocurrio un error al momento de procesar la solicitud, comuniquese con el administrador de sistema.',
+        });
       }
     })();
     return () => {
@@ -193,7 +254,51 @@ export const RespuestaPagadorPage = () => {
     };
   };
   const enviarCavali = async (e) => {
-    message.success("Se proceso correctamente.");
+    let suscribe = true;
+    (async () => {
+      setLoadingApi(true);
+      try {
+        const cantidadControles = document.getElementsByName("fecha").length;
+        const lista = [];
+        for (let i = 0; i < cantidadControles; i++) {
+          if (document.getElementsByName("cavali")[i].checked) {
+            const documento = {
+              fechaConfirmada: document.getElementsByName("fecha")[i].value,
+              netoConfirmado: document.getElementsByName("neto")[i].value,
+              idDocumento: document
+                .getElementsByName("neto")
+              [i].getAttribute("data"),
+              estado: 1
+            };
+            lista.push(documento);
+          }
+        }
+        let data = new FormData();
+        data.append("json", JSON.stringify(lista));
+        const rpta = await documentosActualizarEstado(data);
+        if (rpta.status === 204) {
+          notification['success']({
+            message: 'Se proceso correctamente',
+            description:
+              'Los documentos enviados han si actualizados correctamente.',
+          });
+          setLoadingApi(false);
+          cargarDatos();
+        } else {
+          setLoadingApi(false);
+        }
+      } catch (error) {
+        setLoadingApi(false);
+        notification['error']({
+          message: 'Error en el proceso',
+          description:
+            'Ocurrio un error al momento de procesar la solicitud, comuniquese con el administrador de sistema.',
+        });
+      }
+    })();
+    return () => {
+      suscribe = false;
+    };
   };
 
   const columsDetalle = [
@@ -239,7 +344,7 @@ export const RespuestaPagadorPage = () => {
         const rpta = await listarDocumentos(0);
         if (suscribe) {
           console.log(rpta.data);
-          setDataUsuario(rpta.data);
+          setData(rpta.data);
           setLoadingApi(false);
         }
       } catch (error) {
@@ -251,7 +356,6 @@ export const RespuestaPagadorPage = () => {
       suscribe = false;
     };
   }, []);
-
   return (
     <ContentComponent>
       <PageHeader
@@ -280,6 +384,7 @@ export const RespuestaPagadorPage = () => {
                     type="primary"
                     icon={<SaveOutlined style={{ fontSize: "16px" }} />}
                     onClick={guardarDocumento}
+                    loading={loadingApi}
                   >
                     Guardar
                   </Button>
@@ -288,6 +393,7 @@ export const RespuestaPagadorPage = () => {
                     type="primary"
                     icon={<SendOutlined style={{ fontSize: "16px" }} />}
                     onClick={enviarCavali}
+                    loading={loadingApi}
                   >
                     Cavali
                   </Button>
@@ -298,8 +404,9 @@ export const RespuestaPagadorPage = () => {
             <Table
               loading={loadingApi}
               columns={columns}
-              dataSource={dataUsuario}
+              dataSource={data}
               size="middle"
+              bordered={true}
               pagination={{
                 current: page,
                 pageSize: pageSize,
@@ -343,7 +450,6 @@ export const RespuestaPagadorPage = () => {
           </Descriptions>
           <Descriptions title="Datos Adicionales">
             <Descriptions.Item label="Fecha Operación" span={1}>
-              22/10/2021
             </Descriptions.Item>
             <Descriptions.Item label="TNM Op." span={1}>
               2.00 %

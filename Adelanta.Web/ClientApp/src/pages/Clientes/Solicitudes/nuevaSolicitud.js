@@ -221,9 +221,9 @@ export const NuevaSolicitudPage = () => {
             documentoDetalle.findIndex((p) =>
               tipoOperacion === "F"
                 ? p.rucPagador === detalleP.rucPagador &&
-                  p.moneda === detalleP.moneda
+                p.moneda === detalleP.moneda
                 : p.rucProveedor === detalleP.rucProveedor &&
-                  p.moneda === detalleP.moneda
+                p.moneda === detalleP.moneda
             )
         );
         for (let c = 0; c < cabecera.length; c++) {
@@ -243,7 +243,7 @@ export const NuevaSolicitudPage = () => {
               } else {
                 if (
                   cabecera[c].rucProveedor ===
-                    documentoDetalle[d].rucProveedor &&
+                  documentoDetalle[d].rucProveedor &&
                   cabecera[c].moneda === documentoDetalle[d].moneda
                 ) {
                   detalle.push(documentoDetalle[d]);
@@ -283,7 +283,6 @@ export const NuevaSolicitudPage = () => {
               setLoadingApi(false);
             }
           } else {
-            //message.info("No se pudo procesar el archivo.");
             setLoadingApi(false);
           }
         }
