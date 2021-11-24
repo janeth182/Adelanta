@@ -15,7 +15,7 @@ import {
   Form,
   Descriptions,
   notification,
-  Input
+  Modal
 } from "antd";
 import { SaveOutlined, SendOutlined, EditOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
@@ -96,7 +96,7 @@ export const RespuestaPagadorPage = () => {
       title: "F. Pago Confirmado",
       dataIndex: "fechaPago",
       render: (text, _, index) => {
-        if (text !== null) {
+        if (text !== null && text !== '00/00/0000') {
           return (
             <DatePicker
               value={moment(text, "DD/MM/YYYY")}
@@ -111,6 +111,7 @@ export const RespuestaPagadorPage = () => {
               name={"fecha"}
               onChange={onChange}
               format={"DD/MM/YYYY"}
+              disabledDate={disabledDate}
             />
           )
         }
@@ -149,7 +150,7 @@ export const RespuestaPagadorPage = () => {
         return (
           <>
             <Checkbox
-              onChange={onChangeChecked}              
+              onChange={onChangeChecked}
               name={"cavali"}
               defaultValue={`${JSON.stringify(record)}`}
             ></Checkbox>
@@ -158,17 +159,20 @@ export const RespuestaPagadorPage = () => {
       },
     },
   ];
+  function disabledDate(current) {
+    return current && current < moment().endOf('day');
+  }
   function onChangeChecked(e) {
     console.log(`checked = ${JSON.stringify(e.target)}`);
   }
   function onChange(e, index, dateString) {
-    console.log(e, index);
+    console.log(e, dateString);
     if (page > 1) {
       index = ((page - 1) * pageSize) + index;
     }
     const newData = [...data];
     const newItem = { ...newData[index] };
-    newItem.fechaPago = dateString;
+    newItem.fechaPago = dateString === undefined ? null : dateString;
     newData[index] = newItem;
     setData(newData);
   }
@@ -188,7 +192,7 @@ export const RespuestaPagadorPage = () => {
     (async () => {
       setLoadingApi(true);
       try {
-        const rpta = await listarDocumentos(0);
+        const rpta = await listarDocumentos(7);
         if (suscribe) {
           console.log(rpta.data);
           setData(rpta.data);
@@ -205,38 +209,73 @@ export const RespuestaPagadorPage = () => {
   }
   const guardarDocumento = async (e) => {
     let suscribe = true;
+    let cantError = 0;
+    let mensajes = '';
     (async () => {
       setLoadingApi(true);
       try {
         const cantidadControles = document.getElementsByName("fecha").length;
         const lista = [];
+        debugger
         for (let i = 0; i < cantidadControles; i++) {
-          if (
-            document.getElementsByName("fecha")[i].value !== "" ||
-            document.getElementsByName("neto")[i].value !== ""
-          ) {
+          const idDocumento = document.getElementsByName("neto")[i].getAttribute("data");
+          const registro = data.find(d => d.idDocumento == idDocumento);
+          const netoConfirmado = +(document.getElementsByName("neto")[i].value.replaceAll(',', ''));
+          if (document.getElementsByName("fecha")[i].value !== "" && document.getElementsByName("neto")[i].value !== "") {
+            if (netoConfirmado <= registro.montoTotalVenta) {
+              const documento = {
+                fechaConfirmada: document.getElementsByName("fecha")[i].value,
+                netoConfirmado: netoConfirmado,
+                idDocumento: idDocumento,
+                estado: 0
+              };
+              lista.push(documento);
+            } else {
+              cantError++;
+              mensajes += `<li>El neto confirmado del documento ${registro.serie} no debe ser mayor al total factura.</li>`;
+              notification['info']({
+                message: 'Información',
+                description:
+                  `El neto confirmado del documento ${registro.serie} no debe ser mayor al total factura.`,
+              });
+            }
+          } else if (document.getElementsByName("fecha")[i].value === "" && document.getElementsByName("neto")[i].value === "") {
             const documento = {
               fechaConfirmada: document.getElementsByName("fecha")[i].value,
-              netoConfirmado: document.getElementsByName("neto")[i].value,
-              idDocumento: document
-                .getElementsByName("neto")
-              [i].getAttribute("data"),
+              netoConfirmado: netoConfirmado,
+              idDocumento: idDocumento,
               estado: 0
             };
             lista.push(documento);
+          } else if (document.getElementsByName("fecha")[i].value !== "" && document.getElementsByName("neto")[i].value === "") {
+            notification['info']({
+              message: 'Información',
+              description:
+                `Ingresar el neto confirmado del documento ${registro.serie}.`,
+            });
+          } else if (document.getElementsByName("fecha")[i].value === "" && document.getElementsByName("neto")[i].value !== "") {
+            notification['info']({
+              message: 'Información',
+              description:
+                `Ingresar la fecha pago confirmado del documento ${registro.serie}.`,
+            });
           }
         }
-        let data = new FormData();
-        data.append("json", JSON.stringify(lista));
-        const rpta = await documentosActualizarEstado(data);
-        if (rpta.status === 204) {
-          notification['success']({
-            message: 'Se proceso correctamente',
-            description:
-              'Los documentos enviados han si actualizados correctamente.',
-          });
-          setLoadingApi(false);
-          cargarDatos();
+        if (cantError === 0) {
+          let data = new FormData();
+          data.append("json", JSON.stringify(lista));
+          const rpta = await documentosActualizarEstado(data);
+          if (rpta.status === 204) {
+            notification['success']({
+              message: 'Se proceso correctamente',
+              description:
+                'Los documentos enviados han si actualizados correctamente.',
+            });
+            setLoadingApi(false);
+            cargarDatos();
+          } else {
+            setLoadingApi(false);
+          }
         } else {
           setLoadingApi(false);
         }
@@ -264,11 +303,11 @@ export const RespuestaPagadorPage = () => {
           if (document.getElementsByName("cavali")[i].checked) {
             const documento = {
               fechaConfirmada: document.getElementsByName("fecha")[i].value,
-              netoConfirmado: document.getElementsByName("neto")[i].value,
+              netoConfirmado: document.getElementsByName("neto")[i].value.replaceAll(',', ''),
               idDocumento: document
                 .getElementsByName("neto")
               [i].getAttribute("data"),
-              estado: 1
+              estado: 4
             };
             lista.push(documento);
           }
@@ -277,6 +316,10 @@ export const RespuestaPagadorPage = () => {
         data.append("json", JSON.stringify(lista));
         const rpta = await documentosActualizarEstado(data);
         if (rpta.status === 204) {
+          debugger
+          for (let i = 0; i < cantidadControles; i++) {
+            document.getElementsByName("cavali")[i].checked = false;
+          }
           notification['success']({
             message: 'Se proceso correctamente',
             description:
@@ -341,7 +384,7 @@ export const RespuestaPagadorPage = () => {
     (async () => {
       setLoadingApi(true);
       try {
-        const rpta = await listarDocumentos(0);
+        const rpta = await listarDocumentos(7);
         if (suscribe) {
           console.log(rpta.data);
           setData(rpta.data);

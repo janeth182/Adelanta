@@ -26,6 +26,12 @@ namespace Adelanta.API.Controllers
             return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
         }
 
+        [HttpGet("/api/Documento/ListarDocumentosFactrack/{usuario}")]
+        public async Task<IActionResult> ListarDocumentos([FromRoute] string usuario)
+        {
+            var resultado = await _documentoRepository.ListarDocumentosConformidadFactrack(usuario);
+            return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
+        }
         [HttpPost]
         public async Task<IActionResult> DocumentosActualizarEstado()
         {
