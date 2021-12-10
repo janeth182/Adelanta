@@ -4,7 +4,7 @@ import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/authProvider";
 import { login } from "../../services/loginService";
-import publicIp  from "public-ip";
+import publicIp from "public-ip";
 const { Title } = Typography;
 
 export const LoginPage = () => {
@@ -21,16 +21,17 @@ export const LoginPage = () => {
 				let rpta = '';
 				rpta = await login(values.usuario, values.password, await publicIp.v4());
 				if (rpta.status === 200) {
-					if (suscribe){
-						if(rpta.data.error === 0){
+					if (suscribe) {
+						if (rpta.data.error === 0) {
 							values.token = rpta.data.gSesion;
 							values.id = rpta.data.idUsuario;
+							values.rol = rpta.data.rol;
 							console.log(values);
 							loginUser(values);
-							history.push(REACT_APP_RUTA_SERVIDOR);							
+							history.push(REACT_APP_RUTA_SERVIDOR);
 						} else {
 							message.error(rpta.data.mensaje);
-						}			
+						}
 						setLoadingApi(false);
 					}
 				} else {
@@ -45,7 +46,7 @@ export const LoginPage = () => {
 
 		return () => {
 			suscribe = false;
-		};	
+		};
 	};
 
 	return (
@@ -117,7 +118,7 @@ export const LoginPage = () => {
 					>
 						Ingresar
 					</Button>
-				</Form.Item>				
+				</Form.Item>
 			</Form>
 		</div>
 	);

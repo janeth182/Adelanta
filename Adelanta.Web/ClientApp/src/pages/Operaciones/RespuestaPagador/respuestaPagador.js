@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import {
   PageHeader,
@@ -17,7 +17,7 @@ import {
   notification,
   Modal
 } from "antd";
-import { SaveOutlined, SendOutlined, EditOutlined } from "@ant-design/icons";
+import { SaveOutlined, SendOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
@@ -25,13 +25,15 @@ import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
 import {
   listarDocumentos,
-  documentosActualizarEstado,
+  documentosActualizar,
 } from "../../../services/documentoService";
 import { ModalComponent } from "../../../components/modal/modal";
 import { detalleFacturas } from "../../../model/mocks/detalleFactura";
 import moment from "moment";
-import { isEqual } from "lodash";
+import { estados, mensajeError } from "../../../utils/constant";
+import { AuthContext } from "../../../context/authProvider";
 export const RespuestaPagadorPage = () => {
+  const { logoutUser, user } = useContext(AuthContext);
   const { isModal, showModal, hiddenModal } = useModal();
   const { isMessage, addMessage, messageInfo } = useMessageApi();
   const [page, setPage] = useState(1);
@@ -40,7 +42,6 @@ export const RespuestaPagadorPage = () => {
   const [loadingApi, setLoadingApi] = useState(false);
   const [documento, setDocumento] = useState([]);
   const history = useHistory();
-
   const columns = [
     {
       title: "Solicitud",
@@ -177,7 +178,6 @@ export const RespuestaPagadorPage = () => {
     setData(newData);
   }
   const onChangeNetoConfirmado = (e, index) => {
-    debugger
     if (page > 1) {
       index = ((page - 1) * pageSize) + index;
     }
@@ -220,14 +220,16 @@ export const RespuestaPagadorPage = () => {
         for (let i = 0; i < cantidadControles; i++) {
           const idDocumento = document.getElementsByName("neto")[i].getAttribute("data");
           const registro = data.find(d => d.idDocumento == idDocumento);
-          const netoConfirmado = +(document.getElementsByName("neto")[i].value.replaceAll(',', ''));
-          if (document.getElementsByName("fecha")[i].value !== "" && document.getElementsByName("neto")[i].value !== "") {
-            if (netoConfirmado <= registro.montoTotalVenta) {
+          const netoConfirmado = document.getElementsByName("neto")[i].value == "0" ? "" : document.getElementsByName("neto")[i].value;
+          const fecha = document.getElementsByName("fecha")[i].value;
+          if (fecha !== "" && netoConfirmado !== "") {
+            if (+(netoConfirmado.replaceAll(',', '')) <= registro.montoTotalVenta) {
               const documento = {
-                fechaConfirmada: document.getElementsByName("fecha")[i].value,
-                netoConfirmado: netoConfirmado,
+                fechaConfirmada: fecha,
+                netoConfirmado: netoConfirmado.replaceAll(',', ''),
                 idDocumento: idDocumento,
-                estado: 0
+                estado: estados.REGISTRADO,
+                usuario: user.usuario
               };
               lista.push(documento);
             } else {
@@ -239,21 +241,24 @@ export const RespuestaPagadorPage = () => {
                   `El neto confirmado del documento ${registro.serie} no debe ser mayor al total factura.`,
               });
             }
-          } else if (document.getElementsByName("fecha")[i].value === "" && document.getElementsByName("neto")[i].value === "") {
+          } else if (fecha === "" && netoConfirmado === "") {
             const documento = {
               fechaConfirmada: document.getElementsByName("fecha")[i].value,
               netoConfirmado: netoConfirmado,
               idDocumento: idDocumento,
-              estado: 0
+              estado: estados.REGISTRADO,
+              usuario: user.usuario
             };
             lista.push(documento);
-          } else if (document.getElementsByName("fecha")[i].value !== "" && document.getElementsByName("neto")[i].value === "") {
+          } else if (fecha !== "" && netoConfirmado === "") {
+            cantError++;
             notification['info']({
               message: 'Información',
               description:
                 `Ingresar el neto confirmado del documento ${registro.serie}.`,
             });
-          } else if (document.getElementsByName("fecha")[i].value === "" && document.getElementsByName("neto")[i].value !== "") {
+          } else if (fecha === "" && netoConfirmado !== "") {
+            cantError++;
             notification['info']({
               message: 'Información',
               description:
@@ -264,12 +269,12 @@ export const RespuestaPagadorPage = () => {
         if (cantError === 0) {
           let data = new FormData();
           data.append("json", JSON.stringify(lista));
-          const rpta = await documentosActualizarEstado(data);
+          const rpta = await documentosActualizar(data);
           if (rpta.status === 204) {
             notification['success']({
               message: 'Se proceso correctamente',
               description:
-                'Los documentos enviados han si actualizados correctamente.',
+                'Los documentos enviados han sido actualizados correctamente.',
             });
             setLoadingApi(false);
             cargarDatos();
@@ -284,7 +289,7 @@ export const RespuestaPagadorPage = () => {
         notification['error']({
           message: 'Error en el proceso',
           description:
-            'Ocurrio un error al momento de procesar la solicitud, comuniquese con el administrador de sistema.',
+            mensajeError.GENERAL,
         });
       }
     })();
@@ -307,23 +312,24 @@ export const RespuestaPagadorPage = () => {
               idDocumento: document
                 .getElementsByName("neto")
               [i].getAttribute("data"),
-              estado: 4
+              estado: estados.CONFORMIDAD_EXPRESA
             };
             lista.push(documento);
           }
         }
         let data = new FormData();
         data.append("json", JSON.stringify(lista));
-        const rpta = await documentosActualizarEstado(data);
+        const rpta = await documentosActualizar(data);
         if (rpta.status === 204) {
-          debugger
           for (let i = 0; i < cantidadControles; i++) {
-            document.getElementsByName("cavali")[i].checked = false;
+            if (document.getElementsByName("cavali")[i].checked) {
+              document.getElementsByName("cavali")[i].click();
+            }
           }
           notification['success']({
             message: 'Se proceso correctamente',
             description:
-              'Los documentos enviados han si actualizados correctamente.',
+              'Los documentos enviados a Cavali, han sido procesados correctamente.',
           });
           setLoadingApi(false);
           cargarDatos();
@@ -335,7 +341,7 @@ export const RespuestaPagadorPage = () => {
         notification['error']({
           message: 'Error en el proceso',
           description:
-            'Ocurrio un error al momento de procesar la solicitud, comuniquese con el administrador de sistema.',
+            mensajeError.GENERAL,
         });
       }
     })();

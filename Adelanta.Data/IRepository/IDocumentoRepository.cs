@@ -10,6 +10,9 @@ namespace Adelanta.Data.IRepository
     {
         Task<string> ListarDocumentos(int IdEstado);
         Task<bool> DocumentosActualizarEstado(string Json);
+        Task<bool> DocumentosActualizar(string Json);
         Task<string> ListarDocumentosConformidadFactrack(string user);
+        Task<string> DocumentoConfirmarFactrack(string Json);
+        Task<string> DocumentoSolicitarAprobacion(string Json);
     }
 }

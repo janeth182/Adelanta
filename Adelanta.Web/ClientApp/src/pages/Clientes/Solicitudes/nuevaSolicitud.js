@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import {
   Row,
@@ -25,8 +25,9 @@ import { useModal } from "../../../hooks/useModal";
 import { cargarDocumentos } from "../../../services/solicitudService";
 import XMLParser from "react-xml-parser";
 import { ModalComponent } from "../../../components/modal/modal";
-
+import { AuthContext } from "../../../context/authProvider";
 export const NuevaSolicitudPage = () => {
+  const { logoutUser, user } = useContext(AuthContext);
   const { isModal, showModal, hiddenModal } = useModal();
   const { isMessage, messageInfo } = useMessageApi();
   const [loadingApi, setLoadingApi] = useState(false);
@@ -63,7 +64,6 @@ export const NuevaSolicitudPage = () => {
       dataIndex: "cantidadDoc",
     },
   ];
-
   const handleupload = async (file) => {
     try {
       if (file.type === "text/xml") {
@@ -71,10 +71,7 @@ export const NuevaSolicitudPage = () => {
         reader.fileName = file.name;
         reader.onload = (file) => {
           const xml = file.target.result;
-          const jsonDataFromXml = new XMLParser().parseFromString(
-            xml,
-            "text/xml"
-          );
+          const jsonDataFromXml = new XMLParser().parseFromString(xml, "text/xml");
           const detalle = {};
           jsonDataFromXml.children.forEach((nodo) => {
             if (nodo.name === "cac:AccountingCustomerParty") {
@@ -101,9 +98,15 @@ export const NuevaSolicitudPage = () => {
                 if (child.name === "cac:Party") {
                   child.children.forEach((det) => {
                     if (det.name === "cac:PartyName") {
-                      detalle.proveedor = det.children[0].value;
+                      //detalle.proveedor = det.children[0].value;
                     } else if (det.name === "cac:PartyIdentification") {
                       detalle.rucProveedor = det.children[0].value;
+                    } else if (det.name === "cac:PartyLegalEntity") {
+                      det.children.forEach((leg) => {
+                        if (leg.name === "cbc:RegistrationName") {
+                          detalle.proveedor = leg.value;
+                        }
+                      })
                     }
                   });
                 }
@@ -112,7 +115,7 @@ export const NuevaSolicitudPage = () => {
               detalle.serie = nodo.value;
             } else if (nodo.name === "cbc:DocumentCurrencyCode") {
               detalle.moneda = nodo.value;
-            } else if (nodo.name === "cbc:DueDate") {
+            } else if (nodo.name === "cbc:IssueDate") {
               detalle.fechaEmision = nodo.value;
             } else if (nodo.name === "cbc:IssueTime") {
               detalle.horaEmision = nodo.value;
@@ -138,7 +141,6 @@ export const NuevaSolicitudPage = () => {
                 }
               });
             } else if (nodo.name === "cac:LegalMonetaryTotal") {
-              debugger;
               nodo.children.forEach((child) => {
                 if (child.name === "cbc:PayableAmount") {
                   detalle.montoTotalVenta = child.value;
@@ -151,23 +153,18 @@ export const NuevaSolicitudPage = () => {
           detalle.xml = file.target.result;
           detalle.nombreArchivo = file.target.fileName;
           detalle.archivoPdf = `${file.target.fileName.split(".")[0]}.pdf`;
-          detalle.archivoExcel =
-            tipoOperacion === "C"
-              ? `${file.target.fileName.split(".")[0]}.xlsx`
-              : "";
-          setDocumentoDetalle((documentoDetalle) => [
-            ...documentoDetalle,
-            detalle,
-          ]);
+          const buff = Buffer.from(file.target.result, 'utf-8');
+          const base64 = buff.toString('base64');
+          detalle.base64 = base64;
+          detalle.archivoExcel = tipoOperacion === "C" ? `${file.target.fileName.split(".")[0]}.xlsx` : "";
+          setDocumentoDetalle((documentoDetalle) => [...documentoDetalle, detalle,]);
         };
         reader.readAsText(file);
         setFileList((fileList) => [...fileList, file]);
       } else if (file.type === "application/pdf") {
         setFileListPDF((fileListPDF) => [...fileListPDF, file]);
       } else if (
-        file.type ===
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      ) {
+        file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
         setFileListXLSX((fileListXLSX) => [...fileListXLSX, file]);
       } else {
         message.error("Formato de archivo no permitido.");
@@ -180,7 +177,6 @@ export const NuevaSolicitudPage = () => {
   };
   const removeFile = async (file) => {
     try {
-      debugger;
       if (file.type === "text/xml") {
         setFileList(nuevaLista(fileList, file));
         const detalle = documentoDetalle.filter(function (el) {
@@ -189,10 +185,7 @@ export const NuevaSolicitudPage = () => {
         setDocumentoDetalle(detalle);
       } else if (file.type === "application/pdf") {
         setFileListPDF(nuevaLista(fileListPDF, file));
-      } else if (
-        file.type ===
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      ) {
+      } else if (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
         setFileListXLSX(nuevaLista(fileListXLSX, file));
       } else {
         message.error("Formato de archivo no permitido.");
@@ -219,33 +212,19 @@ export const NuevaSolicitudPage = () => {
           (detalleP, index, documentoDetalle) =>
             index ===
             documentoDetalle.findIndex((p) =>
-              tipoOperacion === "F"
-                ? p.rucPagador === detalleP.rucPagador &&
-                p.moneda === detalleP.moneda
-                : p.rucProveedor === detalleP.rucProveedor &&
-                p.moneda === detalleP.moneda
+              tipoOperacion === "F" ? p.rucPagador === detalleP.rucPagador && p.moneda === detalleP.moneda : p.rucProveedor === detalleP.rucProveedor && p.moneda === detalleP.moneda
             )
         );
         for (let c = 0; c < cabecera.length; c++) {
           let detalle = [];
-          if (
-            cabecera[c].rucPagador !== undefined &&
-            cabecera[c].moneda !== undefined
-          ) {
+          if (cabecera[c].rucPagador !== undefined && cabecera[c].moneda !== undefined) {
             for (let d = 0; d < documentoDetalle.length; d++) {
               if (tipoOperacion === "F") {
-                if (
-                  cabecera[c].rucPagador === documentoDetalle[d].rucPagador &&
-                  cabecera[c].moneda === documentoDetalle[d].moneda
-                ) {
+                if (cabecera[c].rucPagador === documentoDetalle[d].rucPagador && cabecera[c].moneda === documentoDetalle[d].moneda) {
                   detalle.push(documentoDetalle[d]);
                 }
               } else {
-                if (
-                  cabecera[c].rucProveedor ===
-                  documentoDetalle[d].rucProveedor &&
-                  cabecera[c].moneda === documentoDetalle[d].moneda
-                ) {
+                if (cabecera[c].rucProveedor === documentoDetalle[d].rucProveedor && cabecera[c].moneda === documentoDetalle[d].moneda) {
                   detalle.push(documentoDetalle[d]);
                 }
               }
@@ -266,6 +245,7 @@ export const NuevaSolicitudPage = () => {
               data.append("tipoOperacion", tipoOperacion);
               data.append("moneda", cabecera[c].moneda);
               data.append("detalle", JSON.stringify(detalle));
+              data.append("usuario", user.usuario);
               const rpta = await cargarDocumentos(data);
               if (rpta.status === 200) {
                 setListaRespuesta((listaRespuesta) => [

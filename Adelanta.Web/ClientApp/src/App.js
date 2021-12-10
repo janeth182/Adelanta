@@ -15,6 +15,7 @@ import { SolicitudesPage } from "./pages/Clientes/Solicitudes/solicitudes";
 import { NuevaSolicitudPage } from "./pages/Clientes/Solicitudes/nuevaSolicitud";
 import { RespuestaPagadorPage } from "./pages/Operaciones/RespuestaPagador/respuestaPagador";
 import { LiqSolicitarAprobacionPage } from "./pages/Operaciones/LiqSolicitarAprobacion/liqSolicitarAprobacion";
+import { LiqConfirmarAprobacionPage } from "./pages/Operaciones/LiqConfirmarAprobacion/liqConfirmarAprobacion";
 import { ConformidadPagadorPage } from "./pages/Operaciones/ConformidadPagador/conformidadPagador";
 import { RegistroFactrackPage } from "./pages/Operaciones/RegistroFactrack/registroFactrack";
 import { LiquidacionesPage } from "./pages/Operaciones/Liquidaciones/liquidaciones";
@@ -84,6 +85,14 @@ export const App = () => {
             />
             <PrivateRouter
               exact
+              path={
+                REACT_APP_RUTA_SERVIDOR +
+                "operaciones/liquidaciones-confirmar-aprobacion"
+              }
+              component={LiqConfirmarAprobacionPage}
+            />
+            <PrivateRouter
+              exact
               path={REACT_APP_RUTA_SERVIDOR + "operaciones/conformidad-pagador"}
               component={ConformidadPagadorPage}
             />
@@ -131,7 +140,7 @@ export const App = () => {
             />
             <PrivateRouter
               exact
-              path={REACT_APP_RUTA_SERVIDOR + "usuario/editar-usuario"}
+              path={REACT_APP_RUTA_SERVIDOR + "usuarios/editar-usuario/:id"}
               component={EditarUsuariosPage}
             />
             <PrivateRouter

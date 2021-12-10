@@ -34,9 +34,9 @@ namespace Adelanta.API.Controllers
                 }
                 foreach (var file in files)
                 {
-                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                    var fullPath = Path.Combine(pathToSave, fileName);
-                    var dbPath = Path.Combine(folderName, fileName);
+                    var path = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');      
+                    var fullPath = Path.Combine(pathToSave, Path.GetFileName(path));
+                    var dbPath = Path.Combine(folderName, Path.GetFileName(path));
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
@@ -48,6 +48,7 @@ namespace Adelanta.API.Controllers
                 oSolicitudBE.RazonSocial = Request.Form["razonSocial"];
                 oSolicitudBE.Moneda = Request.Form["moneda"];
                 oSolicitudBE.DocumentoJson = Request.Form["detalle"];
+                oSolicitudBE.Usuario = Request.Form["usuario"];
                 var resultado = await _solicitudRepository.CrearSolicitud(oSolicitudBE);                
                 return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
             }

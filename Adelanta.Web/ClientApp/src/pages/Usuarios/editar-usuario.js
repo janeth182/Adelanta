@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Button, Form, Select, message} from "antd";
+import { PageHeader, Row, Col, Card, Button, Form, Select, message } from "antd";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { ContentComponent } from "../../components/layout/content";
@@ -9,14 +9,14 @@ import { MessageApi } from "../../components/message/message";
 import { InputComponent } from "../../components/formControl.js/input";
 import { SelectComponent } from "../../components/formControl.js/select";
 import { crearUsuario, obtenerUsuario, actualizarUsuario, ObtenerUsuarioPorUserName } from "../../services/usuariosService";
-import { SaveOutlined, RetweetOutlined  } from "@ant-design/icons";
+import { SaveOutlined, RetweetOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
 export const EditarUsuariosPage = () => {
 	const { isMessage, messageInfo } = useMessageApi();
 	const [loadingApi, setLoadingApi] = useState(false);
-	const history = useHistory();	
+	const history = useHistory();
 	const formik = useFormik({
 		initialValues: {
 			apellidoMaterno: '',
@@ -30,9 +30,9 @@ export const EditarUsuariosPage = () => {
 			telefono: '',
 			usuario: '',
 			idEstado: 1,
-			rol:'',
+			rol: '',
 			estado: '',
-			usuario: ''	
+			usuario: ''
 		},
 		validationSchema: Yup.object().shape({
 			usuario: Yup.string().required("El campo es requerido"),
@@ -53,15 +53,16 @@ export const EditarUsuariosPage = () => {
 	const urlUsuarios = `${process.env.REACT_APP_RUTA_SERVIDOR}usuarios`;
 	const handleNewUsuario = async (value) => {
 		let suscribe = true;
+		debugger
 		(async () => {
 			setLoadingApi(true);
 			try {
 				let rpta = '';
-				if(history.location.state === 0){
+				if (history.location.state === 0) {
 					rpta = await ObtenerUsuarioPorUserName(value.usuario);
-					if(rpta.data.usuario !== value.usuario){											
+					if (rpta.data.usuario !== value.usuario) {
 						rpta = await crearUsuario(value);
-					}										
+					}
 				} else {
 					rpta = await actualizarUsuario(value);
 				}
@@ -70,10 +71,10 @@ export const EditarUsuariosPage = () => {
 						message.success('Se registro correctamente el usuario.');
 						setLoadingApi(false);
 					}
-				} else if(rpta.status === 204){
+				} else if (rpta.status === 204) {
 					message.success('Se actualizo correctamente el usuario.');
 					setLoadingApi(false);
-				} else if (rpta.status === 200){
+				} else if (rpta.status === 200) {
 					message.info('El usuario ingresado ya existe.');
 					setLoadingApi(false);
 				} else {
@@ -88,7 +89,7 @@ export const EditarUsuariosPage = () => {
 
 		return () => {
 			suscribe = false;
-		};		
+		};
 	};
 
 	useEffect(() => {
@@ -96,10 +97,10 @@ export const EditarUsuariosPage = () => {
 		(async () => {
 			setLoadingApi(true);
 			try {
-				if(history.location.state !== 0 ){
+				if (history.location.state !== 0) {
 					const rpta = await obtenerUsuario(history.location.state);
 					if (rpta.status === 200) {
-						if (suscribe) {						
+						if (suscribe) {
 							formik.initialValues.apellidoMaterno = rpta.data.apellidoMaterno;
 							formik.initialValues.apellidoPaterno = rpta.data.apellidoPaterno;
 							formik.initialValues.direccion = rpta.data.direccion;
@@ -120,7 +121,7 @@ export const EditarUsuariosPage = () => {
 					}
 				} else {
 					setLoadingApi(false);
-				}				
+				}
 			} catch (error) {
 				setLoadingApi(false);
 				console.log(error.response);
@@ -156,11 +157,11 @@ export const EditarUsuariosPage = () => {
 									padding: `0 16px`,
 								}}
 							>
-							<Button type="secondary"
-								icon={<RetweetOutlined />}
-								onClick={() =>									
-								history.push({pathname: `${urlUsuarios}`})}
-							>Regresar</Button>
+								<Button type="secondary"
+									icon={<RetweetOutlined />}
+									onClick={() =>
+										history.push({ pathname: `${urlUsuarios}` })}
+								>Regresar</Button>
 							</div>,
 							<div
 								style={{
@@ -169,9 +170,9 @@ export const EditarUsuariosPage = () => {
 									padding: `0 16px`,
 								}}
 							>
-							<Button type="primary" onClick={formik.handleSubmit} icon={<SaveOutlined />} loading={loadingApi}>
-								Guardar
-							</Button>
+								<Button type="primary" onClick={formik.handleSubmit} icon={<SaveOutlined />} loading={loadingApi}>
+									Guardar
+								</Button>
 							</div>,
 						]}
 					>
@@ -186,7 +187,7 @@ export const EditarUsuariosPage = () => {
 										error={formik.errors.usuario}
 										touched={formik.touched.usuario}
 										title="Usuario:"
-										disabled= {history.location.state === 0 ? false: true}
+										disabled={history.location.state === 0 ? false : true}
 									/>
 								</Col>
 								<Col lg={12} xs={{ span: 24 }}>
@@ -199,7 +200,7 @@ export const EditarUsuariosPage = () => {
 										touched={formik.touched.nombres}
 										title="Nombres:"
 									/>
-								</Col>																
+								</Col>
 							</Row>
 							<Row gutter={12}>
 								<Col lg={12} xs={{ span: 24 }}>
@@ -226,7 +227,7 @@ export const EditarUsuariosPage = () => {
 								</Col>
 							</Row>
 							<Row gutter={12}>
-							    <Col lg={12} xs={{ span: 24 }}>
+								<Col lg={12} xs={{ span: 24 }}>
 									<InputComponent
 										name="documento"
 										value={formik.values.documento}
@@ -248,19 +249,19 @@ export const EditarUsuariosPage = () => {
 										touched={formik.touched.email}
 										title="Email:"
 									/>
-								</Col>							
+								</Col>
 							</Row>
 							<Row gutter={16}>
 								<Col lg={12} xs={{ span: 24 }}>
-								<InputComponent
-									name="direccion"
-									value={formik.values.direccion}
-									onBlur={formik.handleBlur}
-									onChange={formik.handleChange}
-									error={formik.errors.direccion}
-									touched={formik.touched.direccion}
-									title="Direccion:"
-								/>
+									<InputComponent
+										name="direccion"
+										value={formik.values.direccion}
+										onBlur={formik.handleBlur}
+										onChange={formik.handleChange}
+										error={formik.errors.direccion}
+										touched={formik.touched.direccion}
+										title="Direccion:"
+									/>
 								</Col>
 								<Col lg={12} xs={{ span: 24 }}>
 									<InputComponent
@@ -279,27 +280,27 @@ export const EditarUsuariosPage = () => {
 									<SelectComponent
 										value={formik.values.idRol}
 										onBlur={formik.handleBlur}
-										onChange={value => formik.setFieldValue("idRol", value.value)}
+										onChange={value => formik.setFieldValue("idRol", value)}
 										error={formik.errors.idEstado}
 										touched={formik.touched.idEstado}
 										title="Rol:"
-										options={[{value: 1, label:'Administrador'}, {value:2 , label:'Comercial'}]}
+										options={[{ value: 1, label: 'Administrador' }, { value: 2, label: 'Comercial' }, { value: 3, label: 'Operaciones' }, { value: 4, label: 'Clientes' }]}
 									>
 									</SelectComponent>
 								</Col>
 								<Col xs={24} lg={12}>
-									<SelectComponent 
+									<SelectComponent
 										value={formik.values.idEstado}
 										onBlur={formik.handleBlur}
-										onChange={value => formik.setFieldValue("idEstado", value.value)}
+										onChange={value => formik.setFieldValue("idEstado", value)}
 										error={formik.errors.idEstado}
 										touched={formik.touched.idEstado}
 										title="Estado:"
-										options={[{value: 1, label:'Creado'},{value: 2, label:'Activo'},{value: 3, label:'Inactivo'}]}
+										options={[{ value: 1, label: 'Creado' }, { value: 2, label: 'Activo' }, { value: 3, label: 'Inactivo' }]}
 									>
 									</SelectComponent>
-								</Col>								
-							</Row>																			
+								</Col>
+							</Row>
 						</Form>
 					</Card>
 				</Col>

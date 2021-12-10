@@ -23,7 +23,7 @@ namespace Adelanta.Data.Repository
         {
             var db = dbConnection();
             var sp = "SP_SOLICITUD_INSERTAR";
-            var values = new { p_tipoOperacion = oSolicitudBE.TipoOperacion, p_ruc = oSolicitudBE.Ruc, p_razonSocial= oSolicitudBE.RazonSocial, p_moneda = oSolicitudBE.Moneda, p_DocumentoJSON = oSolicitudBE.DocumentoJson };
+            var values = new { p_tipoOperacion = oSolicitudBE.TipoOperacion, p_ruc = oSolicitudBE.Ruc, p_razonSocial= oSolicitudBE.RazonSocial, p_moneda = oSolicitudBE.Moneda, p_usuario = oSolicitudBE.Usuario, p_DocumentoJSON = oSolicitudBE.DocumentoJson };
             var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
             return result.ToList()[0];
         }

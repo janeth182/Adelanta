@@ -12,11 +12,10 @@ export const UsuariosPage = () => {
 	const { isMessage, messageInfo } = useMessageApi();
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
-	const [valueSearch, setValueSearch] = useState("");
 	const [dataUsuario, setDataUsuario] = useState([]);
-	const [loadingApi, setLoadingApi] = useState(false);	
+	const [loadingApi, setLoadingApi] = useState(false);
 	const history = useHistory();
-	const urlEdicion = `${process.env.REACT_APP_RUTA_SERVIDOR}usuario/editar-usuario/`;
+	const urlEdicion = `${process.env.REACT_APP_RUTA_SERVIDOR}usuarios/editar-usuario/`;
 	const confirm = async (id) => {
 		let suscribe = true;
 		(async () => {
@@ -42,9 +41,9 @@ export const UsuariosPage = () => {
 		})();
 		return () => {
 			suscribe = false;
-		};		
+		};
 	}
-	  
+
 	const cancel = async (e) => {
 		message.error('No se elimino al usuario.');
 	}
@@ -54,7 +53,7 @@ export const UsuariosPage = () => {
 			title: "Nro.",
 			dataIndex: "idUsuario",
 			...getColumnSearchProps("idUsuario"),
-		},	
+		},
 		{
 			title: "Usuario",
 			dataIndex: "usuario",
@@ -100,7 +99,7 @@ export const UsuariosPage = () => {
 						{value}
 					</Tag>
 				);
-			}			
+			}
 		},
 		{
 			title: "Acción",
@@ -113,7 +112,7 @@ export const UsuariosPage = () => {
 							type="success"
 							icon={<EditOutlined />}
 							onClick={() =>
-								history.push({pathname: `${urlEdicion}${record.idUsuario}`, state: record.idUsuario})
+								history.push({ pathname: `${urlEdicion}${record.idUsuario}`, state: record.idUsuario })
 							}
 						></Button>
 						<Divider type="vertical" />
@@ -124,15 +123,15 @@ export const UsuariosPage = () => {
 							}}
 							onCancel={() => {
 								cancel(record.idUsuario);
-							}}				
+							}}
 							okText="Sí"
 							cancelText="No"
 						>
-						<Button
-							danger
-							icon={<DeleteOutlined />}
-						></Button>	
-						</Popconfirm>						
+							<Button
+								danger
+								icon={<DeleteOutlined />}
+							></Button>
+						</Popconfirm>
 					</>
 				);
 			},
@@ -182,7 +181,7 @@ export const UsuariosPage = () => {
 				className="site-page-header"
 				onBack={() => null}
 				title=""
-				style={{backgroundcolor:'#f0f2f5'}}
+				style={{ backgroundcolor: '#f0f2f5' }}
 			/>
 			<MessageApi
 				type={messageInfo.type}
@@ -196,18 +195,18 @@ export const UsuariosPage = () => {
 						title="Usuarios"
 						actions={[]}
 						extra={
-							<Button								
+							<Button
 								className="primary-b"
 								type="primary"
-								icon={<PlusSquareOutlined style={{ fontSize: '16px'}}/>}								
+								icon={<PlusSquareOutlined style={{ fontSize: '16px' }} />}
 								onClick={() =>
-									history.push({pathname: `${urlEdicion}0`, state: 0})
+									history.push({ pathname: `${urlEdicion}0`, state: 0 })
 								}
 							>
-							Crear Usuario
+								Crear Usuario
 							</Button>
 						}
-					>	
+					>
 						<Table
 							loading={loadingApi}
 							columns={columns}
@@ -224,7 +223,7 @@ export const UsuariosPage = () => {
 						/>
 					</Card>
 				</Col>
-			</Row>	
+			</Row>
 		</ContentComponent>
 	);
 };

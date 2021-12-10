@@ -1,11 +1,8 @@
 ﻿using Adelanta.Data.IRepository;
 using Dapper;
 using MySql.Data.MySqlClient;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Adelanta.Data.Repository
@@ -37,13 +34,37 @@ namespace Adelanta.Data.Repository
             var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
             return result.ToList()[0];
         }
-        public async Task<bool> DocumentosActualizarEstado(string Json)
+        public async Task<bool> DocumentosActualizar(string Json)
         {
             var db = dbConnection();
             var sp = "SP_DOCUMENTO_ACTUALIZAR";
             var values = new { p_dataJSON = Json };
             var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
             return result > 0;
+        }
+        public async Task<bool> DocumentosActualizarEstado(string Json)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_ACTUALIZAR_ESTADO";
+            var values = new { p_dataJSON = Json };
+            var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
+            return result > 0;
+        }
+        public async Task<string> DocumentoConfirmarFactrack(string Json)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_CONFIRMAR_FRACTRACK";
+            var values = new { p_dataJSON = Json };
+            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
+            return result.ToList()[0];
+        }
+        public async Task<string> DocumentoSolicitarAprobacion(string Json)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_SOLICITAR_APROBACION_1";
+            var values = new { p_dataJSON = Json };
+            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
+            return result.ToList()[0];
         }
     }
 }

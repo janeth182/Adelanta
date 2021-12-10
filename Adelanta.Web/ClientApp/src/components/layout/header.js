@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { Col, Layout, Row, Avatar } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import { ArrowRightOutlined, ArrowLeftOutlined, LogoutOutlined } from "@ant-design/icons";
 import { LayoutContext } from "../../context/layoutProvider";
 import { AuthContext } from "../../context/authProvider";
@@ -12,13 +13,12 @@ export const HeaderComponent = () => {
 
 	return (
 		<Header
-			className={`site-layout-background ${
-				isMobil
-					? "header-slider-colapse"
-					: isSideBar
+			className={`site-layout-background ${isMobil
+				? "header-slider-colapse"
+				: isSideBar
 					? "header-slider-colapse"
 					: "header-slider"
-			}`}
+				}`}
 			style={{
 				padding: 0,
 				position: "fixed",
@@ -50,11 +50,11 @@ export const HeaderComponent = () => {
 								display: "flex",
 								alignItems: "center",
 								marginRight: 10,
-								background: '#f0f2f552'
+								/*background: '#f0f2f552'*/
 							}}
 						>
-							<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-							<span style={{ marginLeft: 5 , }}>{user.usuario}</span>
+							<Avatar size="small" icon={<UserOutlined />} />
+							<span style={{ marginLeft: 5 }}>{`${user.usuario} (${user.rol})`}</span>
 						</div>
 						{React.createElement(LogoutOutlined, {
 							className: "trigger",

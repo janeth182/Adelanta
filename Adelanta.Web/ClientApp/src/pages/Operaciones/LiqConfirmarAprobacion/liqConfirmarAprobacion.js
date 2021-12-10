@@ -9,22 +9,19 @@ import {
     Button,
     Space,
     Checkbox,
-    message,
-    Form,
-    Descriptions,
-    notification
+    notification,
 } from "antd";
-import { CheckCircleOutlined } from "@ant-design/icons";
+import { LikeOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { listarDocumentosFactrack, documentosConfirmarFactrack } from "../../../services/documentoService";
-import { ModalComponent } from "../../../components/modal/modal";
+import { listarDocumentos, documentosActualizarEstado } from "../../../services/documentoService";
 import { estados, mensajeError } from "../../../utils/constant";
 import { AuthContext } from "../../../context/authProvider";
-export const ConformidadPagadorPage = () => {
+import moment from "moment";
+export const LiqConfirmarAprobacionPage = () => {
     const { logoutUser, user } = useContext(AuthContext);
     const { isModal, showModal, hiddenModal } = useModal();
     const { isMessage, addMessage, messageInfo } = useMessageApi();
@@ -32,7 +29,23 @@ export const ConformidadPagadorPage = () => {
     const [pageSize, setPageSize] = useState(10);
     const [data, setData] = useState([]);
     const [loadingApi, setLoadingApi] = useState(false);
+    const history = useHistory();
+    function onChange(date, dateString) {
+        console.log(date, dateString);
+    }
     const columns = [
+        {
+            title: "Liquidación",
+            dataIndex: "nroLiquidacion",
+            ...getColumnSearchProps("pagador"),
+            render: (_, record) => {
+                return (
+                    <a type="primary" onClick={showModal}>
+                        {record.nroLiquidacion}
+                    </a>
+                );
+            },
+        },
         {
             title: "Solicitud",
             dataIndex: "idSolicitud",
@@ -82,40 +95,18 @@ export const ConformidadPagadorPage = () => {
             ...getColumnSearchProps("tipoOperacion"),
         },
         {
-            title: "Conf. Pagador",
-            dataIndex: "estadoDescripcion",
-            ...getColumnSearchProps("estadoDescripcion"),
-            render: (_, record) => {
-                if (record.estado === 5) {
-                    return (
-                        <a type="primary" onClick={showModal}>
-                            {record.estadoDescripcion}
-                        </a>
-                    );
-                } else {
-                    return (
-                        <>
-                            {record.estadoDescripcion}
-                        </>
-                    )
-                }
-            },
-        },
-        {
-            title: "Confirmar",
+            title: "Sol Aprob.",
             dataIndex: "tipoOperacion",
             render: (_, record) => {
-                if (record.estado !== 5) {
-                    return (
-                        <>
-                            <Checkbox
-                                onChange={onChangeChecked}
-                                name={"confirmar"}
-                                value={record.idDocumento}
-                            ></Checkbox>
-                        </>
-                    );
-                }
+                return (
+                    <>
+                        <Checkbox
+                            onChange={onChangeChecked}
+                            name={"liquidacion"}
+                            value={record.idDocumento}
+                        ></Checkbox>
+                    </>
+                );
             },
         },
     ];
@@ -123,19 +114,20 @@ export const ConformidadPagadorPage = () => {
     function onChangeChecked(e) {
         console.log(`checked = ${JSON.stringify(e.target)}`);
     }
-    const confirmarFactrack = async (e) => {
+
+    const solicitarAprobacion = async (e) => {
         let suscribe = true;
         (async () => {
             setLoadingApi(true);
-            const cantidadControles = document.getElementsByName("confirmar").length;
+            const cantidadControles = document.getElementsByName("liquidacion").length;
             try {
                 debugger
                 const lista = [];
                 for (let i = 0; i < cantidadControles; i++) {
-                    if (document.getElementsByName("confirmar")[i].checked) {
+                    if (document.getElementsByName("liquidacion")[i].checked) {
                         const documento = {
-                            idDocumento: document.getElementsByName("confirmar")[i].value,
-                            estado: estados.CONFIRMAR_FACTRACK,
+                            idDocumento: document.getElementsByName("liquidacion")[i].value,
+                            estado: estados.CONFIRMAR_APROBACION,
                             usuario: user.usuario
                         };
                         lista.push(documento);
@@ -143,13 +135,13 @@ export const ConformidadPagadorPage = () => {
                 }
                 let data = new FormData();
                 data.append("json", JSON.stringify(lista));
-                const rpta = await documentosConfirmarFactrack(data);
+                const rpta = await documentosActualizarEstado(data);
                 if (rpta.status === 204) {
                     debugger
                     cargarDatos();
                     for (let i = 0; i < cantidadControles; i++) {
-                        if (document.getElementsByName("confirmar")[i].checked) {
-                            document.getElementsByName("confirmar")[i].click();
+                        if (document.getElementsByName("liquidacion")[i].checked) {
+                            document.getElementsByName("liquidacion")[i].click();
                         }
                     }
                     notification['success']({
@@ -174,17 +166,12 @@ export const ConformidadPagadorPage = () => {
             suscribe = false;
         };
     };
-
-    useEffect(() => {
-        cargarDatos();
-    }, []);
-
     const cargarDatos = async () => {
         let suscribe = true;
         (async () => {
             setLoadingApi(true);
             try {
-                const rpta = await listarDocumentosFactrack(user.usuario);
+                const rpta = await listarDocumentos(estados.SOLICITAR_APROBACION);
                 if (rpta.status === 200) {
                     console.log(rpta.data);
                     setData(rpta.data);
@@ -199,6 +186,9 @@ export const ConformidadPagadorPage = () => {
             suscribe = false;
         };
     }
+    useEffect(() => {
+        cargarDatos();
+    }, []);
     return (
         <ContentComponent>
             <PageHeader
@@ -217,7 +207,7 @@ export const ConformidadPagadorPage = () => {
             <Row>
                 <Col span={24}>
                     <Card
-                        title="Conformidad Factrack"
+                        title="Liquidaciones Confirmar Aprobación"
                         actions={[]}
                         extra={
                             <>
@@ -225,10 +215,10 @@ export const ConformidadPagadorPage = () => {
                                     <Button
                                         className="primary-b"
                                         type="primary"
-                                        icon={<CheckCircleOutlined style={{ fontSize: "16px" }} />}
-                                        onClick={confirmarFactrack}
+                                        icon={<LikeOutlined style={{ fontSize: "16px" }} />}
+                                        onClick={solicitarAprobacion}
                                     >
-                                        Confirmar factrack
+                                        Confirmar Aprobación
                                     </Button>
                                 </Space>
                             </>
@@ -251,24 +241,6 @@ export const ConformidadPagadorPage = () => {
                     </Card>
                 </Col>
             </Row>
-            <ModalComponent
-                title="Detalle de la disconformidad"
-                onClose={hiddenModal}
-                show={isModal}
-                footer={[
-                    <Button className="primary-b" type="primary" onClick={hiddenModal}>
-                        Salir
-                    </Button>,
-                ]}
-            >
-                <Form layout="vertical" className="ant-advanced-search-form">
-                    <Descriptions title="">
-                        <Descriptions.Item label="" span={1}>
-                            Observaciones Factrack
-                        </Descriptions.Item>
-                    </Descriptions>
-                </Form>
-            </ModalComponent>
         </ContentComponent>
     );
 };
