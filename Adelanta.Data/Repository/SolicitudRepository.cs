@@ -27,6 +27,14 @@ namespace Adelanta.Data.Repository
             var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
             return result.ToList()[0];
         }
+        public async Task<string> UpdateSolicitud(int? IdSolicitud, string Json)
+        {
+            var db = dbConnection();
+            var sp = "SP_SOLICITUD_UPDATE";
+            var values = new { p_IdSolicitud = IdSolicitud, p_DocumentoJSON = Json };
+            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
+            return result.ToList()[0];
+        }
         public async Task<string> ListarSolicitudes()
         {
             var db = dbConnection();

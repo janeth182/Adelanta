@@ -51,9 +51,12 @@ namespace Adelanta.API.Controllers
                 oSolicitudBE.Moneda = Request.Form["moneda"];
                 oSolicitudBE.DocumentoJson = Request.Form["detalle"];
                 oSolicitudBE.Usuario = Request.Form["usuario"];
-                var resultado = await _solicitudRepository.CrearSolicitud(oSolicitudBE);
-                var response = await CavaliAPI.addInvoice(resultado);
-                return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
+                var resultadoInsertar = await _solicitudRepository.CrearSolicitud(oSolicitudBE);
+                string[] aResultado = resultadoInsertar.Split('|');
+                oSolicitudBE.IdSolicitud = Convert.ToInt32(aResultado[1]);
+                var response = await CavaliAPI.addInvoice(aResultado[0]);
+                var resultadoActualizar = await _solicitudRepository.UpdateSolicitud(oSolicitudBE.IdSolicitud, response);
+                return Ok(JsonSerializer.Deserialize<dynamic>(resultadoActualizar));
             }
             catch (Exception ex)
             {
