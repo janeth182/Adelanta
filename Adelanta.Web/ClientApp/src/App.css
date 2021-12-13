@@ -110,7 +110,7 @@
 }
 .upload-list-inline .ant-upload-list-item {
 	float: left;
-	width: 200px;
+	width: auto;
 	margin-right: 8px;
   }
   

@@ -1,31 +1,16 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import {
-  Row,
-  Col,
-  Card,
-  Button,
-  Form,
-  Upload,
-  Space,
-  message,
-  Descriptions,
-  Tabs,
-  Table,
-} from "antd";
+import { Row, Col, Card, Button, Form, Upload, Space, message, Descriptions, Tabs, Table } from "antd";
 import { ContentComponent } from "../../../components/layout/content";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import {
-  SaveOutlined,
-  RetweetOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { SaveOutlined, RetweetOutlined, UploadOutlined } from "@ant-design/icons";
 import { useModal } from "../../../hooks/useModal";
 import { cargarDocumentos } from "../../../services/solicitudService";
 import XMLParser from "react-xml-parser";
 import { ModalComponent } from "../../../components/modal/modal";
 import { AuthContext } from "../../../context/authProvider";
+import { mime, mensajeError, estados } from "../../../utils/constant";
 export const NuevaSolicitudPage = () => {
   const { logoutUser, user } = useContext(AuthContext);
   const { isModal, showModal, hiddenModal } = useModal();
@@ -66,133 +51,138 @@ export const NuevaSolicitudPage = () => {
   ];
   const handleupload = async (file) => {
     try {
-      if (file.type === "text/xml") {
-        let reader = new FileReader();
-        reader.fileName = file.name;
-        reader.onload = (file) => {
-          const xml = file.target.result;
-          const jsonDataFromXml = new XMLParser().parseFromString(xml, "text/xml");
-          const detalle = {};
-          jsonDataFromXml.children.forEach((nodo) => {
-            if (nodo.name === "cac:AccountingCustomerParty") {
-              nodo.children.forEach((child) => {
-                if (child.name === "cac:Party") {
-                  child.children.forEach((det) => {
-                    if (det.name === "cac:PartyIdentification") {
-                      detalle.rucPagador = det.children[0].value;
-                    } else if (det.name === "cac:PartyLegalEntity") {
-                      det.children.forEach((legal) => {
-                        if (legal.name === "cbc:RegistrationName") {
-                          detalle.pagador = legal.value;
-                        }
-                      });
-                    }
-                  });
+      if (validarDuplicados(file)) {
+        if (file.type === mime.XML) {
+          let reader = new FileReader();
+          reader.fileName = file.name;
+          reader.onload = (file) => {
+            const xml = file.target.result;
+            const jsonDataFromXml = new XMLParser().parseFromString(xml, mime.XML);
+            const detalle = {};
+            jsonDataFromXml.children.forEach((nodo) => {
+              if (nodo.name === "cac:AccountingCustomerParty") {
+                nodo.children.forEach((child) => {
+                  if (child.name === "cac:Party") {
+                    child.children.forEach((det) => {
+                      if (det.name === "cac:PartyIdentification") {
+                        detalle.rucPagador = det.children[0].value;
+                      } else if (det.name === "cac:PartyLegalEntity") {
+                        det.children.forEach((legal) => {
+                          if (legal.name === "cbc:RegistrationName") {
+                            detalle.pagador = legal.value;
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              } else if (nodo.name === "cac:SellerSupplierParty") {
+                detalle.direccionPagador =
+                  nodo.children[0].children[0].children[0].children[0].value;
+              } else if (nodo.name === "cac:AccountingSupplierParty") {
+                nodo.children.forEach((child) => {
+                  if (child.name === "cac:Party") {
+                    child.children.forEach((det) => {
+                      if (det.name === "cac:PartyName") {
+                      } else if (det.name === "cac:PartyIdentification") {
+                        detalle.rucProveedor = det.children[0].value;
+                      } else if (det.name === "cac:PartyLegalEntity") {
+                        det.children.forEach((leg) => {
+                          if (leg.name === "cbc:RegistrationName") {
+                            detalle.proveedor = leg.value;
+                          }
+                        })
+                      }
+                    });
+                  }
+                });
+              } else if (nodo.name === "cbc:ID") {
+                detalle.serie = nodo.value;
+              } else if (nodo.name === "cbc:DocumentCurrencyCode") {
+                detalle.moneda = nodo.value;
+              } else if (nodo.name === "cbc:IssueDate") {
+                detalle.fechaEmision = nodo.value;
+              } else if (nodo.name === "cbc:IssueTime") {
+                detalle.horaEmision = nodo.value;
+              } else if (nodo.name === "cbc:DueDate") {
+                detalle.fechaVencimiento = nodo.value;
+              } else if (nodo.name === "cac:PaymentTerms") {
+                if (nodo.children.length === 3) {
+                  detalle.formaPago = nodo.children[1].value;
                 }
-              });
-            } else if (nodo.name === "cac:SellerSupplierParty") {
-              detalle.direccionPagador =
-                nodo.children[0].children[0].children[0].children[0].value;
-            } else if (nodo.name === "cac:AccountingSupplierParty") {
-              nodo.children.forEach((child) => {
-                if (child.name === "cac:Party") {
-                  child.children.forEach((det) => {
-                    if (det.name === "cac:PartyName") {
-                      //detalle.proveedor = det.children[0].value;
-                    } else if (det.name === "cac:PartyIdentification") {
-                      detalle.rucProveedor = det.children[0].value;
-                    } else if (det.name === "cac:PartyLegalEntity") {
-                      det.children.forEach((leg) => {
-                        if (leg.name === "cbc:RegistrationName") {
-                          detalle.proveedor = leg.value;
-                        }
-                      })
-                    }
-                  });
-                }
-              });
-            } else if (nodo.name === "cbc:ID") {
-              detalle.serie = nodo.value;
-            } else if (nodo.name === "cbc:DocumentCurrencyCode") {
-              detalle.moneda = nodo.value;
-            } else if (nodo.name === "cbc:IssueDate") {
-              detalle.fechaEmision = nodo.value;
-            } else if (nodo.name === "cbc:IssueTime") {
-              detalle.horaEmision = nodo.value;
-            } else if (nodo.name === "cbc:DueDate") {
-              detalle.fechaVencimiento = nodo.value;
-            } else if (nodo.name === "cac:PaymentTerms") {
-              if (nodo.children.length === 3) {
-                detalle.formaPago = nodo.children[1].value;
+              } else if (nodo.name === "cac:TaxTotal") {
+                nodo.children.forEach((child) => {
+                  if (child.name === "cbc:TaxAmount") {
+                    detalle.montoTotalImpuesto = child.value;
+                  } else if (child.name === "cbc:TaxSubtotal") {
+                    child.children.forEach((det) => {
+                      if (det.name === "cac:TaxCategory") {
+                        detalle.codigoTributo = det.children[0].children[0].value;
+                        detalle.nombreTributo = det.children[0].children[1].value;
+                        detalle.codigoInternacionalTributo =
+                          det.children[0].children[2].value;
+                      }
+                    });
+                  }
+                });
+              } else if (nodo.name === "cac:LegalMonetaryTotal") {
+                nodo.children.forEach((child) => {
+                  if (child.name === "cbc:PayableAmount") {
+                    detalle.montoTotalVenta = child.value;
+                  } else if (child.name === "cbc:LineExtensionAmount") {
+                    detalle.montoOperacion = child.value;
+                  }
+                });
               }
-            } else if (nodo.name === "cac:TaxTotal") {
-              nodo.children.forEach((child) => {
-                if (child.name === "cbc:TaxAmount") {
-                  detalle.montoTotalImpuesto = child.value;
-                } else if (child.name === "cbc:TaxSubtotal") {
-                  child.children.forEach((det) => {
-                    if (det.name === "cac:TaxCategory") {
-                      detalle.codigoTributo = det.children[0].children[0].value;
-                      detalle.nombreTributo = det.children[0].children[1].value;
-                      detalle.codigoInternacionalTributo =
-                        det.children[0].children[2].value;
-                    }
-                  });
-                }
-              });
-            } else if (nodo.name === "cac:LegalMonetaryTotal") {
-              nodo.children.forEach((child) => {
-                if (child.name === "cbc:PayableAmount") {
-                  detalle.montoTotalVenta = child.value;
-                } else if (child.name === "cbc:LineExtensionAmount") {
-                  detalle.montoOperacion = child.value;
-                }
-              });
-            }
-          });
-          detalle.xml = file.target.result;
-          detalle.nombreArchivo = file.target.fileName;
-          detalle.archivoPdf = `${file.target.fileName.split(".")[0]}.pdf`;
-          const buff = Buffer.from(file.target.result, 'utf-8');
-          const base64 = buff.toString('base64');
-          detalle.base64 = base64;
-          detalle.archivoExcel = tipoOperacion === "C" ? `${file.target.fileName.split(".")[0]}.xlsx` : "";
-          setDocumentoDetalle((documentoDetalle) => [...documentoDetalle, detalle,]);
-        };
-        reader.readAsText(file);
-        setFileList((fileList) => [...fileList, file]);
-      } else if (file.type === "application/pdf") {
-        setFileListPDF((fileListPDF) => [...fileListPDF, file]);
-      } else if (
-        file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
-        setFileListXLSX((fileListXLSX) => [...fileListXLSX, file]);
+            });
+            detalle.xml = file.target.result;
+            detalle.nombreArchivo = file.target.fileName;
+            detalle.archivoPdf = `${file.target.fileName.split(".")[0]}.pdf`;
+            const buff = Buffer.from(file.target.result, 'utf-8');
+            const base64 = buff.toString('base64');
+            detalle.base64 = base64;
+            detalle.archivoExcel = tipoOperacion === "C" ? `${file.target.fileName.split(".")[0]}.xlsx` : "";
+            detalle.estado = estados.PENDIENTE_CAVALI;
+            setDocumentoDetalle((documentoDetalle) => [...documentoDetalle, detalle,]);
+          };
+          reader.readAsText(file);
+          setFileList((fileList) => [...fileList, file]);
+        } else if (file.type === mime.PDF) {
+          setFileListPDF((fileListPDF) => [...fileListPDF, file]);
+        } else if (
+          file.type === mime.EXCEL) {
+          setFileListXLSX((fileListXLSX) => [...fileListXLSX, file]);
+        } else {
+          message.error(mensajeError.FOMARTO_ARCHIVO);
+        }
+        return false;
       } else {
-        message.error("Formato de archivo no permitido.");
+        message.error(mensajeError.ARCHIVO_DUPLICADO.replace('{0}', file.name));
+        return Upload.LIST_IGNORE;
       }
-      return false;
     } catch (error) {
-      message.error("Formato de archivo no permitido.");
+      message.error(mensajeError.FOMARTO_ARCHIVO);
       return true;
     }
   };
   const removeFile = async (file) => {
     try {
-      if (file.type === "text/xml") {
+      if (file.type === mime.XML) {
         setFileList(nuevaLista(fileList, file));
         const detalle = documentoDetalle.filter(function (el) {
           return el.nombreArchivo != file.name;
         });
         setDocumentoDetalle(detalle);
-      } else if (file.type === "application/pdf") {
+      } else if (file.type === mime.PDF) {
         setFileListPDF(nuevaLista(fileListPDF, file));
-      } else if (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+      } else if (file.type === mime.EXCEL) {
         setFileListXLSX(nuevaLista(fileListXLSX, file));
       } else {
-        message.error("Formato de archivo no permitido.");
+        message.error(mensajeError.FOMARTO_ARCHIVO);
       }
       return true;
     } catch (error) {
-      message.error("Formato de archivo no permitido.");
+      message.error(mensajeError.FOMARTO_ARCHIVO);
       return false;
     }
   };
@@ -201,6 +191,19 @@ export const NuevaSolicitudPage = () => {
       return el.name != file.name;
     });
   };
+  const validarDuplicados = (file) => {
+    debugger
+    let documento = "";
+    if (file.type === mime.XML) {
+      documento = fileList.find(element => element.name.toLowerCase() === file.name.toLowerCase());
+    } else if (file.type === mime.PDF) {
+      documento = fileListPDF.find(element => element.name.toLowerCase() === file.name.toLowerCase());
+    } else if (file.type === mime.EXCEL) {
+      documento = fileListXLSX.find(element => element.name.toLowerCase() === file.name.toLowerCase());
+    }
+    const cantidad = documento === undefined ? 0 : Object.keys(documento).length;
+    return cantidad > 0 ? false : true;
+  }
   const enviarDocumentos = async () => {
     let suscribe = true;
     let listaError = [];
@@ -269,7 +272,7 @@ export const NuevaSolicitudPage = () => {
         showModal();
       } catch (error) {
         setLoadingApi(false);
-        message.error("Ocurrio un error al momento de procesar la solicitud.");
+        message.error(mensajeError.GENERAL);
       }
     })();
 

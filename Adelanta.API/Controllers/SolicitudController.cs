@@ -1,4 +1,6 @@
-﻿using Adelanta.Data.IRepository;
+﻿using Adelanta.API.Services;
+using Adelanta.Core.Log;
+using Adelanta.Data.IRepository;
 using Adelanta.Model;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -49,11 +51,13 @@ namespace Adelanta.API.Controllers
                 oSolicitudBE.Moneda = Request.Form["moneda"];
                 oSolicitudBE.DocumentoJson = Request.Form["detalle"];
                 oSolicitudBE.Usuario = Request.Form["usuario"];
-                var resultado = await _solicitudRepository.CrearSolicitud(oSolicitudBE);                
+                var resultado = await _solicitudRepository.CrearSolicitud(oSolicitudBE);
+                var response = await CavaliAPI.addInvoice(resultado);
                 return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
             }
             catch (Exception ex)
             {
+                Log.grabarLog(ex);
                 return StatusCode(500, $"Internal server error: {ex}");
             }
         }
