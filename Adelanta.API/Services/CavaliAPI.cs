@@ -21,7 +21,7 @@ namespace Adelanta.API.Services
 
             using (var client = new HttpClient())
             {
-
+                // Initialization  
                 Token authorization = GeToken();
 
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authorization.AccessToken);
@@ -38,6 +38,7 @@ namespace Adelanta.API.Services
                     return responseObj = await response.Content.ReadAsStringAsync();
                 }                
             }
+
             return responseObj;
         }
 
