@@ -16,39 +16,38 @@ namespace Adelanta.API.Services
 {
     public class OAuth2Client
     {
-		public static async Task<Token> GetTokenAsync(string authenticationUrl, Dictionary<string, string> authenticationCredentials)
+		public static async Task<Token> GetTokenAsync(HttpClient client)
 		{
             try
             {
-				HttpClient client = new HttpClient();
-				
-					FormUrlEncodedContent content = new FormUrlEncodedContent(authenticationCredentials);
-					Log.grabarLog("EntroGetTokenAsync");
-					Log.grabarLog("authenticationUrl"+ authenticationUrl);
-					Log.grabarLog("content" + content.ToString());
-					HttpResponseMessage response = await client.PostAsync(authenticationUrl, content).ConfigureAwait(false);
-					Log.grabarLog("response" + response.StatusCode.ToString());
-					if (response.StatusCode != System.Net.HttpStatusCode.OK)
-					{
-						string message = String.Format("POST failed. Received HTTP {0}", response.StatusCode);
-						Log.grabarLog("EntroGetTokenAsyncExcep");
-						throw new ApplicationException(message);
-					}
-					Log.grabarLog("SalioThrowoGetTokenAsync");
-					string responseString = await response.Content.ReadAsStringAsync();
+				IConfigurationBuilder builder = new ConfigurationBuilder();
+				builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
+				var root = builder.Build();
+				Dictionary<string, string> authenticationCredentials = root.GetSection("Authentication:Credentials").GetChildren().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+				FormUrlEncodedContent content = new FormUrlEncodedContent(authenticationCredentials);
+				Log.grabarLog("EntroGetTokenAsync: ");
+				Log.grabarLog("authenticationUrl: " + root.GetSection("Authentication:URL").Value);
+				Log.grabarLog("content: " + content.ToString());
+				HttpResponseMessage response = await client.PostAsync(root.GetSection("Authentication:URL").Value, content).ConfigureAwait(false);
+				Log.grabarLog("response" + response.StatusCode.ToString());
+				if (response.StatusCode != System.Net.HttpStatusCode.OK)
+				{
+					string message = String.Format("POST failed. Received HTTP {0}", response.StatusCode);
+					Log.grabarLog("EntroGetTokenAsyncExcep");
+					throw new ApplicationException(message);
+				}
+				Log.grabarLog("SalioThrowoGetTokenAsync: ");
+				string responseString = await response.Content.ReadAsStringAsync();
 
-					Token token = JsonConvert.DeserializeObject<Token>(responseString);
+				Token token = JsonConvert.DeserializeObject<Token>(responseString);
 
-					return token;
-								
+				return token;
 			}
             catch (Exception ex)
             {
 				Log.grabarLog(ex);
 				throw;
-            }
-			
-		}
-	
+            }			
+		}	
 	}
 }

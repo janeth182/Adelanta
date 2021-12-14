@@ -55,7 +55,7 @@ namespace Adelanta.API.Controllers
                 string[] aResultado = resultadoInsertar.Split('|');
                 oSolicitudBE.IdSolicitud = Convert.ToInt32(aResultado[1]);
                 Log.grabarLog("Inicio");
-                var response = await CavaliAPI.addInvoice(aResultado[0]).ConfigureAwait(false);
+                var response = await CavaliAPI.addInvoiceXML(aResultado[0]).ConfigureAwait(false);
                 Log.grabarLog("Fin");
                 var resultadoActualizar = await _solicitudRepository.UpdateSolicitud(oSolicitudBE.IdSolicitud, response);
                 return Ok(JsonSerializer.Deserialize<dynamic>(resultadoActualizar));
