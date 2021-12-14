@@ -1,4 +1,5 @@
 ﻿using Adelanta.API.Services.Entities;
+using Adelanta.Core.Log;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -17,13 +18,13 @@ namespace Adelanta.API.Services
     {
         public static async Task<string> addInvoice(string trama)
         {
-            string responseObj = string.Empty;
 
-            using (var client = new HttpClient())
-            {
 
-                Token authorization = GeToken();
+            var client = new HttpClient();
+            
 
+                Token authorization = await GeToken().ConfigureAwait(false);
+                Log.grabarLog("ResultadoToken"+authorization.AccessToken.ToString());
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authorization.AccessToken);
                 client.DefaultRequestHeaders.Add("x-api-key", "ZHTPyt9lRe6XCmqvDdrsMkzB77JrOtRlspXyJ100");
                 
@@ -32,25 +33,40 @@ namespace Adelanta.API.Services
                 HttpContent httpContent = new StringContent(trama, Encoding.UTF8);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");                                
                 var content = new StringContent(trama, Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(new Uri("https://api.qae.cavali.com.pe/factrack/v2/add-invoice-xml"), content);
+                var response = await client.PostAsync(new Uri("https://api.qae.cavali.com.pe/factrack/v2/add-invoice-xml"), content).ConfigureAwait(false);
                 if (response.IsSuccessStatusCode)
                 {
-                    return responseObj = await response.Content.ReadAsStringAsync();
-                }                
-            }
-            return responseObj;
+                    Log.grabarLog("ResultadoOK"+response.ToString());
+                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    Log.grabarLog("ResultadoERROR");
+                    return string.Empty;
+                }
+            
+            
         }
 
-        public static Token GeToken()
+        public static async Task<Token> GeToken()
         {
-            IConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
-            var root = builder.Build();
-            Dictionary<string, string> authenticationCredentials = root.GetSection("Authentication:Credentials").GetChildren().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
-
-            Token token =  OAuth2Client.GetTokenAsync(root.GetSection("Authentication:URL").Value, authenticationCredentials).Result;
-
-            return token;
+            try
+            {
+                IConfigurationBuilder builder = new ConfigurationBuilder();
+                Log.grabarLog("InicioToken");
+                builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
+                var root = builder.Build();
+                Dictionary<string, string> authenticationCredentials = root.GetSection("Authentication:Credentials").GetChildren().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+                Log.grabarLog("FormaJSON");
+                Token token = await OAuth2Client.GetTokenAsync(root.GetSection("Authentication:URL").Value, authenticationCredentials).ConfigureAwait(false);
+                Log.grabarLog("finalizaToken" + token.ToString());
+                return token;
+            }
+            catch (Exception ex)
+            {
+                Log.grabarLog(ex);
+                throw;
+            }
         }
     }
 }

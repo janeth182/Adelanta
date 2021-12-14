@@ -50,11 +50,13 @@ namespace Adelanta.API.Controllers
                 oSolicitudBE.RazonSocial = Request.Form["razonSocial"];
                 oSolicitudBE.Moneda = Request.Form["moneda"];
                 oSolicitudBE.DocumentoJson = Request.Form["detalle"];
-                oSolicitudBE.Usuario = Request.Form["usuario"];
+                oSolicitudBE.Usuario = Request.Form["usuario"];                
                 var resultadoInsertar = await _solicitudRepository.CrearSolicitud(oSolicitudBE);
                 string[] aResultado = resultadoInsertar.Split('|');
                 oSolicitudBE.IdSolicitud = Convert.ToInt32(aResultado[1]);
-                var response = await CavaliAPI.addInvoice(aResultado[0]);
+                Log.grabarLog("Inicio");
+                var response = await CavaliAPI.addInvoice(aResultado[0]).ConfigureAwait(false);
+                Log.grabarLog("Fin");
                 var resultadoActualizar = await _solicitudRepository.UpdateSolicitud(oSolicitudBE.IdSolicitud, response);
                 return Ok(JsonSerializer.Deserialize<dynamic>(resultadoActualizar));
             }
