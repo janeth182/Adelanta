@@ -19,6 +19,23 @@ namespace Adelanta.Core.Log
             archivo = String.Format("{0}{1}", root.GetSection("AppSettings:LOG").Value, Cadena.fomatoAMD("LogError", ".txt"));
             Objeto<Exception>.grabarArchivoTexto(ex, archivo);
         }
+        public static void grabarLog(string mensaje)
+        {
+            string archivo = string.Empty;
+            IConfigurationBuilder builder = new ConfigurationBuilder();
+            builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
+            var root = builder.Build();
+            archivo = String.Format("{0}{1}", root.GetSection("AppSettings:LOG").Value, Cadena.fomatoAMD("LogError", ".txt"));
+
+            using (FileStream fs = new FileStream(archivo, FileMode.Append, FileAccess.Write, FileShare.Write))
+            {
+                using (StreamWriter sw = new StreamWriter(fs, Encoding.Default))
+                {   
+                    sw.WriteLine(mensaje);
+                }
+            }
+            
+        }
         public class Cadena
         {
             public static string fomatoAMD(string texto, string extension = "")

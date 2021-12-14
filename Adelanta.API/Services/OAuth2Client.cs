@@ -1,5 +1,6 @@
 ﻿using Adelanta.API.Services.Entities;
 using Adelanta.API.Services.Interfaces;
+using Adelanta.Core.Log;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -16,26 +17,38 @@ namespace Adelanta.API.Services
     public class OAuth2Client
     {
 		public static async Task<Token> GetTokenAsync(string authenticationUrl, Dictionary<string, string> authenticationCredentials)
-        {
-            HttpClient client = new HttpClient();
-
-            FormUrlEncodedContent content = new FormUrlEncodedContent(authenticationCredentials);
-
-            using (HttpResponseMessage response = await client.PostAsync(authenticationUrl, content))
+		{
+            try
             {
-                if (response.StatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    string message = String.Format("POST failed. Received HTTP {0}", response.StatusCode);
-                    throw new ApplicationException(message);
-                }
+				HttpClient client = new HttpClient();
+				
+					FormUrlEncodedContent content = new FormUrlEncodedContent(authenticationCredentials);
+					Log.grabarLog("EntroGetTokenAsync");
+					Log.grabarLog("authenticationUrl"+ authenticationUrl);
+					Log.grabarLog("content" + content.ToString());
+					HttpResponseMessage response = await client.PostAsync(authenticationUrl, content).ConfigureAwait(false);
+					Log.grabarLog("response" + response.StatusCode.ToString());
+					if (response.StatusCode != System.Net.HttpStatusCode.OK)
+					{
+						string message = String.Format("POST failed. Received HTTP {0}", response.StatusCode);
+						Log.grabarLog("EntroGetTokenAsyncExcep");
+						throw new ApplicationException(message);
+					}
+					Log.grabarLog("SalioThrowoGetTokenAsync");
+					string responseString = await response.Content.ReadAsStringAsync();
 
-                string responseString = await response.Content.ReadAsStringAsync();
+					Token token = JsonConvert.DeserializeObject<Token>(responseString);
 
-                Token token = JsonConvert.DeserializeObject<Token>(responseString);
-
-                return token;
+					return token;
+								
+			}
+            catch (Exception ex)
+            {
+				Log.grabarLog(ex);
+				throw;
             }
-        }
-
-    }
+			
+		}
+	
+	}
 }
