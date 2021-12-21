@@ -4,11 +4,11 @@ export const api = axios.create({
 	baseURL: process.env.REACT_APP_URL_API,
 	headers: {
 		Accept: "application/json",
-		"Content-Type": "application/json",		
+		"Content-Type": "application/json",
 	},
 });
 
-export const fileUpload = axios.create({
+export const formColeccion = axios.create({
 	baseURL: process.env.REACT_APP_URL_API,
 	headers: {
 		Accept: "application/json",

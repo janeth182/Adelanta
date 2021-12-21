@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Menu } from "antd";
-import { HomeOutlined, UserOutlined, FileAddOutlined, FieldTimeOutlined  } from "@ant-design/icons";
+import { HomeOutlined, UserOutlined, FileAddOutlined, FieldTimeOutlined } from "@ant-design/icons";
 import { useContext } from "react";
 import { LayoutContext } from "antd/lib/layout/layout";
-import { listarMenu, obtenerMenuPorSesion} from "../../services/menuService";
+import { listarMenu, obtenerMenuPorSesion } from "../../services/menuService";
 import { useHistory } from "react-router-dom";
 import { AuthContext } from "../../context/authProvider";
 const { SubMenu } = Menu;
@@ -13,53 +13,52 @@ export const MenuComponent = () => {
 	const location = useLocation();
 	const { user } = useContext(AuthContext);
 	const { isMobil } = useContext(LayoutContext);
-	const [openKeys, setOpenKeys] = useState([""]);		
+	const [openKeys, setOpenKeys] = useState([""]);
 	useEffect(() => {
 		let suscribe = true;
-		(async () => {			
+		(async () => {
 			try {
 				const rutaServidor = process.env.REACT_APP_RUTA_SERVIDOR;
 				const rpta = await obtenerMenuPorSesion(user.token);
 				const menu = [];
 				if (rpta.status === 200) {
 					if (suscribe) {
-						console.log(JSON.stringify(rpta))
 						rpta.data.forEach(item => {
-							if(item.idMenuPadre == '0'){
-								const subMenu = []; 
-								rpta.data.forEach( hijo => {
-									if(item.idMenu === hijo.idMenuPadre){
+							if (item.idMenuPadre == '0') {
+								const subMenu = [];
+								rpta.data.forEach(hijo => {
+									if (item.idMenu === hijo.idMenuPadre) {
 										subMenu.push({
 											id: `${rutaServidor}${hijo.rutaPagina}`,
 											title: hijo.menu,
-											ruta: `${rutaServidor}${hijo.rutaPagina}`,											
+											ruta: `${rutaServidor}${hijo.rutaPagina}`,
 											icon: "",
 										})
 									}
-								});							
-								if(subMenu.length === 0){
+								});
+								if (subMenu.length === 0) {
 									menu.push({
 										id: `${rutaServidor}${item.rutaPagina}`,
-										type: subMenu.length === 0 ? 'menu':'submenu',
+										type: subMenu.length === 0 ? 'menu' : 'submenu',
 										title: item.menu,
-										ruta : `${rutaServidor}${item.rutaPagina}`,
+										ruta: `${rutaServidor}${item.rutaPagina}`,
 										icon: 'home',
 										rutas: [
-											...subMenu							
-										],																								
+											...subMenu
+										],
 									});
 								} else {
 									menu.push({
 										id: `${rutaServidor}${item.rutaPagina}`,
-										type: subMenu.length === 0 ? 'menu':'submenu',
+										type: subMenu.length === 0 ? 'menu' : 'submenu',
 										title: item.menu,
 										icon: 'home',
 										rutas: [
-											...subMenu							
-										],																								
+											...subMenu
+										],
 									});
-								}		
-							}	
+								}
+							}
 						});
 						rutas = menu;
 						let id = "";
@@ -79,7 +78,7 @@ export const MenuComponent = () => {
 						});
 					}
 				}
-			} catch (error) {				
+			} catch (error) {
 				console.log(error.response);
 			}
 		})();
@@ -93,7 +92,7 @@ export const MenuComponent = () => {
 			case "home":
 				return <FieldTimeOutlined />;
 			case "user":
-				return <UserOutlined spin={true}/>;
+				return <UserOutlined spin={true} />;
 			case "add":
 				return <FileAddOutlined />;
 			default:
@@ -102,7 +101,6 @@ export const MenuComponent = () => {
 	};
 
 	const onOpenChange = (keys) => {
-		console.log("keys", keys);
 		setOpenKeys(keys[1]);
 	};
 
@@ -111,7 +109,6 @@ export const MenuComponent = () => {
 			theme="dark"
 			onOpenChange={onOpenChange}
 			onClick={(e) => {
-				console.log("w", e);
 				if (e.keyPath.length > 1) {
 					setOpenKeys(e.keyPath[1]);
 				} else {

@@ -1,56 +1,56 @@
 import { useState, useEffect, useContext } from "react";
-import { useHistory } from "react-router-dom";
-import {
-  PageHeader,
-  Row,
-  Col,
-  Card,
-  Table,
-  Button,
-  Space,
-  Checkbox,
-  message,
-  InputNumber,
-  DatePicker,
-  Form,
-  Descriptions,
-  notification,
-  Modal
-} from "antd";
-import { SaveOutlined, SendOutlined } from "@ant-design/icons";
+import { PageHeader, Row, Col, Card, Table, Button, Space, Checkbox, InputNumber, DatePicker, Form, Descriptions, notification, Modal } from "antd";
+import { SaveOutlined, SendOutlined, SearchOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
-import { MessageApi } from "../../../components/message/message";
-import {
-  listarDocumentos,
-  documentosActualizar,
-} from "../../../services/documentoService";
+import { listarDocumentosFiltros, documentosActualizar } from "../../../services/documentoService";
+import { obtenerSolicitudDetalle } from "../../../services/solicitudService";
 import { ModalComponent } from "../../../components/modal/modal";
 import { detalleFacturas } from "../../../model/mocks/detalleFactura";
 import moment from "moment";
-import { estados, mensajeError } from "../../../utils/constant";
+import { estados, mensajeError, mensajeOK } from "../../../utils/constant";
 import { AuthContext } from "../../../context/authProvider";
+import { useFormik } from "formik";
 export const RespuestaPagadorPage = () => {
   const { logoutUser, user } = useContext(AuthContext);
   const { isModal, showModal, hiddenModal } = useModal();
-  const { isMessage, addMessage, messageInfo } = useMessageApi();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [data, setData] = useState([]);
+  const [detalleSolicitud, setDetalleSolicitud] = useState([]);
   const [loadingApi, setLoadingApi] = useState(false);
+  const [filtro, setFiltro] = useState(false);
   const [documento, setDocumento] = useState([]);
-  const history = useHistory();
+  const formik = useFormik({
+    initialValues: {
+      idSolicitud: '',
+      cedente: '',
+      tipoOperacion: '',
+      tasaNominalMensual: 0,
+      tasaNominalAnual: 0,
+      financiamiento: 0,
+      fondoResguardo: 0,
+      cantidadDocumentos: 0,
+      contrato: 0,
+      comisionCartaNotarial: 0,
+      serie: '',
+      moneda: '',
+      montoTotalImpuesto: 0,
+      montoOperacion: 0,
+      montoTotalVenta: 0
+    },
+  });
   const columns = [
     {
-      title: "Solicitud",
+      title: "Sol.",
       dataIndex: "idSolicitud",
-      ...getColumnSearchProps("idSolicitud"),
-      render: (_, record) => {
+      /*  ...getColumnSearchProps("pagador"),*/
+      render: (text, _, index) => {
         return (
-          <a type="primary" onClick={showModal}>
-            {record.idSolicitud}
+          <a type="primary" onClick={(v) => verDetalle(v, _.idSolicitud)}>
+            {_.idSolicitud}
           </a>
         );
       },
@@ -58,40 +58,45 @@ export const RespuestaPagadorPage = () => {
     {
       title: "Cliente",
       dataIndex: "pagador",
-      ...getColumnSearchProps("pagador"),
+      /*  ...getColumnSearchProps("pagador"),*/
     },
     {
       title: "RUC",
       dataIndex: "rucPagador",
-      ...getColumnSearchProps("rucPagador"),
+      /*  ...getColumnSearchProps("pagador"),*/
     },
     {
       title: "Aceptante",
       dataIndex: "proveedor",
-      ...getColumnSearchProps("proveedor"),
+      /*  ...getColumnSearchProps("pagador"),*/
     },
     {
       title: "RUC",
       dataIndex: "rucProveedor",
-      ...getColumnSearchProps("rucProveedor"),
+      /*  ...getColumnSearchProps("pagador"),*/
     },
     {
       title: "Nro. Documento",
       dataIndex: "serie",
       key: "serie",
-      ...getColumnSearchProps("serie"),
-      //render: (text, _, index) => <Input value={text} onChange={(v) => onChangeDataCell(v, index)} />,
+      /*  ...getColumnSearchProps("pagador"),*/
     },
     {
       title: "Total Factura",
       dataIndex: "montoTotalVenta",
-      ...getColumnSearchProps("montoTotalVenta"),
+      /*  ...getColumnSearchProps("pagador"),*/
     },
     {
       title: "Moneda",
       dataIndex: "moneda",
       editable: true,
-      ...getColumnSearchProps("moneda"),
+      /*  ...getColumnSearchProps("pagador"),*/
+    },
+    {
+      title: "F. Creación",
+      dataIndex: "fechaCreacion",
+      editable: true,
+      /*  ...getColumnSearchProps("pagador"),*/
     },
     {
       title: "F. Pago Confirmado",
@@ -142,7 +147,7 @@ export const RespuestaPagadorPage = () => {
     {
       title: "T. Operación",
       dataIndex: "tipoOperacion",
-      ...getColumnSearchProps("tipoOperacion"),
+      /*  ...getColumnSearchProps("pagador"),*/
     },
     {
       title: "Cavali",
@@ -160,6 +165,47 @@ export const RespuestaPagadorPage = () => {
       },
     },
   ];
+  const verDetalle = async (v, idSolicitud) => {
+    let suscribe = true;
+    (async () => {
+      setLoadingApi(true);
+      try {
+        console.log(idSolicitud);
+        const rpta = await obtenerSolicitudDetalle(idSolicitud);
+        if (suscribe) {
+          formik.initialValues.idSolicitud = rpta.data[0].idSolicitud;
+          formik.initialValues.cedente = rpta.data[0].cedente;
+          formik.initialValues.tipoOperacion = rpta.data[0].tipoOperacion;
+          formik.initialValues.tasaNominalMensual = rpta.data[0].tasaNominalMensual;
+          formik.initialValues.tasaNominalAnual = rpta.data[0].tasaNominalAnual;
+          formik.initialValues.financiamiento = rpta.data[0].financiamiento;
+          formik.initialValues.fondoResguardo = rpta.data[0].fondoResguardo;
+          formik.initialValues.cantidadDocumentos = rpta.data[0].cantidadDocumentos;
+          formik.initialValues.contrato = rpta.data[0].contrato;
+          formik.initialValues.comisionCartaNotarial = rpta.data[0].comisionCartaNotarial;
+          formik.initialValues.serie = rpta.data[0].serie;
+          formik.initialValues.moneda = rpta.data[0].moneda;
+          formik.initialValues.montoTotalImpuesto = rpta.data[0].montoTotalImpuesto;
+          formik.initialValues.montoOperacion = rpta.data[0].montoOperacion;
+          formik.initialValues.montoTotalVenta = rpta.data[0].montoTotalVenta;
+          formik.initialValues.servicioCobranza = rpta.data[0].servicioCobranza;
+          formik.initialValues.servicioCustodia = rpta.data[0].servicioCustodia;
+          formik.initialValues.comisionEstructuracion = rpta.data[0].comisionEstructuracion;
+          formik.initialValues.ejecutivoComercial = rpta.data[0].ejecutivoComercial;
+          console.log(rpta.data);
+          showModal();
+          setDetalleSolicitud(rpta.data[0].detalle);
+          setLoadingApi(false);
+        }
+      } catch (error) {
+        setLoadingApi(false);
+        console.log(error.response);
+      }
+    })();
+    return () => {
+      suscribe = false;
+    };
+  }
   function disabledDate(current) {
     return current && current < moment().endOf('day');
   }
@@ -167,7 +213,6 @@ export const RespuestaPagadorPage = () => {
     console.log(`checked = ${JSON.stringify(e.target)}`);
   }
   function onChange(e, index, dateString) {
-    console.log(e, dateString);
     if (page > 1) {
       index = ((page - 1) * pageSize) + index;
     }
@@ -192,10 +237,33 @@ export const RespuestaPagadorPage = () => {
     (async () => {
       setLoadingApi(true);
       try {
-        const rpta = await listarDocumentos(7);
-        if (suscribe) {
-          console.log(rpta.data);
-          setData(rpta.data);
+        let fechaDesde = document.getElementById('dFechaDesde').value;
+        let fechaHasta = document.getElementById('dFechaHasta').value;
+        if (!filtro) {
+          fechaDesde = moment().format('DD/MM/YYYY');
+          fechaHasta = moment().format('DD/MM/YYYY');
+          setFiltro(true);
+        }
+        const filtros = {
+          fechaDesde,
+          fechaHasta,
+          idEstado: estados.REGISTRADO
+        }
+        if (fechaDesde !== '' && fechaHasta !== '') {
+          let data = new FormData();
+          data.append("json", JSON.stringify(filtros));
+          const rpta = await listarDocumentosFiltros(data);
+          if (suscribe) {
+            console.log(rpta.data);
+            setData(rpta.data);
+            setLoadingApi(false);
+          }
+        } else {
+          notification['info']({
+            message: 'Información',
+            description:
+              `Seleccione fechas.`,
+          });
           setLoadingApi(false);
         }
       } catch (error) {
@@ -216,7 +284,6 @@ export const RespuestaPagadorPage = () => {
       try {
         const cantidadControles = document.getElementsByName("fecha").length;
         const lista = [];
-        debugger
         for (let i = 0; i < cantidadControles; i++) {
           const idDocumento = document.getElementsByName("neto")[i].getAttribute("data");
           const registro = data.find(d => d.idDocumento == idDocumento);
@@ -274,7 +341,7 @@ export const RespuestaPagadorPage = () => {
             notification['success']({
               message: 'Se proceso correctamente',
               description:
-                'Los documentos enviados han sido actualizados correctamente.',
+                mensajeOK.GENERAL,
             });
             setLoadingApi(false);
             cargarDatos();
@@ -304,36 +371,58 @@ export const RespuestaPagadorPage = () => {
       try {
         const cantidadControles = document.getElementsByName("fecha").length;
         const lista = [];
-        for (let i = 0; i < cantidadControles; i++) {
-          if (document.getElementsByName("cavali")[i].checked) {
-            const documento = {
-              fechaConfirmada: document.getElementsByName("fecha")[i].value,
-              netoConfirmado: document.getElementsByName("neto")[i].value.replaceAll(',', ''),
-              idDocumento: document
-                .getElementsByName("neto")
-              [i].getAttribute("data"),
-              estado: estados.CONFORMIDAD_EXPRESA
-            };
-            lista.push(documento);
-          }
-        }
-        let data = new FormData();
-        data.append("json", JSON.stringify(lista));
-        const rpta = await documentosActualizar(data);
-        if (rpta.status === 204) {
+        let cantidadError = 0;
+        if (validarCantidadEnviadosCavali()) {
           for (let i = 0; i < cantidadControles; i++) {
             if (document.getElementsByName("cavali")[i].checked) {
-              document.getElementsByName("cavali")[i].click();
+              if (document.getElementsByName("fecha")[i].value !== '' && document.getElementsByName("neto")[i].value !== '') {
+                const documento = {
+                  fechaConfirmada: document.getElementsByName("fecha")[i].value,
+                  netoConfirmado: document.getElementsByName("neto")[i].value.replaceAll(',', ''),
+                  idDocumento: document.getElementsByName("neto")[i].getAttribute("data"),
+                  estado: estados.CONFORMIDAD_EXPRESA
+                };
+                lista.push(documento);
+              } else {
+                cantidadError++;
+                const documento = data.find(element => element.idDocumento == document.getElementsByName("neto")[i].getAttribute("data"));
+                notification['info']({
+                  message: 'Información',
+                  description:
+                    mensajeError.ENVIO_CAVALI.replace('{0}', documento.serie),
+                });
+              }
             }
           }
-          notification['success']({
-            message: 'Se proceso correctamente',
-            description:
-              'Los documentos enviados a Cavali, han sido procesados correctamente.',
-          });
-          setLoadingApi(false);
-          cargarDatos();
+          if (cantidadError === 0) {
+            let data = new FormData();
+            data.append("json", JSON.stringify(lista));
+            const rpta = await documentosActualizar(data);
+            if (rpta.status === 204) {
+              for (let i = 0; i < cantidadControles; i++) {
+                if (document.getElementsByName("cavali")[i].checked) {
+                  document.getElementsByName("cavali")[i].click();
+                }
+              }
+              notification['success']({
+                message: 'Se proceso correctamente',
+                description:
+                  mensajeOK.CORRECTO_CAVALI,
+              });
+              setLoadingApi(false);
+              cargarDatos();
+            } else {
+              setLoadingApi(false);
+            }
+          } else {
+            setLoadingApi(false);
+          }
         } else {
+          notification['info']({
+            message: 'Información',
+            description:
+              mensajeError.SELECCIONE_UNO,
+          });
           setLoadingApi(false);
         }
       } catch (error) {
@@ -349,61 +438,50 @@ export const RespuestaPagadorPage = () => {
       suscribe = false;
     };
   };
-
+  const validarCantidadEnviadosCavali = () => {
+    debugger
+    let cantidad = 0;
+    const cantidadControles = document.getElementsByName("fecha").length;
+    for (let i = 0; i < cantidadControles; i++) {
+      if (document.getElementsByName("cavali")[i].checked) {
+        cantidad++;
+      }
+    }
+    return cantidad > 0 ? true : false;
+  }
   const columsDetalle = [
     {
       title: "Nro. Factura",
-      dataIndex: "idFactura",
+      dataIndex: "serie",
     },
     {
       title: "Fecha Pago",
       dataIndex: "fechaEmision",
     },
     {
-      title: "Monto de Pago",
-      dataIndex: "montoSinIGV",
-    },
-    {
       title: "F. resguardo",
-      dataIndex: "montoSinIGV",
+      dataIndex: "fondoResguardo",
     },
     {
       title: "Monto Pago",
-      dataIndex: "total",
+      dataIndex: "montoTotalVenta",
     },
     {
       title: "Intereses",
-      dataIndex: "archivos",
+      dataIndex: "interesesIGV",
     },
     {
       title: "Gastos",
-      dataIndex: "archivos",
+      dataIndex: "gastosIGV",
     },
     {
       title: "Desembolso",
-      dataIndex: "archivos",
+      dataIndex: "montoDesembolso",
     },
   ];
 
   useEffect(() => {
-    let suscribe = true;
-    (async () => {
-      setLoadingApi(true);
-      try {
-        const rpta = await listarDocumentos(7);
-        if (suscribe) {
-          console.log(rpta.data);
-          setData(rpta.data);
-          setLoadingApi(false);
-        }
-      } catch (error) {
-        setLoadingApi(false);
-        console.log(error.response);
-      }
-    })();
-    return () => {
-      suscribe = false;
-    };
+    cargarDatos();
   }, []);
   return (
     <ContentComponent>
@@ -411,23 +489,38 @@ export const RespuestaPagadorPage = () => {
         backIcon={null}
         className="site-page-header"
         onBack={() => null}
-        title=""
+        title="Respuesta Pagador"
         style={{ backgroundcolor: "#f0f2f5" }}
-      />
-      <MessageApi
-        type={messageInfo.type}
-        message={messageInfo.text}
-        description={messageInfo.description}
-        visibility={isMessage}
       />
       <Row>
         <Col span={24}>
           <Card
-            title="Respuesta Pagador"
+            title=""
             actions={[]}
             extra={
               <>
                 <Space>
+                  <DatePicker
+                    format={"DD/MM/YYYY"}
+                    placeholder='Fecha Creación desde:'
+                    style={{ width: "200px" }}
+                    id={'dFechaDesde'}
+                    label={'Field'}
+                  />
+                  <DatePicker
+                    format={"DD/MM/YYYY"}
+                    placeholder='Fecha Creación hasta:'
+                    style={{ width: "200px" }}
+                    id={'dFechaHasta'}
+                  />
+                  <Button
+                    type="primary"
+                    icon={<SearchOutlined style={{ fontSize: "16px" }} />}
+                    onClick={cargarDatos}
+                    loading={loadingApi}
+                  >
+                    Buscar
+                  </Button>
                   <Button
                     className="primary-b"
                     type="primary"
@@ -482,61 +575,61 @@ export const RespuestaPagadorPage = () => {
         <Form layout="vertical" className="ant-advanced-search-form">
           <Descriptions title="Datos Principales">
             <Descriptions.Item label="Solicitud" span={1}>
-              50
+              {formik.values.idSolicitud}
             </Descriptions.Item>
             <Descriptions.Item label="Moneda" span={1}>
-              PEN
+              {formik.values.moneda}
             </Descriptions.Item>
             <Descriptions.Item label="Cedente" span={1}>
-              ISI Group S.A.C
+              {formik.values.cedente}
             </Descriptions.Item>
             <Descriptions.Item label="Pagador" span={1}>
               Rimac
             </Descriptions.Item>
             <Descriptions.Item label="Tipo de Operación" span={1}>
-              Factoring
+              {formik.values.tipoOperacion}
             </Descriptions.Item>
           </Descriptions>
           <Descriptions title="Datos Adicionales">
             <Descriptions.Item label="Fecha Operación" span={1}>
             </Descriptions.Item>
             <Descriptions.Item label="TNM Op." span={1}>
-              2.00 %
+              {formik.values.tasaNominalMensual} %
             </Descriptions.Item>
             <Descriptions.Item label="TNA op." span={1}>
-              24.00 %
+              {formik.values.tasaNominalAnual} %
             </Descriptions.Item>
             <Descriptions.Item label="Ejecutivo" span={1}>
-              Grabriel
+              {formik.values.ejecutivoComercial}
             </Descriptions.Item>
             <Descriptions.Item label="Financiamiento" span={1}>
-              90%
+              {formik.values.financiamiento} %
             </Descriptions.Item>
             <Descriptions.Item label="F. Resguardo" span={1}>
-              10%
+              {formik.values.fondoResguardo} %
             </Descriptions.Item>
             <Descriptions.Item label="Com. Estruct." span={1}>
-              0.00%
+              {formik.values.comisionEstructuracion} %
             </Descriptions.Item>
             <Descriptions.Item label="Cant. Doc." span={1}>
-              4
+              {formik.values.cantidadDocumentos}
             </Descriptions.Item>
           </Descriptions>
           <Descriptions title="Datos Contractuales">
             <Descriptions.Item label="Contrato" span={1}>
-              S/. 3500.00
+              S/. {formik.values.contrato}
             </Descriptions.Item>
             <Descriptions.Item label="Gatos al ext." span={1}>
               S/. 2000.00
             </Descriptions.Item>
-            <Descriptions.Item label="Con. Carta Not." span={1}>
-              S/. 400.00
+            <Descriptions.Item label="Com. Carta Not." span={1}>
+              S/. {formik.values.comisionCartaNotarial}
             </Descriptions.Item>
             <Descriptions.Item label="Ser. Cobr. Doc" span={1}>
-              S/. 100.00
+              S/. {formik.values.servicioCobranza}
             </Descriptions.Item>
             <Descriptions.Item label="Ser. Custodia" span={1}>
-              S/. 100.00
+              S/. {formik.values.servicioCustodia}
             </Descriptions.Item>
             <Descriptions.Item label="Fecha Carta Not." span={1}>
               22/10/2021
@@ -546,7 +639,7 @@ export const RespuestaPagadorPage = () => {
           <Table
             loading={loadingApi}
             columns={columsDetalle}
-            dataSource={detalleFacturas.data}
+            dataSource={detalleSolicitud}
             size="small"
             pagination={{
               current: page,
@@ -559,6 +652,6 @@ export const RespuestaPagadorPage = () => {
           />
         </Form>
       </ModalComponent>
-    </ContentComponent>
+    </ContentComponent >
   );
 };

@@ -52,13 +52,11 @@ namespace Adelanta.API.Controllers
                 oSolicitudBE.DocumentoJson = Request.Form["detalle"];
                 oSolicitudBE.Usuario = Request.Form["usuario"];                
                 var resultadoInsertar = await _solicitudRepository.CrearSolicitud(oSolicitudBE);
-                string[] aResultado = resultadoInsertar.Split('|');
-                oSolicitudBE.IdSolicitud = Convert.ToInt32(aResultado[1]);
-                Log.grabarLog("Inicio");
-                var response = await CavaliAPI.addInvoiceXML(aResultado[0]).ConfigureAwait(false);
-                Log.grabarLog("Fin");
-                var resultadoActualizar = await _solicitudRepository.UpdateSolicitud(oSolicitudBE.IdSolicitud, response);
-                return Ok(JsonSerializer.Deserialize<dynamic>(resultadoActualizar));
+                /*string[] aResultado = resultadoInsertar.Split('|');
+                oSolicitudBE.IdSolicitud = Convert.ToInt32(aResultado[1]);                
+                var response = await CavaliAPI.addInvoiceXML(aResultado[0]).ConfigureAwait(false);                
+                var resultadoActualizar = await _solicitudRepository.UpdateSolicitud(oSolicitudBE.IdSolicitud, response);*/
+                return Ok(JsonSerializer.Deserialize<dynamic>(resultadoInsertar));
             }
             catch (Exception ex)
             {
@@ -69,8 +67,30 @@ namespace Adelanta.API.Controllers
         [HttpGet("/api/Solicitud/ListarSolicitudes")]
         public async Task<IActionResult> ListarSolicitudes()
         {
-            var resultado = await _solicitudRepository.ListarSolicitudes();
-            return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
+            try
+            {
+                var resultado = await _solicitudRepository.ListarSolicitudes();
+                return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
+            }
+            catch(Exception ex)
+            {
+                Log.grabarLog(ex);
+                return StatusCode(500, $"Internal server error: {ex}");
+            }       
+        }
+        [HttpGet("/api/Solicitud/ObtenerSolicitudDetalle/{IdSolicitud}")]
+        public async Task<IActionResult> ObtenerSolicitudDetalle([FromRoute] int IdSolicitud)
+        {
+            try
+            {
+                var resultado = await _solicitudRepository.ObtenerSolicitudDetalle(IdSolicitud);
+                return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
+            }
+            catch (Exception ex)
+            {
+                Log.grabarLog(ex);
+                return StatusCode(500, $"Internal server error: {ex}");
+            }
         }
     }
 }

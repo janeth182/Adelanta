@@ -66,5 +66,13 @@ namespace Adelanta.Data.Repository
             var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
             return result.ToList()[0];
         }
+        public async Task<string> ListarDocumentosFiltros(string Json)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_LISTAR_FILTROS";
+            var values = new { p_dataJSON = Json };
+            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
+            return result.ToList()[0];
+        }
     }
 }

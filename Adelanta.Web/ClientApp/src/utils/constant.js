@@ -12,7 +12,13 @@ export const estados = {
 export const mensajeError = {
     GENERAL: 'Ocurrio un error al momento de procesar la solicitud, comuniquese con el administrador de sistema.',
     FOMARTO_ARCHIVO: 'Formato de archivo no permitido.',
-    ARCHIVO_DUPLICADO: 'El Archivo {0} ya se encuentra cargado.'
+    ARCHIVO_DUPLICADO: 'El Archivo {0} ya se encuentra cargado.',
+    SELECCIONE_UNO: 'Seleccione al menos un registro.',
+    ENVIO_CAVALI: 'El documento {0} no debe tener el campo F. Pago Confirmado y Neto Confirmado vacios.'
+};
+export const mensajeOK = {
+    GENERAL: 'Los documentos, han sido procesados correctamente..',
+    CORRECTO_CAVALI: 'Los documentos enviados a Cavali, han sido procesados correctamente.',
 };
 export const mime = {
     PDF: 'application/pdf',

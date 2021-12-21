@@ -11,7 +11,6 @@ import { aprobacionDeselmbolso } from "../../../model/mocks/aprobacionDesembolso
 import { ExportCSV } from '../../../utils/excel';
 import { ModalComponent } from "../../../components/modal/modal";
 import { listarDocumentos, documentosActualizarEstado } from "../../../services/documentoService";
-import { desembolsado } from "../../../model/mocks/desembolsado";
 import { estados, mensajeError } from "../../../utils/constant";
 export const AprobacionDesembolsoPage = () => {
 	const { isModal, showModal, hiddenModal } = useModal();

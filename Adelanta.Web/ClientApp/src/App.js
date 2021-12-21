@@ -33,15 +33,14 @@ export const App = () => {
       <LayoutProvider>
         <BrowserRouter>
           <Switch>
-            <PublicRouter
-              exact
-              path={REACT_APP_RUTA_SERVIDOR + "login"}
-              component={LoginPage}
-            />
             <PrivateRouter
+              exact
               path={REACT_APP_RUTA_SERVIDOR}
               component={HomePage}
-              exact
+            />
+            <PublicRouter
+              path={REACT_APP_RUTA_SERVIDOR + "login"}
+              component={LoginPage}
             />
             <PrivateRouter
               exact
@@ -49,7 +48,6 @@ export const App = () => {
               component={SolicitudesPage}
             />
             <PrivateRouter
-              exact
               path={
                 REACT_APP_RUTA_SERVIDOR + "clientes/solicitudes/nueva-solicitud"
               }

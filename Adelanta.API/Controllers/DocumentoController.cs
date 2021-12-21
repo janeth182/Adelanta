@@ -1,5 +1,6 @@
 ﻿
 using Adelanta.API.Util;
+using Adelanta.Core.Log;
 using Adelanta.Data.IRepository;
 using Adelanta.Model;
 using Microsoft.AspNetCore.Http;
@@ -33,7 +34,15 @@ namespace Adelanta.API.Controllers
                 return Ok(string.Empty);
             return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
         }
-
+        [HttpPost("/api/Documento/ListarDocumentosFiltros")]
+        public async Task<IActionResult> ListarDocumentosFiltros()
+        {
+            string Json = Request.Form["json"];
+            var resultado = await _documentoRepository.ListarDocumentosFiltros(Json);
+            if (resultado == null)
+                return Ok(string.Empty);
+            return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
+        }
         [HttpGet("/api/Documento/ListarDocumentosFactrack/{usuario}")]
         public async Task<IActionResult> ListarDocumentos([FromRoute] string usuario)
         {
@@ -104,6 +113,7 @@ namespace Adelanta.API.Controllers
             }
             catch (Exception ex)
             {
+                Log.grabarLog(ex);
                 return StatusCode(500, $"Internal server error: {ex}");
             }
         }
@@ -167,6 +177,7 @@ namespace Adelanta.API.Controllers
             }
             catch (Exception ex)
             {
+                Log.grabarLog(ex);
                 return StatusCode(500, $"Internal server error: {ex}");
             }
         }

@@ -97,7 +97,7 @@ namespace Adelanta.Core
             }
             catch (Exception ex)
             {
-                // Log.grabarLogPrincipal(ex, "Componente Mail", "", "");
+                Log.Log.grabarLog(ex);
             }
         }
         private string ObtenerMime(string extension)

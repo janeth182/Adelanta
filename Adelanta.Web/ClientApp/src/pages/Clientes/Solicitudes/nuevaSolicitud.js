@@ -142,7 +142,7 @@ export const NuevaSolicitudPage = () => {
             const base64 = buff.toString('base64');
             detalle.base64 = base64;
             detalle.archivoExcel = tipoOperacion === "C" ? `${file.target.fileName.split(".")[0]}.xlsx` : "";
-            detalle.estado = estados.PENDIENTE_CAVALI;
+            detalle.estado = estados.REGISTRADO;
             setDocumentoDetalle((documentoDetalle) => [...documentoDetalle, detalle,]);
           };
           reader.readAsText(file);
@@ -170,7 +170,7 @@ export const NuevaSolicitudPage = () => {
       if (file.type === mime.XML) {
         setFileList(nuevaLista(fileList, file));
         const detalle = documentoDetalle.filter(function (el) {
-          return el.nombreArchivo != file.name;
+          return el.nombreArchivo !== file.name;
         });
         setDocumentoDetalle(detalle);
       } else if (file.type === mime.PDF) {
@@ -188,7 +188,7 @@ export const NuevaSolicitudPage = () => {
   };
   const nuevaLista = (array, file) => {
     return array.filter(function (el) {
-      return el.name != file.name;
+      return el.name !== file.name;
     });
   };
   const validarDuplicados = (file) => {
@@ -211,24 +211,26 @@ export const NuevaSolicitudPage = () => {
       setLoadingApi(true);
       try {
         console.log(documentoDetalle);
-        const cabecera = documentoDetalle.filter(
-          (detalleP, index, documentoDetalle) =>
+        const documentosValidos = obtenerDocumentosValidos();
+        console.log("Documentos Validos", documentosValidos);
+        const cabecera = documentosValidos.filter(
+          (detalleP, index, documentosValidos) =>
             index ===
-            documentoDetalle.findIndex((p) =>
+            documentosValidos.findIndex((p) =>
               tipoOperacion === "F" ? p.rucPagador === detalleP.rucPagador && p.moneda === detalleP.moneda : p.rucProveedor === detalleP.rucProveedor && p.moneda === detalleP.moneda
             )
         );
         for (let c = 0; c < cabecera.length; c++) {
           let detalle = [];
-          if (cabecera[c].rucPagador !== undefined && cabecera[c].moneda !== undefined) {
-            for (let d = 0; d < documentoDetalle.length; d++) {
+          if (cabecera[c].rucPagador !== undefined && cabecera[c].moneda !== undefined && cabecera[c].rucProveedor !== undefined && cabecera[c].proveedor !== undefined) {
+            for (let d = 0; d < documentosValidos.length; d++) {
               if (tipoOperacion === "F") {
-                if (cabecera[c].rucPagador === documentoDetalle[d].rucPagador && cabecera[c].moneda === documentoDetalle[d].moneda) {
-                  detalle.push(documentoDetalle[d]);
+                if (cabecera[c].rucPagador === documentosValidos[d].rucPagador && cabecera[c].moneda === documentosValidos[d].moneda) {
+                  detalle.push(documentosValidos[d]);
                 }
               } else {
-                if (cabecera[c].rucProveedor === documentoDetalle[d].rucProveedor && cabecera[c].moneda === documentoDetalle[d].moneda) {
-                  detalle.push(documentoDetalle[d]);
+                if (cabecera[c].rucProveedor === documentosValidos[d].rucProveedor && cabecera[c].moneda === documentosValidos[d].moneda) {
+                  detalle.push(documentosValidos[d]);
                 }
               }
             }
@@ -259,6 +261,7 @@ export const NuevaSolicitudPage = () => {
                 setLoadingApi(false);
               } else {
                 listaError.push(cabecera);
+                console.log(listaError);
                 setLoadingApi(false);
               }
             } else {
@@ -280,6 +283,27 @@ export const NuevaSolicitudPage = () => {
       suscribe = false;
     };
   };
+  const validarDocumento = (documento) => {
+    let error = true;
+    if (!documento.rucPagador || !documento.pagador || !documento.rucProveedor || !documento.proveedor
+      || !documento.serie || !documento.fechaEmision || !documento.moneda || !documento.montoOperacion
+      || !documento.montoTotalImpuesto || !documento.montoTotalVenta) {
+      error = false;
+    }
+    return error;
+  }
+  const obtenerDocumentosValidos = () => {
+    const documentosValidos = [];
+    documentoDetalle.forEach(documento => {
+      debugger
+      if (validarDocumento(documento)) {
+        documentosValidos.push(documento);
+      } else {
+
+      }
+    })
+    return documentosValidos;
+  }
   const obtenerTipoOperacion = async (e) => {
     setTipoOperacion(e);
   };
