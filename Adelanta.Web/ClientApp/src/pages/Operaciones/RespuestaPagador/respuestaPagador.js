@@ -4,11 +4,9 @@ import { SaveOutlined, SendOutlined, SearchOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
-import { useMessageApi } from "../../../hooks/useMessage";
-import { listarDocumentosFiltros, documentosActualizar } from "../../../services/documentoService";
+import { listarDocumentosFiltros, documentosActualizar, documentosEnviarCavali } from "../../../services/documentoService";
 import { obtenerSolicitudDetalle } from "../../../services/solicitudService";
 import { ModalComponent } from "../../../components/modal/modal";
-import { detalleFacturas } from "../../../model/mocks/detalleFactura";
 import moment from "moment";
 import { estados, mensajeError, mensajeOK } from "../../../utils/constant";
 import { AuthContext } from "../../../context/authProvider";
@@ -22,7 +20,8 @@ export const RespuestaPagadorPage = () => {
   const [detalleSolicitud, setDetalleSolicitud] = useState([]);
   const [loadingApi, setLoadingApi] = useState(false);
   const [filtro, setFiltro] = useState(false);
-  const [documento, setDocumento] = useState([]);
+  const [dataFechaInicio, setDataFechaInicio] = useState(10);
+  const dateFormat = "DD/MM/YYYY";
   const formik = useFormik({
     initialValues: {
       idSolicitud: '',
@@ -56,7 +55,7 @@ export const RespuestaPagadorPage = () => {
       },
     },
     {
-      title: "Cliente",
+      title: "Aceptante",
       dataIndex: "pagador",
       /*  ...getColumnSearchProps("pagador"),*/
     },
@@ -66,7 +65,7 @@ export const RespuestaPagadorPage = () => {
       /*  ...getColumnSearchProps("pagador"),*/
     },
     {
-      title: "Aceptante",
+      title: "Cedente",
       dataIndex: "proveedor",
       /*  ...getColumnSearchProps("pagador"),*/
     },
@@ -139,6 +138,7 @@ export const RespuestaPagadorPage = () => {
               onChange={(v) => onChangeNetoConfirmado(v, index)}
               name={"neto"}
               data={_.idDocumento}
+              data-solicitud={_.idSolicitud}
             />
           </>
         );
@@ -240,6 +240,7 @@ export const RespuestaPagadorPage = () => {
         let fechaDesde = document.getElementById('dFechaDesde').value;
         let fechaHasta = document.getElementById('dFechaHasta').value;
         if (!filtro) {
+          debugger
           fechaDesde = moment().format('DD/MM/YYYY');
           fechaHasta = moment().format('DD/MM/YYYY');
           setFiltro(true);
@@ -371,6 +372,7 @@ export const RespuestaPagadorPage = () => {
       try {
         const cantidadControles = document.getElementsByName("fecha").length;
         const lista = [];
+        const solicitudes = [];
         let cantidadError = 0;
         if (validarCantidadEnviadosCavali()) {
           for (let i = 0; i < cantidadControles; i++) {
@@ -380,8 +382,12 @@ export const RespuestaPagadorPage = () => {
                   fechaConfirmada: document.getElementsByName("fecha")[i].value,
                   netoConfirmado: document.getElementsByName("neto")[i].value.replaceAll(',', ''),
                   idDocumento: document.getElementsByName("neto")[i].getAttribute("data"),
-                  estado: estados.CONFORMIDAD_EXPRESA
+                  estado: estados.PENDIENTE_CAVALI,
+                  idSolicitud: document.getElementsByName("neto")[i].getAttribute("data-solicitud")
                 };
+                solicitudes.push({
+                  idSolicitud: document.getElementsByName("neto")[i].getAttribute("data-solicitud")
+                });
                 lista.push(documento);
               } else {
                 cantidadError++;
@@ -395,25 +401,37 @@ export const RespuestaPagadorPage = () => {
             }
           }
           if (cantidadError === 0) {
-            let data = new FormData();
-            data.append("json", JSON.stringify(lista));
-            const rpta = await documentosActualizar(data);
-            if (rpta.status === 204) {
-              for (let i = 0; i < cantidadControles; i++) {
-                if (document.getElementsByName("cavali")[i].checked) {
-                  document.getElementsByName("cavali")[i].click();
+            const solicitudesFilter = [...new Map(solicitudes.map(item => [item.idSolicitud, item])).values()];
+            console.log(solicitudesFilter)
+            for (let i = 0; i < solicitudesFilter.length; i++) {
+              let documentosEnviar = [];
+              for (let s = 0; s < lista.length; s++) {
+                if (solicitudesFilter[i].idSolicitud === lista[s].idSolicitud) {
+                  documentosEnviar.push(lista[s]);
                 }
               }
-              notification['success']({
-                message: 'Se proceso correctamente',
-                description:
-                  mensajeOK.CORRECTO_CAVALI,
-              });
-              setLoadingApi(false);
-              cargarDatos();
-            } else {
-              setLoadingApi(false);
+
+              let data = new FormData();
+              data.append("json", JSON.stringify(documentosEnviar));
+              data.append("idSolicitud", solicitudesFilter[i].idSolicitud);
+              const rpta = await documentosEnviarCavali(data);
+              if (rpta.status === 204) {
+                for (let p = 0; p < cantidadControles; p++) {
+                  if (document.getElementsByName("cavali")[p].checked) {
+                    document.getElementsByName("cavali")[p].click();
+                  }
+                }
+                notification['success']({
+                  message: `Se proceso correctamente la solicitud ${solicitudesFilter[i].idSolicitud}`,
+                  description:
+                    mensajeOK.CORRECTO_CAVALI,
+                });
+              } else {
+                setLoadingApi(false);
+              }
             }
+            cargarDatos();
+            setLoadingApi(false);
           } else {
             setLoadingApi(false);
           }
@@ -481,6 +499,7 @@ export const RespuestaPagadorPage = () => {
   ];
 
   useEffect(() => {
+    setDataFechaInicio(moment().format('DD/MM/YYYY'));
     cargarDatos();
   }, []);
   return (
@@ -506,12 +525,16 @@ export const RespuestaPagadorPage = () => {
                     style={{ width: "200px" }}
                     id={'dFechaDesde'}
                     label={'Field'}
+                    defaultValue={moment(moment(), dateFormat)}
+                    format={dateFormat}
                   />
                   <DatePicker
                     format={"DD/MM/YYYY"}
                     placeholder='Fecha Creación hasta:'
                     style={{ width: "200px" }}
                     id={'dFechaHasta'}
+                    defaultValue={moment(moment(), dateFormat)}
+                    format={dateFormat}
                   />
                   <Button
                     type="primary"

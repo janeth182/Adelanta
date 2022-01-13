@@ -9,6 +9,9 @@ export const listarDocumentosFactrack = async (id) => {
 export const documentosActualizar = async (data) => {
   return await formColeccion.post(`Documento/Actualizar`, data);
 };
+export const documentosEnviarCavali = async (data) => {
+  return await formColeccion.post(`Documento/DocumentosEnviarCAVALI`, data);
+};
 export const documentosActualizarEstado = async (data) => {
   return await formColeccion.post(`Documento/ActualizarEstado`, data);
 };

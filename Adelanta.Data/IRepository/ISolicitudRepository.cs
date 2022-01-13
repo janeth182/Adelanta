@@ -9,5 +9,7 @@ namespace Adelanta.Data.IRepository
         Task<string> UpdateSolicitud(int? IdSolicitud, string Json);
         Task<string> ListarSolicitudes();
         Task<string> ObtenerSolicitudDetalle(int IdSolicitud);
+        Task<string> ObtenerSolicitudDetalleLiquidacion(string nroLiquidacion);
+        Task<string> CrearSolicitudCapitalTrabajo(string Json);
     }
 }

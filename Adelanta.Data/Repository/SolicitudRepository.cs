@@ -23,7 +23,12 @@ namespace Adelanta.Data.Repository
         {
             var db = dbConnection();
             var sp = "SP_SOLICITUD_INSERTAR";
-            var values = new { p_tipoOperacion = oSolicitudBE.TipoOperacion, p_ruc = oSolicitudBE.Ruc, p_razonSocial= oSolicitudBE.RazonSocial, p_moneda = oSolicitudBE.Moneda, p_usuario = oSolicitudBE.Usuario, p_DocumentoJSON = oSolicitudBE.DocumentoJson };
+            var values = new { p_tipoOperacion = oSolicitudBE.TipoOperacion,
+                p_cedente = oSolicitudBE.Cedente,
+                p_aceptante = oSolicitudBE.Aceptante,
+                p_rucAceptante = oSolicitudBE.RucAceptante,
+                p_rucCedente = oSolicitudBE.RucCedente, 
+                p_moneda = oSolicitudBE.Moneda, p_usuario = oSolicitudBE.Usuario, p_DocumentoJSON = oSolicitudBE.DocumentoJson };
             var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
             return result.ToList()[0];
         }
@@ -48,6 +53,22 @@ namespace Adelanta.Data.Repository
             var db = dbConnection();
             var sp = "SP_SOLICITUD_DETALLE_X_IDSOLICITUD";
             var values = new { p_IdSolicitud = IdSolicitud };
+            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
+            return result.ToList()[0];
+        }
+        public async Task<string> ObtenerSolicitudDetalleLiquidacion(string nroLiquidacion)
+        {
+            var db = dbConnection();
+            var sp = "SP_SOLICITUD_DETALLE_X_LIQUIDACION";
+            var values = new { p_NroLiquidacion = nroLiquidacion };
+            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
+            return result.ToList()[0];
+        }
+        public async Task<string> CrearSolicitudCapitalTrabajo(string Json)
+        {
+            var db = dbConnection();
+            var sp = "SP_SOLICITUD_INSERTAR_CAPITAL_TRABAJO";
+            var values = new { p_dataJSON = Json };
             var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
             return result.ToList()[0];
         }

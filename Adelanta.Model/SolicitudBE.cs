@@ -3,8 +3,10 @@
     public class SolicitudBE
     {
         public int? IdSolicitud { get; set; }
-        public string Ruc { get; set; }
-        public string RazonSocial { get; set; }
+        public string Cedente { get; set; }
+        public string RucCedente { get; set; }
+        public string Aceptante { get; set; }
+        public string RucAceptante { get; set; }
         public decimal Importe { get; set; }
         public string Moneda { get; set; }        
         public string TipoDocumento { get; set; }
@@ -14,5 +16,6 @@
         public decimal FondoResguardo { get; set; }
         public string Liquidacion { get; set; }
         public string Usuario { get; set; }
+        public decimal MontoTotalVenta { get; set; }
     }
 }

@@ -46,8 +46,10 @@ namespace Adelanta.API.Controllers
                 }
                 SolicitudBE oSolicitudBE = new SolicitudBE();
                 oSolicitudBE.TipoOperacion = Request.Form["tipoOperacion"];
-                oSolicitudBE.Ruc = Request.Form["ruc"];
-                oSolicitudBE.RazonSocial = Request.Form["razonSocial"];
+                oSolicitudBE.RucCedente = Request.Form["rucCedente"];
+                oSolicitudBE.Cedente = Request.Form["cedente"];
+                oSolicitudBE.Aceptante = Request.Form["aceptante"];
+                oSolicitudBE.RucAceptante = Request.Form["rucAceptante"];
                 oSolicitudBE.Moneda = Request.Form["moneda"];
                 oSolicitudBE.DocumentoJson = Request.Form["detalle"];
                 oSolicitudBE.Usuario = Request.Form["usuario"];                
@@ -91,6 +93,38 @@ namespace Adelanta.API.Controllers
                 Log.grabarLog(ex);
                 return StatusCode(500, $"Internal server error: {ex}");
             }
+        }
+        [HttpGet("/api/Solicitud/ObtenerSolicitudDetalleLiquidacion/{NroLiquidacion}")]
+        public async Task<IActionResult> ObtenerSolicitudDetalleLiquidacion([FromRoute] string NroLiquidacion)
+        {
+            try
+            {
+                var resultado = await _solicitudRepository.ObtenerSolicitudDetalleLiquidacion(NroLiquidacion);
+                return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
+            }
+            catch (Exception ex)
+            {
+                Log.grabarLog(ex);
+                return StatusCode(500, $"Internal server error: {ex}");
+            }
+        }
+
+        [HttpPost("/api/Solicitud/CrearSolicitudCapitalTrabajo")]
+        public async Task<IActionResult> ListarDocumentosFiltros()
+        {
+            try
+            {
+                string Json = Request.Form["json"];
+                var resultado = await _solicitudRepository.CrearSolicitudCapitalTrabajo(Json);
+                if (resultado == null)
+                    return Ok(string.Empty);
+                return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
+            }
+            catch (Exception ex)
+            {
+                Log.grabarLog(ex);
+                return StatusCode(500, $"Internal server error: {ex}");
+            }        
         }
     }
 }

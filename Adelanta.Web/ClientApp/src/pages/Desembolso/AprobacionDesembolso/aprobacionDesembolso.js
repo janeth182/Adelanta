@@ -34,12 +34,7 @@ export const AprobacionDesembolsoPage = () => {
 			},
 		},
 		{
-			title: "Solicitud",
-			dataIndex: "idSolicitud",
-			...getColumnSearchProps("idSolicitud"),
-		},
-		{
-			title: "Cliente",
+			title: "Aceptante",
 			dataIndex: "pagador",
 			...getColumnSearchProps("pagador"),
 		},
@@ -47,16 +42,6 @@ export const AprobacionDesembolsoPage = () => {
 			title: "RUC",
 			dataIndex: "rucPagador",
 			...getColumnSearchProps("rucPagador"),
-		},
-		{
-			title: "Aceptante",
-			dataIndex: "proveedor",
-			...getColumnSearchProps("proveedor"),
-		},
-		{
-			title: "RUC",
-			dataIndex: "rucProveedor",
-			...getColumnSearchProps("rucProveedor"),
 		},
 		{
 			title: "Nro. Documento",
@@ -77,9 +62,19 @@ export const AprobacionDesembolsoPage = () => {
 			dataIndex: "netoConfirmado",
 		},
 		{
-			title: "T. Operación",
-			dataIndex: "tipoOperacion",
-			...getColumnSearchProps("tipoOperacion"),
+			title: "Intereses Inc. IGV",
+			dataIndex: "interesesIGV",
+			...getColumnSearchProps("interesesIGV"),
+		},
+		{
+			title: "Gastos Inc. IGV",
+			dataIndex: "gastosIGV",
+			...getColumnSearchProps("interesesIGV"),
+		},
+		{
+			title: "Monto Desembolsado",
+			dataIndex: "montoDesembolso",
+			...getColumnSearchProps("montoDesembolso"),
 		},
 		{
 			title: "Aprobar.",

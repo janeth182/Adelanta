@@ -1,4 +1,5 @@
 ﻿
+using Adelanta.API.Services;
 using Adelanta.API.Util;
 using Adelanta.Core.Log;
 using Adelanta.Data.IRepository;
@@ -178,6 +179,28 @@ namespace Adelanta.API.Controllers
             catch (Exception ex)
             {
                 Log.grabarLog(ex);
+                return StatusCode(500, $"Internal server error: {ex}");
+            }
+        }
+
+        [HttpPost("/api/Documento/DocumentosEnviarCAVALI")]
+        public async Task<IActionResult> DocumentosEnviarCAVALI()
+        {
+            try
+            {
+                string Json = Request.Form["json"];
+                if (Json == null)
+                    return BadRequest();
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var resultadoJsonEnviarCavali = await _documentoRepository.EnviarCavali(Json);
+                var response = await CavaliAPI.addInvoiceXML(resultadoJsonEnviarCavali).ConfigureAwait(false);
+                var resultado = await _documentoRepository.DocumentosActualizarEnvioCavali(Json, response);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
                 return StatusCode(500, $"Internal server error: {ex}");
             }
         }

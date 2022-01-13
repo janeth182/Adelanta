@@ -24,6 +24,7 @@ import { listarDocumentosFactrack, documentosConfirmarFactrack } from "../../../
 import { ModalComponent } from "../../../components/modal/modal";
 import { estados, mensajeError } from "../../../utils/constant";
 import { AuthContext } from "../../../context/authProvider";
+import { useFormik } from "formik";
 export const ConformidadPagadorPage = () => {
     const { logoutUser, user } = useContext(AuthContext);
     const { isModal, showModal, hiddenModal } = useModal();
@@ -32,6 +33,27 @@ export const ConformidadPagadorPage = () => {
     const [pageSize, setPageSize] = useState(10);
     const [data, setData] = useState([]);
     const [loadingApi, setLoadingApi] = useState(false);
+    const formik = useFormik({
+        initialValues: {
+            nroLiquidacion: '',
+            fechaOperacion: '',
+            idSolicitud: '',
+            cedente: '',
+            tipoOperacion: '',
+            tasaNominalMensual: 0,
+            tasaNominalAnual: 0,
+            financiamiento: 0,
+            fondoResguardo: 0,
+            cantidadDocumentos: 0,
+            contrato: 0,
+            comisionCartaNotarial: 0,
+            serie: '',
+            moneda: '',
+            montoTotalImpuesto: 0,
+            montoOperacion: 0,
+            montoTotalVenta: 0
+        },
+    });
     const columns = [
         {
             title: "Solicitud",
@@ -39,7 +61,7 @@ export const ConformidadPagadorPage = () => {
             ...getColumnSearchProps("idSolicitud"),
         },
         {
-            title: "Cliente",
+            title: "Aceptante",
             dataIndex: "pagador",
             ...getColumnSearchProps("pagador"),
         },
@@ -49,7 +71,7 @@ export const ConformidadPagadorPage = () => {
             ...getColumnSearchProps("rucPagador"),
         },
         {
-            title: "Aceptante",
+            title: "Cedente",
             dataIndex: "proveedor",
             ...getColumnSearchProps("proveedor"),
         },
@@ -112,6 +134,7 @@ export const ConformidadPagadorPage = () => {
                                 onChange={onChangeChecked}
                                 name={"confirmar"}
                                 value={record.idDocumento}
+                                data-sol={record.idSolicitud}
                             ></Checkbox>
                         </>
                     );
@@ -136,7 +159,9 @@ export const ConformidadPagadorPage = () => {
                         const documento = {
                             idDocumento: document.getElementsByName("confirmar")[i].value,
                             estado: estados.CONFIRMAR_FACTRACK,
-                            usuario: user.usuario
+                            usuario: user.usuario,
+                            idSolicitud: document.getElementsByName("confirmar")[i].getAttribute("data-sol"),
+                            nroLiquidacion: ""
                         };
                         lista.push(documento);
                     }

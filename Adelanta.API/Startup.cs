@@ -27,6 +27,7 @@ namespace Adelanta.API
             services.AddScoped<ILoginRepository, LoginRepository>();
             services.AddScoped<ISolicitudRepository, SolicitudRepository>();
             services.AddScoped<IDocumentoRepository, DocumentoRepository>();
+            services.AddScoped<IClienteRepository, ClienteRepository>();
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(

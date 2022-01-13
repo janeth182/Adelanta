@@ -1,33 +1,18 @@
 import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import {
-    PageHeader,
-    Row,
-    Col,
-    Card,
-    Table,
-    Button,
-    Space,
-    Checkbox,
-    message,
-    InputNumber,
-    DatePicker,
-    Form,
-    Descriptions,
-    notification,
-} from "antd";
-import { SaveOutlined, SendOutlined, EditOutlined } from "@ant-design/icons";
+import { PageHeader, Row, Col, Card, Table, Button, Space, Checkbox, Form, Descriptions, notification, } from "antd";
+import { SendOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
 import { listarDocumentos, documentoSolicitarAprobacion } from "../../../services/documentoService";
+import { obtenerSolicitudDetalleLiquidacion } from "../../../services/solicitudService";
 import { estados, mensajeError } from "../../../utils/constant";
 import { ModalComponent } from "../../../components/modal/modal";
-import { detalleFacturas } from "../../../model/mocks/detalleFactura";
 import { AuthContext } from "../../../context/authProvider";
-import moment from "moment";
+import { useFormik } from "formik";
 export const LiqSolicitarAprobacionPage = () => {
     const { logoutUser, user } = useContext(AuthContext);
     const { isModal, showModal, hiddenModal } = useModal();
@@ -37,22 +22,82 @@ export const LiqSolicitarAprobacionPage = () => {
     const [data, setData] = useState([]);
     const [loadingApi, setLoadingApi] = useState(false);
     const history = useHistory();
-
+    const [detalleSolicitud, setDetalleSolicitud] = useState([]);
+    const formik = useFormik({
+        initialValues: {
+            nroLiquidacion: '',
+            fechaOperacion: '',
+            idSolicitud: '',
+            cedente: '',
+            tipoOperacion: '',
+            tasaNominalMensual: 0,
+            tasaNominalAnual: 0,
+            financiamiento: 0,
+            fondoResguardo: 0,
+            cantidadDocumentos: 0,
+            contrato: 0,
+            comisionCartaNotarial: 0,
+            serie: '',
+            moneda: '',
+            montoTotalImpuesto: 0,
+            montoOperacion: 0,
+            montoTotalVenta: 0
+        },
+    });
+    const verDetalle = async (v, nroLiquidacion) => {
+        let suscribe = true;
+        (async () => {
+            setLoadingApi(true);
+            try {
+                const rpta = await obtenerSolicitudDetalleLiquidacion(nroLiquidacion);
+                debugger
+                if (suscribe) {
+                    console.log(rpta);
+                    formik.initialValues.nroLiquidacion = rpta.data.nroLiquidacion;
+                    formik.initialValues.cedente = rpta.data.cedente;
+                    formik.initialValues.tipoOperacion = rpta.data.tipoOperacion;
+                    formik.initialValues.tasaNominalMensual = rpta.data.tasaNominalMensual;
+                    formik.initialValues.tasaNominalAnual = rpta.data.tasaNominalAnual;
+                    formik.initialValues.financiamiento = rpta.data.financiamiento;
+                    formik.initialValues.fondoResguardo = rpta.data.fondoResguardo;
+                    formik.initialValues.cantidadDocumentos = rpta.data.cantidadDocumentos;
+                    formik.initialValues.contrato = rpta.data.contrato;
+                    formik.initialValues.comisionCartaNotarial = rpta.data.comisionCartaNotarial;
+                    formik.initialValues.serie = rpta.data.serie;
+                    formik.initialValues.moneda = rpta.data.moneda;
+                    formik.initialValues.montoTotalImpuesto = rpta.data.montoTotalImpuesto;
+                    formik.initialValues.montoOperacion = rpta.data.montoOperacion;
+                    formik.initialValues.montoTotalVenta = rpta.data.montoTotalVenta;
+                    formik.initialValues.servicioCobranza = rpta.data.servicioCobranza;
+                    formik.initialValues.servicioCustodia = rpta.data.servicioCustodia;
+                    formik.initialValues.comisionEstructuracion = rpta.data.comisionEstructuracion;
+                    formik.initialValues.ejecutivoComercial = rpta.data.ejecutivoComercial;
+                    formik.initialValues.fechaOperacion = rpta.data.fechaOperacion;
+                    showModal();
+                    setDetalleSolicitud(rpta.data.detalle);
+                    setLoadingApi(false);
+                }
+            } catch (error) {
+                setLoadingApi(false);
+                console.log(error.response);
+            }
+        })();
+        return () => {
+            suscribe = false;
+        };
+    }
     function onChange(date, dateString) {
         console.log(date, dateString);
-    }
-    function disabledDate(current) {
-        return current && current < moment().endOf('day');
     }
     const columns = [
         {
             title: "Liquidación",
             dataIndex: "nroLiquidacion",
             ...getColumnSearchProps("nroLiquidacion"),
-            render: (_, record) => {
+            render: (text, _, index) => {
                 return (
-                    <a type="primary" onClick={showModal}>
-                        {record.nroLiquidacion}
+                    <a type="primary" onClick={(v) => verDetalle(v, _.nroLiquidacion)}>
+                        {_.nroLiquidacion}
                     </a>
                 );
             },
@@ -63,7 +108,7 @@ export const LiqSolicitarAprobacionPage = () => {
             ...getColumnSearchProps("idSolicitud"),
         },
         {
-            title: "Cliente",
+            title: "Aceptante",
             dataIndex: "pagador",
             ...getColumnSearchProps("pagador"),
         },
@@ -73,7 +118,7 @@ export const LiqSolicitarAprobacionPage = () => {
             ...getColumnSearchProps("rucPagador"),
         },
         {
-            title: "Aceptante",
+            title: "Cedente",
             dataIndex: "proveedor",
             ...getColumnSearchProps("proveedor"),
         },
@@ -128,37 +173,34 @@ export const LiqSolicitarAprobacionPage = () => {
     const columsDetalle = [
         {
             title: "Nro. Factura",
-            dataIndex: "idFactura",
+            dataIndex: "serie",
         },
         {
             title: "Fecha Pago",
-            dataIndex: "fechaEmision",
-        },
-        {
-            title: "Monto de Pago",
-            dataIndex: "montoSinIGV",
+            dataIndex: "fechaPago",
         },
         {
             title: "F. resguardo",
-            dataIndex: "montoSinIGV",
+            dataIndex: "fondoResguardo",
         },
         {
             title: "Monto Pago",
-            dataIndex: "total",
+            dataIndex: "montoTotalVenta",
         },
         {
             title: "Intereses",
-            dataIndex: "archivos",
+            dataIndex: "interesesIGV",
         },
         {
             title: "Gastos",
-            dataIndex: "archivos",
+            dataIndex: "gastosIGV",
         },
         {
             title: "Desembolso",
-            dataIndex: "archivos",
+            dataIndex: "montoDesembolso",
         },
     ];
+
     useEffect(() => {
         cargarDatos();
     }, []);
@@ -300,68 +342,62 @@ export const LiqSolicitarAprobacionPage = () => {
                 <Form layout="vertical" className="ant-advanced-search-form">
                     <Descriptions title="Datos Principales">
                         <Descriptions.Item label="Liquidación" span={1}>
-                            50
+                            {formik.values.nroLiquidacion}
                         </Descriptions.Item>
                         <Descriptions.Item label="Moneda" span={1}>
-                            PEN
+                            {formik.values.moneda}
                         </Descriptions.Item>
                         <Descriptions.Item label="Cedente" span={1}>
-                            ISI Group S.A.C
+                            {formik.values.cedente}
                         </Descriptions.Item>
                         <Descriptions.Item label="Pagador" span={1}>
                             Rimac
                         </Descriptions.Item>
                         <Descriptions.Item label="Tipo de Operación" span={1}>
-                            Factoring
+                            {formik.values.tipoOperacion}
                         </Descriptions.Item>
                     </Descriptions>
                     <Descriptions title="Datos Adicionales">
                         <Descriptions.Item label="Fecha Operación" span={1}>
-                            <Space direction="vertical">
-                                <DatePicker
-                                    onChange={onChange}
-                                    format={"DD/MM/YYYY"}
-                                    disabledDate={disabledDate}
-                                />
-                            </Space>
+                            {formik.values.fechaOperacion}
                         </Descriptions.Item>
                         <Descriptions.Item label="TNM Op." span={1}>
-                            2.00 %
+                            {formik.values.tasaNominalMensual} %
                         </Descriptions.Item>
                         <Descriptions.Item label="TNA op." span={1}>
-                            24.00 %
+                            {formik.values.tasaNominalAnual} %
                         </Descriptions.Item>
                         <Descriptions.Item label="Ejecutivo" span={1}>
-                            Grabriel
+                            {formik.values.ejecutivoComercial}
                         </Descriptions.Item>
                         <Descriptions.Item label="Financiamiento" span={1}>
-                            90%
+                            {formik.values.financiamiento} %
                         </Descriptions.Item>
                         <Descriptions.Item label="F. Resguardo" span={1}>
-                            10%
+                            {formik.values.fondoResguardo} %
                         </Descriptions.Item>
                         <Descriptions.Item label="Com. Estruct." span={1}>
-                            0.00%
+                            {formik.values.comisionEstructuracion} %
                         </Descriptions.Item>
                         <Descriptions.Item label="Cant. Doc." span={1}>
-                            4
+                            {formik.values.cantidadDocumentos}
                         </Descriptions.Item>
                     </Descriptions>
                     <Descriptions title="Datos Contractuales">
                         <Descriptions.Item label="Contrato" span={1}>
-                            S/. 3500.00
+                            S/. {formik.values.contrato}
                         </Descriptions.Item>
                         <Descriptions.Item label="Gatos al ext." span={1}>
                             S/. 2000.00
                         </Descriptions.Item>
-                        <Descriptions.Item label="Con. Carta Not." span={1}>
-                            S/. 400.00
+                        <Descriptions.Item label="Com. Carta Not." span={1}>
+                            S/. {formik.values.comisionCartaNotarial}
                         </Descriptions.Item>
                         <Descriptions.Item label="Ser. Cobr. Doc" span={1}>
-                            S/. 100.00
+                            S/. {formik.values.servicioCobranza}
                         </Descriptions.Item>
                         <Descriptions.Item label="Ser. Custodia" span={1}>
-                            S/. 100.00
+                            S/. {formik.values.servicioCustodia}
                         </Descriptions.Item>
                         <Descriptions.Item label="Fecha Carta Not." span={1}>
                             22/10/2021
@@ -371,7 +407,7 @@ export const LiqSolicitarAprobacionPage = () => {
                     <Table
                         loading={loadingApi}
                         columns={columsDetalle}
-                        dataSource={detalleFacturas.data}
+                        dataSource={detalleSolicitud}
                         size="small"
                         pagination={{
                             current: page,

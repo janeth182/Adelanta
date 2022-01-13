@@ -1,17 +1,6 @@
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import {
-  PageHeader,
-  Row,
-  Col,
-  Card,
-  Table,
-  Button,
-  Tag,
-  Form,
-  Descriptions,
-  Space,
-} from "antd";
+import { PageHeader, Row, Col, Card, Table, Button, Tag, Form, Descriptions, Space } from "antd";
 import { PlusSquareOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
@@ -57,6 +46,16 @@ export const SolicitudesPage = () => {
           return record.liquidacion;
         }
       },
+    },
+    {
+      title: "Cedente",
+      dataIndex: "cedente",
+      ...getColumnSearchProps("cedente"),
+    },
+    {
+      title: "RUC",
+      dataIndex: "rucCedente",
+      ...getColumnSearchProps("rucCedente"),
     },
     {
       title: "Aceptante",
@@ -209,6 +208,19 @@ export const SolicitudesPage = () => {
                   }
                 >
                   Nueva Solicitud
+                </Button>
+                <Button
+                  className="primary-b"
+                  type="primary"
+                  icon={<PlusSquareOutlined style={{ fontSize: "16px" }} />}
+                  onClick={() =>
+                    history.push({
+                      pathname: `${process.env.REACT_APP_RUTA_SERVIDOR}clientes/Solicitudes/capital-trabajo`,
+                      state: 0,
+                    })
+                  }
+                >
+                  Nueva Solicitud Capital de Trabajo
                 </Button>
                 <ExportCSV
                   csvData={solicitudes.data}

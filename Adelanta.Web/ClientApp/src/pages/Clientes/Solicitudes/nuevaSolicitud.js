@@ -33,11 +33,19 @@ export const NuevaSolicitudPage = () => {
       dataIndex: "idSolicitud",
     },
     {
+      title: "Cedente",
+      dataIndex: "cedente",
+    },
+    {
+      title: "Ruc Cedente",
+      dataIndex: "rucCedente",
+    },
+    {
       title: "Aceptante",
       dataIndex: "aceptante",
     },
     {
-      title: "Ruc",
+      title: "Ruc Aceptante",
       dataIndex: "ruc",
     },
     {
@@ -217,19 +225,21 @@ export const NuevaSolicitudPage = () => {
           (detalleP, index, documentosValidos) =>
             index ===
             documentosValidos.findIndex((p) =>
-              tipoOperacion === "F" ? p.rucPagador === detalleP.rucPagador && p.moneda === detalleP.moneda : p.rucProveedor === detalleP.rucProveedor && p.moneda === detalleP.moneda
+              tipoOperacion === "F" ? p.rucPagador === detalleP.rucPagador && p.moneda === detalleP.moneda && p.rucProveedor === detalleP.rucProveedor
+                : p.rucProveedor === detalleP.rucProveedor && p.moneda === detalleP.moneda && p.rucPagador === detalleP.rucPagador
             )
         );
+        console.log(cabecera);
         for (let c = 0; c < cabecera.length; c++) {
           let detalle = [];
           if (cabecera[c].rucPagador !== undefined && cabecera[c].moneda !== undefined && cabecera[c].rucProveedor !== undefined && cabecera[c].proveedor !== undefined) {
             for (let d = 0; d < documentosValidos.length; d++) {
               if (tipoOperacion === "F") {
-                if (cabecera[c].rucPagador === documentosValidos[d].rucPagador && cabecera[c].moneda === documentosValidos[d].moneda) {
+                if (cabecera[c].rucPagador === documentosValidos[d].rucPagador && cabecera[c].moneda === documentosValidos[d].moneda && cabecera[c].rucProveedor === documentosValidos[d].rucProveedor) {
                   detalle.push(documentosValidos[d]);
                 }
               } else {
-                if (cabecera[c].rucProveedor === documentosValidos[d].rucProveedor && cabecera[c].moneda === documentosValidos[d].moneda) {
+                if (cabecera[c].rucProveedor === documentosValidos[d].rucProveedor && cabecera[c].moneda === documentosValidos[d].moneda && cabecera[c].rucPagador === documentosValidos[d].rucPagador) {
                   detalle.push(documentosValidos[d]);
                 }
               }
@@ -240,13 +250,10 @@ export const NuevaSolicitudPage = () => {
                 data.append("file[]", fileListPDF[i]);
               }
 
-              if (tipoOperacion === "F") {
-                data.append("ruc", cabecera[c].rucPagador);
-                data.append("razonSocial", cabecera[c].pagador);
-              } else {
-                data.append("ruc", cabecera[c].rucProveedor);
-                data.append("razonSocial", cabecera[c].proveedor);
-              }
+              data.append("rucCedente", cabecera[c].rucProveedor);
+              data.append("cedente", cabecera[c].proveedor);
+              data.append("aceptante", cabecera[c].pagador);
+              data.append("rucAceptante", cabecera[c].rucPagador);
               data.append("tipoOperacion", tipoOperacion);
               data.append("moneda", cabecera[c].moneda);
               data.append("detalle", JSON.stringify(detalle));

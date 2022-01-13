@@ -42,6 +42,14 @@ namespace Adelanta.Data.Repository
             var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
             return result > 0;
         }
+        public async Task<string> EnviarCavali(string Json)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_ENVIAR_CAVALI";
+            var values = new { p_dataJSON = Json };
+            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
+            return result.ToList()[0];
+        }
         public async Task<bool> DocumentosActualizarEstado(string Json)
         {
             var db = dbConnection();
@@ -73,6 +81,14 @@ namespace Adelanta.Data.Repository
             var values = new { p_dataJSON = Json };
             var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
             return result.ToList()[0];
+        }
+        public async Task<bool> DocumentosActualizarEnvioCavali(string DocumentoJson, string RespuestaCavaliJson)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_ACTUALIZAR_ENVIO_CAVALI";
+            var values = new { p_DocumentoJSON = DocumentoJson, p_RespuestaCavaliJSON = RespuestaCavaliJson };
+            var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
+            return result > 0;
         }
     }
 }

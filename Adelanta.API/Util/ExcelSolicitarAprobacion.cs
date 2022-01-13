@@ -30,7 +30,7 @@ namespace Adelanta.API.Util
                 Color colFromHexFooter = System.Drawing.ColorTranslator.FromHtml("#D5D8DC");
 
                 worksheet.Cells[5, 2].Value = "CLIENTE";
-                worksheet.Cells[5, 3].Value = oSolicitudBE.RazonSocial;
+                worksheet.Cells[5, 3].Value = oSolicitudBE.Cedente;
                 worksheet.Cells[5, 3].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[5, 3].Style.Border.Top.Color.SetColor(colFromHex);
                 worksheet.Cells[5, 3].Style.Border.Left.Style = ExcelBorderStyle.Thin;
@@ -41,7 +41,7 @@ namespace Adelanta.API.Util
                 worksheet.Cells[5, 3].Style.Border.Bottom.Color.SetColor(colFromHex);
 
                 worksheet.Cells[6, 2].Value = "RUC CLIENTE";
-                worksheet.Cells[6, 3].Value = oSolicitudBE.Ruc;
+                worksheet.Cells[6, 3].Value = oSolicitudBE.RucCedente;
                 worksheet.Cells[6, 3].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[6, 3].Style.Border.Top.Color.SetColor(colFromHex);
                 worksheet.Cells[6, 3].Style.Border.Left.Style = ExcelBorderStyle.Thin;
@@ -279,7 +279,7 @@ namespace Adelanta.API.Util
                         worksheet.Cells[rowCounter++, 3].Style.Border.Bottom.Color.SetColor(colFromHex);
 
                         worksheet.Cells[rowCounter, 2].Value = "CLIENTE";
-                        worksheet.Cells[rowCounter, 3].Value = oSolicitudBE.RazonSocial;
+                        worksheet.Cells[rowCounter, 3].Value = oSolicitudBE.Cedente;
                         worksheet.Cells[rowCounter, 3].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                         worksheet.Cells[rowCounter, 3].Style.Border.Top.Color.SetColor(colFromHex);
                         worksheet.Cells[rowCounter, 3].Style.Border.Left.Style = ExcelBorderStyle.Thin;
@@ -290,7 +290,7 @@ namespace Adelanta.API.Util
                         worksheet.Cells[rowCounter++, 3].Style.Border.Bottom.Color.SetColor(colFromHex);
 
                         worksheet.Cells[rowCounter, 2].Value = "RUC CLIENTE";
-                        worksheet.Cells[rowCounter, 3].Value = oSolicitudBE.Ruc;
+                        worksheet.Cells[rowCounter, 3].Value = oSolicitudBE.RucCedente;
                         worksheet.Cells[rowCounter, 3].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                         worksheet.Cells[rowCounter, 3].Style.Border.Top.Color.SetColor(colFromHex);
                         worksheet.Cells[rowCounter, 3].Style.Border.Left.Style = ExcelBorderStyle.Thin;

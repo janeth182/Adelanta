@@ -13,6 +13,7 @@ import { EditarUsuariosPage } from "./pages/Usuarios/editar-usuario";
 import { FacturasPage } from "./pages/Clientes/Facturas/facturas";
 import { SolicitudesPage } from "./pages/Clientes/Solicitudes/solicitudes";
 import { NuevaSolicitudPage } from "./pages/Clientes/Solicitudes/nuevaSolicitud";
+import { CapitalTrabajoPage } from "./pages/Clientes/Solicitudes/capitalTrabajo";
 import { RespuestaPagadorPage } from "./pages/Operaciones/RespuestaPagador/respuestaPagador";
 import { LiqSolicitarAprobacionPage } from "./pages/Operaciones/LiqSolicitarAprobacion/liqSolicitarAprobacion";
 import { LiqConfirmarAprobacionPage } from "./pages/Operaciones/LiqConfirmarAprobacion/liqConfirmarAprobacion";
@@ -52,6 +53,12 @@ export const App = () => {
                 REACT_APP_RUTA_SERVIDOR + "clientes/solicitudes/nueva-solicitud"
               }
               component={NuevaSolicitudPage}
+            />
+            <PrivateRouter
+              path={
+                REACT_APP_RUTA_SERVIDOR + "clientes/solicitudes/capital-trabajo"
+              }
+              component={CapitalTrabajoPage}
             />
             <PrivateRouter
               exact
