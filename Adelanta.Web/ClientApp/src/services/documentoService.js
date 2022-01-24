@@ -24,3 +24,6 @@ export const documentoSolicitarAprobacion = async (data) => {
 export const listarDocumentosFiltros = async (data) => {
   return await formColeccion.post(`Documento/ListarDocumentosFiltros`, data);
 };
+export const listarDocumentosDesembolso = async (data) => {
+  return await formColeccion.post(`Documento/ListarDocumentosDesembolso`, data);
+};

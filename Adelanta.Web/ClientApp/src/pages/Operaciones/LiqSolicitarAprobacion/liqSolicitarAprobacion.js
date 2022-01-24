@@ -7,12 +7,13 @@ import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { listarDocumentos, documentoSolicitarAprobacion } from "../../../services/documentoService";
+import { listarDocumentos, documentoSolicitarAprobacion, documentosActualizarEstado } from "../../../services/documentoService";
 import { obtenerSolicitudDetalleLiquidacion } from "../../../services/solicitudService";
 import { estados, mensajeError } from "../../../utils/constant";
 import { ModalComponent } from "../../../components/modal/modal";
 import { AuthContext } from "../../../context/authProvider";
 import { useFormik } from "formik";
+
 export const LiqSolicitarAprobacionPage = () => {
     const { logoutUser, user } = useContext(AuthContext);
     const { isModal, showModal, hiddenModal } = useModal();
@@ -29,6 +30,7 @@ export const LiqSolicitarAprobacionPage = () => {
             fechaOperacion: '',
             idSolicitud: '',
             cedente: '',
+            aceptante: '',
             tipoOperacion: '',
             tasaNominalMensual: 0,
             tasaNominalAnual: 0,
@@ -55,6 +57,7 @@ export const LiqSolicitarAprobacionPage = () => {
                     console.log(rpta);
                     formik.initialValues.nroLiquidacion = rpta.data.nroLiquidacion;
                     formik.initialValues.cedente = rpta.data.cedente;
+                    formik.initialValues.aceptante = rpta.data.aceptante;
                     formik.initialValues.tipoOperacion = rpta.data.tipoOperacion;
                     formik.initialValues.tasaNominalMensual = rpta.data.tasaNominalMensual;
                     formik.initialValues.tasaNominalAnual = rpta.data.tasaNominalAnual;
@@ -160,6 +163,7 @@ export const LiqSolicitarAprobacionPage = () => {
                             onChange={onChangeChecked}
                             name={"liquidacion"}
                             value={record.idDocumento}
+                            data-tipo={record.tipo}
                         ></Checkbox>
                     </>
                 );
@@ -213,6 +217,7 @@ export const LiqSolicitarAprobacionPage = () => {
             try {
                 debugger
                 const lista = [];
+                const listaCapitalTrabajo = [];
                 for (let i = 0; i < cantidadControles; i++) {
                     if (document.getElementsByName("liquidacion")[i].checked) {
                         const documento = {
@@ -220,28 +225,56 @@ export const LiqSolicitarAprobacionPage = () => {
                             estado: estados.SOLICITAR_APROBACION,
                             usuario: user.usuario
                         };
-                        lista.push(documento);
-                    }
-                }
-                let data = new FormData();
-                data.append("json", JSON.stringify(lista));
-                const rpta = await documentoSolicitarAprobacion(data);
-                if (rpta.status === 204) {
-                    debugger
-                    cargarDatos();
-                    for (let i = 0; i < cantidadControles; i++) {
-                        if (document.getElementsByName("liquidacion")[i].checked) {
-                            document.getElementsByName("liquidacion")[i].click();
+                        if (document.getElementsByName("liquidacion")[i].getAttribute('data-tipo') === 'C' || document.getElementsByName("liquidacion")[i].getAttribute('data-tipo') === 'F') {
+                            lista.push(documento);
+                        } else {
+                            listaCapitalTrabajo.push(documento);
                         }
                     }
-                    notification['success']({
-                        message: 'Se proceso correctamente',
-                        description:
-                            'Los documentos enviados han si actualizados correctamente.',
-                    });
-                    setLoadingApi(false);
-                } else {
-                    setLoadingApi(false);
+                }
+                if (listaCapitalTrabajo.length > 0) {
+                    let data = new FormData();
+                    data.append("json", JSON.stringify(listaCapitalTrabajo));
+                    const rpta = await documentosActualizarEstado(data);
+                    if (rpta.status === 204) {
+                        debugger
+                        cargarDatos();
+                        for (let i = 0; i < cantidadControles; i++) {
+                            if (document.getElementsByName("liquidacion")[i].checked) {
+                                document.getElementsByName("liquidacion")[i].click();
+                            }
+                        }
+                        notification['success']({
+                            message: 'Se proceso correctamente',
+                            description:
+                                'Los documentos de capital de trabajo enviados han si actualizados correctamente.',
+                        });
+                        setLoadingApi(false);
+                    } else {
+                        setLoadingApi(false);
+                    }
+                }
+                if (lista.length > 0) {
+                    let data = new FormData();
+                    data.append("json", JSON.stringify(lista));
+                    const rpta = await documentoSolicitarAprobacion(data);
+                    if (rpta.status === 204) {
+                        debugger
+                        cargarDatos();
+                        for (let i = 0; i < cantidadControles; i++) {
+                            if (document.getElementsByName("liquidacion")[i].checked) {
+                                document.getElementsByName("liquidacion")[i].click();
+                            }
+                        }
+                        notification['success']({
+                            message: 'Se proceso correctamente',
+                            description:
+                                'Los documentos enviados han si actualizados correctamente.',
+                        });
+                        setLoadingApi(false);
+                    } else {
+                        setLoadingApi(false);
+                    }
                 }
             } catch (error) {
                 setLoadingApi(false);
@@ -351,7 +384,7 @@ export const LiqSolicitarAprobacionPage = () => {
                             {formik.values.cedente}
                         </Descriptions.Item>
                         <Descriptions.Item label="Pagador" span={1}>
-                            Rimac
+                            {formik.values.aceptante}
                         </Descriptions.Item>
                         <Descriptions.Item label="Tipo de Operación" span={1}>
                             {formik.values.tipoOperacion}

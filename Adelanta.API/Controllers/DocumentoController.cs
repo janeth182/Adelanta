@@ -204,5 +204,21 @@ namespace Adelanta.API.Controllers
                 return StatusCode(500, $"Internal server error: {ex}");
             }
         }
+        [HttpPost("/api/Documento/ListarDocumentosDesembolso")]
+        public async Task<IActionResult> ListarDocumentosDesembolso()
+        {
+            try
+            {
+                string Usuario = Request.Form["usuario"];
+                var resultado = await _documentoRepository.ListarDocumentosDesembolso(Usuario);
+                if (resultado == null)
+                    return Ok(string.Empty);
+                return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex}");
+            }            
+        }
     }
 }

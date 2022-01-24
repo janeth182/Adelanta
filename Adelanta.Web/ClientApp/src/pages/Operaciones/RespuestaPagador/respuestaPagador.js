@@ -560,7 +560,7 @@ export const RespuestaPagadorPage = () => {
                     onClick={enviarCavali}
                     loading={loadingApi}
                   >
-                    Cavali
+                    Enviar Cavali
                   </Button>
                 </Space>
               </>

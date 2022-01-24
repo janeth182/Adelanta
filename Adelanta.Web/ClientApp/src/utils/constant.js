@@ -7,7 +7,8 @@ export const estados = {
     CONFIRMAR_APROBACION: 10,
     PENDIENTE_CAVALI: 11,
     ERROR_CAVALI: 12,
-    APROBAR_DESEMBOLSO: 13
+    APROBAR_DESEMBOLSO: 13,
+    COMFIRMAR_DESEMBOLSO: 16
 };
 export const mensajeError = {
     GENERAL: 'Ocurrio un error al momento de procesar la solicitud, comuniquese con el administrador de sistema.',
