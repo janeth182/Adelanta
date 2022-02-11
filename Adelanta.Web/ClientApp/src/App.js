@@ -25,6 +25,7 @@ import { GeneracionArchivoPage } from "./pages/Desembolso/GeneracionArchivo/gene
 import { ConsultaFacturasPage } from "./pages/Facturacion/ConsultaFacturas/consultaFacturas";
 import { EmitirFacturasPage } from "./pages/Facturacion/EmitirFacturas/emitirFacturas";
 import { ClientesPage } from "./pages/Comercial/Clientes/clientes";
+import { EditarClientePage } from "./pages/Comercial/Clientes/editar-cliente";
 import { CheckListPage } from "./pages/Comercial/CheckList/checkList";
 import { PagadorPage } from "./pages/Comercial/Pagador/pagador";
 export const App = () => {
@@ -127,6 +128,11 @@ export const App = () => {
               exact
               path={REACT_APP_RUTA_SERVIDOR + "comercial/clientes"}
               component={ClientesPage}
+            />
+            <PrivateRouter
+              exact
+              path={REACT_APP_RUTA_SERVIDOR + "comercial/editar-cliente/:id"}
+              component={EditarClientePage}
             />
             <PrivateRouter
               exact

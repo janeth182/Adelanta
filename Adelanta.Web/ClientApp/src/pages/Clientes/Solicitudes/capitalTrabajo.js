@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { Row, Col, Card, Button, Form, Space, notification, Input, InputNumber, Descriptions } from "antd";
+import { Row, Col, Card, Button, Form, Space, notification, Input, InputNumber, Descriptions, Select } from "antd";
 import { ContentComponent } from "../../../components/layout/content";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
@@ -16,6 +16,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import moment from "moment";
 import { SelectComponent } from "../../../components/formControl.js/select";
+const { Option } = Select;
 export const CapitalTrabajoPage = () => {
     const { Search } = Input;
     const { logoutUser, user } = useContext(AuthContext);
@@ -31,19 +32,21 @@ export const CapitalTrabajoPage = () => {
     const [dataFechaPago, setDataFechaPago] = useState();
     const [dataDiasPrestamo, setDataDiasPrestamo] = useState();
     const [dataTasaAnual, setDataTasaAnual] = useState(0);
-    const [dataIntereses, setDataIntereses] = useState();
-    const [dataGastos, setDataGastos] = useState();
-    const [dataTotalFacturar, setDataTotalFacturar] = useState();
-    const [dataTotalDesembolsar, setDataTotalDesembolsar] = useState();
+    const [dataIntereses, setDataIntereses] = useState(0);
+    const [dataMontoDescontar, setDataMontoDescontar] = useState(0);
+    const [dataGastos, setDataGastos] = useState(0);
+    const [dataTotalFacturar, setDataTotalFacturar] = useState(0);
+    const [dataTotalDesembolsar, setDataTotalDesembolsar] = useState(0);
     const [dataComisionCartaNotarial, setDataComisionCartaNotarial] = useState();
     const [dataServicioCobranza, setDataServicioCobranza] = useState();
     const [dataServicioCustodia, setDataServicioCustodia] = useState();
     const [dataIdSolicitud, setDataIdSolicitud] = useState();
-    const [dataTipo, setDataTipo] = useState('CN');
-
+    const [dataMoneda, setDataMoneda] = useState('PEN');
+    const [dataTipo, setDataTipo] = useState('CB');
+    const [dataTasaMensual, setDataTasaMensual] = useState(0);
     const urlSolicitud = `${process.env.REACT_APP_RUTA_SERVIDOR}clientes/Solicitudes`;
 
-    const buscarCliente = e => {
+    const buscarCliente = async (e) => {
         let suscribe = true;
         (async () => {
             setLoadingApi(true);
@@ -56,20 +59,25 @@ export const CapitalTrabajoPage = () => {
                     if (suscribe) {
                         console.log(JSON.stringify(rpta.data));
                         setDataRazonSocial(rpta.data.razonSocial);
-                        setDataTasaAnual(rpta.data.tasaNominalAnual);
+                        setDataTasaAnual(rpta.data.tasaAnual);
                         setDataComisionCartaNotarial(rpta.data.comisionCartaNotarial);
                         setDataServicioCobranza(rpta.data.servicioCobranza);
-                        setDataServicioCustodia(rpta.data.servicioCobranza);
+                        setDataServicioCustodia(rpta.data.servicioCustodia);
+                        setDataTasaMensual(rpta.data.tasaNominalMensual);
                         setLoadingApi(false);
                     }
                 } else {
                     setDataRazonSocial('');
                     setLoadingApi(false);
                 }
-
             } catch (error) {
                 setLoadingApi(false);
                 console.log(error.response);
+                setDataRazonSocial('');
+                setDataTasaAnual(0);
+                setDataComisionCartaNotarial(0);
+                setDataServicioCobranza(0);
+                setDataServicioCustodia(0);
             }
         })();
         return () => {
@@ -82,10 +90,10 @@ export const CapitalTrabajoPage = () => {
         setDataMontoGarantia(e.target.value);
     }
     const validarCapitalSolicitado = e => {
-        const montoGarantia = dataMontoGarantia;
-        const capitalSolicitado = e.target.value;
+        const montoGarantia = dataMontoGarantia.replace(/\$\s?|(,*)/g, "");
+        const capitalSolicitado = e.target.value.replace(/\$\s?|(,*)/g, "");
         debugger
-        if (capitalSolicitado > montoGarantia) {
+        if (+capitalSolicitado > +montoGarantia) {
             notification['info']({
                 message: 'Información',
                 description: 'Capital Solicitado no puede ser mayor al monto de garantía.'
@@ -101,17 +109,21 @@ export const CapitalTrabajoPage = () => {
         let startdate = moment();
         startdate = moment(startdate, "DD-MM-YYYY").add(dias, 'days');
         startdate = startdate.format("DD/MM/YYYY");
-        const capitalTrabajo = dataCapitalTrabajo;
-        const tasaAnual = dataTasaAnual;
-        const interes = parseFloat(capitalTrabajo * (((tasaAnual / 100) * 12) / 360) * dias * 1.18).toFixed(2);
-        const gastos = parseFloat((dataComisionCartaNotarial + dataServicioCobranza + dataServicioCustodia) * 1.18).toFixed(2);
-        const totalFacturar = parseFloat(interes + gastos).toFixed(2);
-        const totalDesembolsar = dataTipo === 'CN' ? dataCapitalTrabajo : dataCapitalTrabajo - totalFacturar;
+        const capitalTrabajo = +(dataCapitalTrabajo.replace(/\$\s?|(,*)/g, ""));
+        const tasaAnual = +dataTasaAnual / 100;
+        const tasaMensual = +dataTasaMensual / 100;
+        const gatosSinIGV = parseFloat(((+dataComisionCartaNotarial) + (+dataServicioCobranza) + (+dataServicioCustodia))).toFixed(2);
+        const gastos = parseFloat(gatosSinIGV * 1.18).toFixed(2);
+        const montoDescontar = dataTipo === 'CN' ? parseFloat(((360 * capitalTrabajo) + (360 * gatosSinIGV)) / (360 - (dias * (tasaMensual * 12) * 1.18))).toFixed(2) : 0;
+        const interes = dataTipo === 'CN' ? parseFloat(montoDescontar * dias * ((tasaMensual * 12) / 360) * 1.18).toFixed(2) : parseFloat((+capitalTrabajo) * (((+tasaAnual) * 12) / 360) * dias * 1.18).toFixed(2);
+        const totalFacturar = parseFloat((+interes) + (+gastos)).toFixed(2);
+        const totalDesembolsar = dataTipo === 'CN' ? dataCapitalTrabajo : parseFloat(capitalTrabajo + (+totalFacturar)).toFixed(2);
         setDataIntereses(interes);
         setDataGastos(gastos);
         setDataFechaPago(startdate);
         setDataTotalFacturar(totalFacturar);
         setDataTotalDesembolsar(totalDesembolsar);
+        setDataMontoDescontar(montoDescontar);
     };
     const validateMessages = {
         required: '${label} is requerido!',
@@ -125,18 +137,18 @@ export const CapitalTrabajoPage = () => {
     };
     const layout = {
         labelCol: {
-            span: 12,
+            flex: '210px'
         },
         wrapperCol: {
-            span: 16,
+            span: 12,
         },
     };
     const onFinish = (values) => {
+        debugger
         let suscribe = true;
         (async () => {
             setLoadingApi(true);
             try {
-                debugger
                 values.solicitud.fechaPago = dataFechaPago;
                 values.solicitud.interesIGV = dataIntereses;
                 values.solicitud.gatosIGV = dataGastos;
@@ -145,6 +157,7 @@ export const CapitalTrabajoPage = () => {
                 values.solicitud.tipoOperacion = dataTipo;
                 values.solicitud.razonSocial = dataRazonSocial;
                 values.solicitud.usuario = user.usuario;
+                values.solicitud.montoDescontar = dataMontoDescontar;
                 console.log("Success:", values);
                 let data = new FormData();
                 data.append("json", JSON.stringify(values.solicitud));
@@ -176,6 +189,16 @@ export const CapitalTrabajoPage = () => {
         return () => {
             suscribe = false;
         };
+    };
+    const cambiarTipo = (e) => {
+        setDataTipo(e);
+        if (e !== 'CN') {
+            setDataMontoDescontar(0);
+        }
+    }
+
+    const onFinishFailed = (errorInfo) => {
+        console.log("Failed:", errorInfo);
     };
     return (
         <ContentComponent style={{ padding: "0 24px", minHeight: 280 }}>
@@ -211,20 +234,35 @@ export const CapitalTrabajoPage = () => {
                             </div>,
                         ]}
                     >
-                        <Form {...layout} autoComplete="off" onFinish={onFinish} validateMessages={validateMessages}>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
-                                    <SelectComponent
-                                        title="Seleccione Tipo:"
-                                        value={dataTipo}
-                                        onChange={value => setDataTipo(value)}
-                                        options={[{ value: 'CN', label: 'Capital de Trabajo Neto' }, { value: 'CB', label: 'Capital de Trabajo Bruto' }]}
+                        <Row>
+                            <Col lg={12} xs={{ span: 24 }}>
+                                <Form {...layout}
+                                    autoComplete="off"
+                                    onFinish={onFinish}
+                                    onFinishFailed={onFinishFailed}
+                                    validateMessages={validateMessages}>
+                                    <Form.Item
+                                        label="Seleccione Tipo"
+                                        rules={[
+                                            {
+                                                required: true,
+                                            },
+                                        ]}
                                     >
-                                    </SelectComponent>
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
+                                        <Select value={dataTipo} placeholder="Seleccione Tipo" onChange={cambiarTipo} >
+                                            <Option value="CN">Capital de Trabajo Neto</Option>
+                                            <Option value="CB">Capital de Trabajo Bruto</Option>
+                                        </Select>
+                                    </Form.Item>
+                                    <Form.Item
+                                        name={['solicitud', 'moneda']}
+                                        label="Seleccione Moneda"
+                                    >
+                                        <Select defaultValue={dataMoneda} disabled placeholder="Seleccione Moneda" onChange={value => setDataMoneda(value)}>
+                                            <Option value="PEN">Soles</Option>
+                                            <Option value="USD">Dolares</Option>
+                                        </Select>
+                                    </Form.Item>
                                     <Form.Item name={['solicitud', 'ruc']}
                                         label="Ingrese RUC"
                                         value={dataRUC}
@@ -235,20 +273,11 @@ export const CapitalTrabajoPage = () => {
                                         ]}>
                                         <Search placeholder="Ingrese RUC" onSearch={buscarCliente} />
                                     </Form.Item>
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
-                                    <InputComponent
-                                        name={['solicitud', 'razonSocial']}
-                                        value={dataRazonSocial}
-                                        bordered={false}
-                                        title="Total a Desembolsar con IGV:"
-                                    />
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
+                                    <Form.Item name={['solicitud', 'razonSocial']}
+                                        label="Razon Social:"
+                                    >
+                                        <label>{dataRazonSocial}</label>
+                                    </Form.Item>
                                     <Form.Item bordered={false}
                                         name={['solicitud', 'montoGarantia']}
                                         label="Monto de la Garantia:"
@@ -259,12 +288,13 @@ export const CapitalTrabajoPage = () => {
                                             },
                                         ]}
                                     >
-                                        <InputNumber value={dataMontoGarantia} />
+                                        <InputNumber value={dataMontoGarantia}
+                                            formatter={(value) =>
+                                                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                            }
+                                            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                                        />
                                     </Form.Item>
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
                                     <Form.Item bordered={false}
                                         name={['solicitud', 'capitalTrabajoSolicitado']}
                                         label="Capital de Trabajo Solicitado:"
@@ -275,12 +305,13 @@ export const CapitalTrabajoPage = () => {
                                             },
                                         ]}
                                     >
-                                        <InputNumber value={dataCapitalTrabajo} />
+                                        <InputNumber value={dataCapitalTrabajo}
+                                            formatter={(value) =>
+                                                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                                            }
+                                            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                                        />
                                     </Form.Item>
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
                                     <Form.Item bordered={false}
                                         name={['solicitud', 'diasPrestamo']}
                                         label="Días de prestamo:"
@@ -296,80 +327,85 @@ export const CapitalTrabajoPage = () => {
                                     >
                                         <InputNumber />
                                     </Form.Item>
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
                                     <InputComponent
                                         name={['solicitud', 'fechaPago']}
                                         value={dataFechaPago}
                                         bordered={false}
                                         title="Fecha de Pago:"
                                     />
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
+                                    <Form.Item name={['solicitud', 'montoDescontar']}
+                                        label="Monto a descontar:"
+                                        style={dataTipo !== 'CN' ? { display: 'none' } : { display: '' }}
+                                    >
+                                        <label>{dataMontoDescontar !== 0 ? dataMontoDescontar.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : dataMontoDescontar}</label>
+                                    </Form.Item>
                                     <InputComponent
                                         name={['solicitud', 'interes']}
-                                        value={dataIntereses}
+                                        value={dataIntereses !== 0 ? dataIntereses.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : dataIntereses}
                                         bordered={false}
                                         title="Intereses incluido IGV:"
                                     />
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
                                     <InputComponent
                                         name={['solicitud', 'gastosIncluidoIGV']}
-                                        value={dataGastos}
+                                        value={dataGastos !== 0 ? dataGastos.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : dataGastos}
                                         bordered={false}
                                         title="Gastos incluido IGV:"
                                     />
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
                                     <InputComponent
                                         name={['solicitud', 'totalFacturarIGV']}
-                                        value={dataTotalFacturar}
+                                        value={dataTotalFacturar !== 0 ? dataTotalFacturar.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : dataTotalFacturar}
                                         bordered={false}
                                         title="Total a Facturar con IGV:"
                                     />
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
                                     <InputComponent
                                         name={['solicitud', 'totalDesembolsarIGV']}
-                                        value={dataTotalDesembolsar}
+                                        value={dataTotalDesembolsar !== 0 ? dataTotalDesembolsar.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : dataTotalDesembolsar}
                                         bordered={false}
                                         title="Total a Desembolsar con IGV:"
                                     />
-                                </Col>
-                            </Row>
-                            <Row gutter={12}>
-                                <Col lg={6} xs={{ span: 24 }}>
-                                    <Space>
-                                        <Button
-                                            className="primary-b"
-                                            type="primary"
-                                            icon={<CalculatorOutlined style={{ fontSize: "16px" }} />}
-                                            onClick={calcular}
-                                        >
-                                            Calcular
-                                        </Button>
-                                        <Button
-                                            type="primary"
-                                            htmlType="submit"
-                                            icon={<SaveOutlined />}
-                                        >
-                                            Registrar Solicitud
-                                        </Button>
-                                    </Space>
-                                </Col>
-                            </Row>
-                        </Form>
+                                    <Row gutter={12}>
+                                        <Col lg={6} xs={{ span: 24 }}>
+                                            <Space>
+                                                <Button
+                                                    className="primary-b"
+                                                    type="primary"
+                                                    icon={<CalculatorOutlined style={{ fontSize: "16px" }} />}
+                                                    onClick={calcular}
+                                                >
+                                                    Calcular
+                                                </Button>
+                                                <Button
+                                                    type="primary"
+                                                    htmlType="submit"
+                                                    icon={<SaveOutlined />}
+                                                >
+                                                    Registrar Solicitud
+                                                </Button>
+                                            </Space>
+                                        </Col>
+                                    </Row>
+                                </Form>
+                            </Col>
+                            <Col lg={6} xs={{ span: 24 }}>
+                                <div>
+                                    <Descriptions
+                                        title="Datos del Cliente"
+                                        bordered
+                                    >
+                                        <Descriptions.Item label="Tasa Anual" span={3}>% {dataTasaAnual}</Descriptions.Item>
+                                        <Descriptions.Item label="Tasa Mensual" span={3}>% {dataTasaMensual}</Descriptions.Item>
+                                        <Descriptions.Item label="Comisión Carta Notarial" span={3}>S/. {dataComisionCartaNotarial}</Descriptions.Item>
+                                        <Descriptions.Item label="Servicio Cobranza" span={3}>S/. {dataServicioCobranza}</Descriptions.Item>
+                                        <Descriptions.Item label="Servicio Custodia" span={3}>S/. {dataServicioCustodia}</Descriptions.Item>
+                                    </Descriptions>
+                                </div>
+                            </Col>
+                            <Col lg={6} xs={{ span: 24 }}>
+
+                            </Col>
+
+                        </Row>
+
                     </Card>
                 </Col>
             </Row>
@@ -399,6 +435,7 @@ export const CapitalTrabajoPage = () => {
                 <Form layout="vertical" className="ant-advanced-search-form">
                     <Descriptions title="Solicitud Generada" bordered>
                         <Descriptions.Item label="Nro Solicitud">{dataIdSolicitud}</Descriptions.Item>
+                        <Descriptions.Item label="Moneda">{dataMoneda}</Descriptions.Item>
                     </Descriptions>
                 </Form>
             </ModalComponent>

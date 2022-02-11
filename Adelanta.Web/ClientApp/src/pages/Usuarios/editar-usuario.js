@@ -284,7 +284,7 @@ export const EditarUsuariosPage = () => {
 										error={formik.errors.idEstado}
 										touched={formik.touched.idEstado}
 										title="Rol:"
-										options={[{ value: 1, label: 'Administrador' }, { value: 2, label: 'Comercial' }, { value: 3, label: 'Operaciones' }, { value: 4, label: 'Clientes' }]}
+										options={[{ value: 1, label: 'Administrador' }, { value: 2, label: 'Comercial' }, { value: 3, label: 'Operaciones' }, { value: 4, label: 'Clientes' }, { value: 5, label: 'Test' }]}
 									>
 									</SelectComponent>
 								</Col>

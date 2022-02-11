@@ -92,5 +92,69 @@ namespace Adelanta.API.Services
                 }
             }            
         }
+        public static async Task<string> addInvoiceConformity(string trama)
+        {
+            var jsonSerializerOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
+            IConfigurationBuilder builder = new ConfigurationBuilder();
+            builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
+            var root = builder.Build();
+            using (var httpClient = new HttpClient())
+            {
+                Dictionary<string, string> authenticationCredentials = root.GetSection("Authentication:Credentials").GetChildren().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+                Log.grabarLog("Llamando Token");
+                FormUrlEncodedContent content = new FormUrlEncodedContent(authenticationCredentials);
+                var httpRespuestaToken = await httpClient.PostAsync(root.GetSection("Authentication:URL").Value, content).ConfigureAwait(false);
+                Log.grabarLog("Termino Llamando Token");
+                var respuestaToken = JsonConvert.DeserializeObject<Token>(await httpRespuestaToken.Content.ReadAsStringAsync().ConfigureAwait(false));
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", respuestaToken.AccessToken);
+                httpClient.DefaultRequestHeaders.Add("x-api-key", "ZHTPyt9lRe6XCmqvDdrsMkzB77JrOtRlspXyJ100");
+                Log.grabarLog("Inicio invoce Token");
+                var contentBody = new StringContent(trama, Encoding.UTF8, "application/json");
+                var respuesta = await httpClient.PutAsync("https://api.qae.cavali.com.pe/factrack/v2/add-invoice-conformity", contentBody).ConfigureAwait(false);
+                Log.grabarLog("Fin");
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    Log.grabarLog("ResultadoOK" + respuesta.ToString());
+                    return await respuesta.Content.ReadAsStringAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    Log.grabarLog("ResultadoERROR");
+                    return string.Empty;
+                }
+            }
+        }
+        public static async Task<string> startAcv(string trama)
+        {
+            var jsonSerializerOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
+            IConfigurationBuilder builder = new ConfigurationBuilder();
+            builder.AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"));
+            var root = builder.Build();
+            using (var httpClient = new HttpClient())
+            {
+                Dictionary<string, string> authenticationCredentials = root.GetSection("Authentication:Credentials").GetChildren().Select(x => new KeyValuePair<string, string>(x.Key, x.Value)).ToDictionary(x => x.Key, x => x.Value);
+                Log.grabarLog("Llamando Token");
+                FormUrlEncodedContent content = new FormUrlEncodedContent(authenticationCredentials);
+                var httpRespuestaToken = await httpClient.PostAsync(root.GetSection("Authentication:URL").Value, content).ConfigureAwait(false);
+                Log.grabarLog("Termino Llamando Token");
+                var respuestaToken = JsonConvert.DeserializeObject<Token>(await httpRespuestaToken.Content.ReadAsStringAsync().ConfigureAwait(false));
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", respuestaToken.AccessToken);
+                httpClient.DefaultRequestHeaders.Add("x-api-key", "ZHTPyt9lRe6XCmqvDdrsMkzB77JrOtRlspXyJ100");
+                Log.grabarLog("Inicio invoce Token");
+                var contentBody = new StringContent(trama, Encoding.UTF8, "application/json");
+                var respuesta = await httpClient.PutAsync("https://api.qae.cavali.com.pe/factrack/v2/start-acv", contentBody).ConfigureAwait(false);
+                Log.grabarLog("Fin");
+                if (respuesta.IsSuccessStatusCode)
+                {
+                    Log.grabarLog("ResultadoOK" + respuesta.ToString());
+                    return await respuesta.Content.ReadAsStringAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    Log.grabarLog("ResultadoERROR");
+                    return string.Empty;
+                }
+            }
+        }
     }
 }

@@ -56,6 +56,10 @@ export const NuevaSolicitudPage = () => {
       title: "Nro Documentos",
       dataIndex: "cantidadDoc",
     },
+    {
+      title: "Observación",
+      dataIndex: "mensaje",
+    }
   ];
   const handleupload = async (file) => {
     try {
@@ -65,7 +69,7 @@ export const NuevaSolicitudPage = () => {
           reader.fileName = file.name;
           reader.onload = (file) => {
             const xml = file.target.result;
-            const jsonDataFromXml = new XMLParser().parseFromString(xml, mime.XML);
+            const jsonDataFromXml = new XMLParser().parseFromString(xml.replace(/<\!--.*?-->/g, ""), mime.XML);
             const detalle = {};
             jsonDataFromXml.children.forEach((nodo) => {
               if (nodo.name === "cac:AccountingCustomerParty") {

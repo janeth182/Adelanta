@@ -1,28 +1,15 @@
 import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import {
-    PageHeader,
-    Row,
-    Col,
-    Card,
-    Table,
-    Button,
-    Space,
-    Checkbox,
-    message,
-    Form,
-    Descriptions,
-    notification
-} from "antd";
+import { PageHeader, Row, Col, Card, Table, Button, Space, Checkbox, Form, Descriptions, notification } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { listarDocumentosFactrack, documentosConfirmarFactrack } from "../../../services/documentoService";
+import { listarDocumentosFactrack, documentosConfirmarFactrack, documentosEnviarConformidadCavali, documentoSolicitarAprobacion } from "../../../services/documentoService";
 import { ModalComponent } from "../../../components/modal/modal";
-import { estados, mensajeError } from "../../../utils/constant";
+import { estados, mensajeError, mensajeOK } from "../../../utils/constant";
 import { AuthContext } from "../../../context/authProvider";
 import { useFormik } from "formik";
 export const ConformidadPagadorPage = () => {
@@ -124,6 +111,24 @@ export const ConformidadPagadorPage = () => {
             },
         },
         {
+            title: "Actualizar",
+            dataIndex: "tipoOperacion",
+            render: (_, record) => {
+                if (record.estado !== 5) {
+                    return (
+                        <>
+                            <Checkbox
+                                onChange={onChangeChecked}
+                                name={"actualizar"}
+                                value={record.idDocumento}
+                                data-sol={record.idSolicitud}
+                            ></Checkbox>
+                        </>
+                    );
+                }
+            },
+        },
+        {
             title: "Confirmar",
             dataIndex: "tipoOperacion",
             render: (_, record) => {
@@ -170,19 +175,25 @@ export const ConformidadPagadorPage = () => {
                 data.append("json", JSON.stringify(lista));
                 const rpta = await documentosConfirmarFactrack(data);
                 if (rpta.status === 204) {
-                    debugger
-                    cargarDatos();
-                    for (let i = 0; i < cantidadControles; i++) {
-                        if (document.getElementsByName("confirmar")[i].checked) {
-                            document.getElementsByName("confirmar")[i].click();
+                    let data = new FormData();
+                    data.append("json", JSON.stringify(lista));
+                    const rpta = await documentoSolicitarAprobacion(data);
+                    if (rpta.status === 204) {
+                        cargarDatos();
+                        for (let i = 0; i < cantidadControles; i++) {
+                            if (document.getElementsByName("confirmar")[i].checked) {
+                                document.getElementsByName("confirmar")[i].click();
+                            }
                         }
+                        notification['success']({
+                            message: 'Se proceso correctamente',
+                            description:
+                                'Los documentos enviados han si actualizados correctamente.',
+                        });
+                        setLoadingApi(false);
+                    } else {
+                        setLoadingApi(false);
                     }
-                    notification['success']({
-                        message: 'Se proceso correctamente',
-                        description:
-                            'Los documentos enviados han si actualizados correctamente.',
-                    });
-                    setLoadingApi(false);
                 } else {
                     setLoadingApi(false);
                 }
@@ -199,7 +210,84 @@ export const ConformidadPagadorPage = () => {
             suscribe = false;
         };
     };
+    const actualizarConformidad = async () => {
 
+        let suscribe = true;
+        (async () => {
+            setLoadingApi(true);
+            try {
+                const control = document.getElementsByName("actualizar");
+                const cantidadControles = control.length;
+                const solicitudes = [];
+                const lista = [];
+                if (validarCantidadChecked()) {
+                    for (let i = 0; i < cantidadControles; i++) {
+                        if (control[i].checked === true) {
+                            const documento = {
+                                idDocumento: control[i].value,
+                                idSolicitud: control[i].getAttribute("data-sol"),
+                                estado: estados.CONFORMIDAD_EXPRESA,
+                                usuario: user.usuario
+                            };
+                            solicitudes.push({
+                                idSolicitud: control[i].getAttribute("data-sol")
+                            });
+                            lista.push(documento);
+                        }
+                    }
+                    const solicitudesFilter = [...new Map(solicitudes.map(item => [item.idSolicitud, item])).values()];
+                    console.log(solicitudesFilter)
+                    for (let i = 0; i < solicitudesFilter.length; i++) {
+                        let documentosEnviar = [];
+                        for (let s = 0; s < lista.length; s++) {
+                            if (solicitudesFilter[i].idSolicitud === lista[s].idSolicitud) {
+                                documentosEnviar.push(lista[s]);
+                            }
+                        }
+
+                        let data = new FormData();
+                        data.append("json", JSON.stringify(documentosEnviar));
+                        data.append("idSolicitud", solicitudesFilter[i].idSolicitud);
+                        const rpta = await documentosEnviarConformidadCavali(data);
+                        if (rpta.status === 204) {
+                            cargarDatos();
+                            notification['success']({
+                                message: `Se proceso correctamente la solicitud ${solicitudesFilter[i].idSolicitud}`,
+                                description:
+                                    mensajeOK.CORRECTO_CAVALI,
+                            });
+                        } else {
+                            setLoadingApi(false);
+                        }
+                    }
+                    setLoadingApi(false);
+                } else {
+                    setLoadingApi(false);
+                }
+            } catch (error) {
+                setLoadingApi(false);
+                notification['error']({
+                    message: 'Error en el proceso',
+                    description:
+                        mensajeError.GENERAL,
+                });
+            }
+        })();
+        return () => {
+            suscribe = false;
+        };
+    }
+    const validarCantidadChecked = () => {
+        debugger
+        let cantidad = 0;
+        const cantidadControles = document.getElementsByName("actualizar").length;
+        for (let i = 0; i < cantidadControles; i++) {
+            if (document.getElementsByName("actualizar")[i].checked) {
+                cantidad++;
+            }
+        }
+        return cantidad > 0 ? true : false;
+    }
     useEffect(() => {
         cargarDatos();
     }, []);
@@ -247,6 +335,14 @@ export const ConformidadPagadorPage = () => {
                         extra={
                             <>
                                 <Space>
+                                    <Button
+                                        className="primary-b"
+                                        type="primary"
+                                        icon={<CheckCircleOutlined style={{ fontSize: "16px" }} />}
+                                        onClick={actualizarConformidad}
+                                    >
+                                        Actualizar Comformidad
+                                    </Button>
                                     <Button
                                         className="primary-b"
                                         type="primary"

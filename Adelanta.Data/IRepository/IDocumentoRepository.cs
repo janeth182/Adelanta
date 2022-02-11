@@ -17,6 +17,10 @@ namespace Adelanta.Data.IRepository
         Task<string> ListarDocumentosFiltros(string Json);
         Task<string> EnviarCavali(string Json);
         Task<bool> DocumentosActualizarEnvioCavali(string DocumentoJson, string RespuestaCavaliJson);
+        Task<bool> DocumentosActualizarEnvioConformidadCavali(string DocumentoJson, string RespuestaCavaliJson);
         Task<string> ListarDocumentosDesembolso(string Usuario);
+        Task<string> EnviarConformidadCavali(string Json);
+        Task<string> EnviarAnotacionCuenta(string Json);
+        Task<bool> DocumentosActualizarAnotacionCuenta(string DocumentoJson, string RespuestaCavaliJson);
     }
 }

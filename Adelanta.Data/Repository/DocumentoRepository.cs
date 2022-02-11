@@ -58,6 +58,14 @@ namespace Adelanta.Data.Repository
             var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
             return result.ToList()[0];
         }
+        public async Task<string> EnviarConformidadCavali(string Json)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_ENVIAR_CONFORMIDAD_CAVALI";
+            var values = new { p_dataJSON = Json };
+            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
+            return result.ToList()[0];
+        }
         public async Task<bool> DocumentosActualizarEstado(string Json)
         {
             var db = dbConnection();
@@ -95,6 +103,30 @@ namespace Adelanta.Data.Repository
             var db = dbConnection();
             var sp = "SP_DOCUMENTO_ACTUALIZAR_ENVIO_CAVALI";
             var values = new { p_DocumentoJSON = DocumentoJson, p_RespuestaCavaliJSON = RespuestaCavaliJson };
+            var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
+            return result > 0;
+        }
+        public async Task<bool> DocumentosActualizarEnvioConformidadCavali(string DocumentoJson, string RespuestaCavaliJson)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_ACTUALIZAR_ENVIO_CONFORMIDAD_CAVALI";
+            var values = new { p_RespuestaCavaliJSON = RespuestaCavaliJson, p_DocumentoJSON = DocumentoJson };
+            var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
+            return result > 0;
+        }
+        public async Task<string> EnviarAnotacionCuenta(string Json)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_ENVIAR_ANOTACION_CUENTA";
+            var values = new { p_dataJSON = Json };
+            var result = await db.QueryAsync<string>(sp, values, commandType: CommandType.StoredProcedure);
+            return result.ToList()[0];
+        }
+        public async Task<bool> DocumentosActualizarAnotacionCuenta(string DocumentoJson, string RespuestaCavaliJson)
+        {
+            var db = dbConnection();
+            var sp = "SP_DOCUMENTO_ACTUALIZAR_ANOTACION_CUENTA";
+            var values = new { p_RespuestaCavaliJSON = RespuestaCavaliJson, p_DocumentoJSON = DocumentoJson };
             var result = await db.ExecuteAsync(sp, values, commandType: CommandType.StoredProcedure);
             return result > 0;
         }

@@ -26,6 +26,7 @@ export const RespuestaPagadorPage = () => {
     initialValues: {
       idSolicitud: '',
       cedente: '',
+      aceptante: '',
       tipoOperacion: '',
       tasaNominalMensual: 0,
       tasaNominalAnual: 0,
@@ -175,6 +176,7 @@ export const RespuestaPagadorPage = () => {
         if (suscribe) {
           formik.initialValues.idSolicitud = rpta.data[0].idSolicitud;
           formik.initialValues.cedente = rpta.data[0].cedente;
+          formik.initialValues.aceptante = rpta.data[0].aceptante;
           formik.initialValues.tipoOperacion = rpta.data[0].tipoOperacion;
           formik.initialValues.tasaNominalMensual = rpta.data[0].tasaNominalMensual;
           formik.initialValues.tasaNominalAnual = rpta.data[0].tasaNominalAnual;
@@ -383,7 +385,8 @@ export const RespuestaPagadorPage = () => {
                   netoConfirmado: document.getElementsByName("neto")[i].value.replaceAll(',', ''),
                   idDocumento: document.getElementsByName("neto")[i].getAttribute("data"),
                   estado: estados.PENDIENTE_CAVALI,
-                  idSolicitud: document.getElementsByName("neto")[i].getAttribute("data-solicitud")
+                  idSolicitud: document.getElementsByName("neto")[i].getAttribute("data-solicitud"),
+                  usuario: user.usuario
                 };
                 solicitudes.push({
                   idSolicitud: document.getElementsByName("neto")[i].getAttribute("data-solicitud")
@@ -560,7 +563,7 @@ export const RespuestaPagadorPage = () => {
                     onClick={enviarCavali}
                     loading={loadingApi}
                   >
-                    Enviar Cavali
+                    Registro de Facturas
                   </Button>
                 </Space>
               </>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Table, Button, Space, Checkbox, Form, Descriptions, notification, } from "antd";
+import { PageHeader, Row, Col, Card, Table, Button, Space, Checkbox, Form, Descriptions, notification, DatePicker, InputNumber, Input } from "antd";
 import { SendOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
@@ -13,7 +13,7 @@ import { estados, mensajeError } from "../../../utils/constant";
 import { ModalComponent } from "../../../components/modal/modal";
 import { AuthContext } from "../../../context/authProvider";
 import { useFormik } from "formik";
-
+import moment from "moment";
 export const LiqSolicitarAprobacionPage = () => {
     const { logoutUser, user } = useContext(AuthContext);
     const { isModal, showModal, hiddenModal } = useModal();
@@ -91,6 +91,9 @@ export const LiqSolicitarAprobacionPage = () => {
     }
     function onChange(date, dateString) {
         console.log(date, dateString);
+    }
+    function disabledDate(current) {
+        return current && current < moment().endOf('day');
     }
     const columns = [
         {
@@ -203,6 +206,47 @@ export const LiqSolicitarAprobacionPage = () => {
             title: "Desembolso",
             dataIndex: "montoDesembolso",
         },
+        {
+            title: "Descuento",
+            dataIndex: "descuento",
+            render: (text, _, index) => {
+                return (
+                    <>
+                        <InputNumber
+                            value={text}
+                            formatter={(value) =>
+                                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                            }
+                            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                            /*onChange={(v) => onChangeNetoConfirmado(v, index)}*/
+                            name={"descuento"}
+                            data={_.idDocumento}
+                            data-solicitud={_.idSolicitud}
+                        />
+                    </>
+                );
+            },
+        },
+        {
+            title: "Total Desembolso",
+            dataIndex: "totalDesembolso",
+        },
+        {
+            title: "Observación",
+            dataIndex: "observacion",
+            render: (text, _, index) => {
+                return (
+                    <>
+                        <Input
+                            value={text}
+                            name={"observacion"}
+                            data={_.idDocumento}
+                            data-solicitud={_.idSolicitud}
+                        />
+                    </>
+                );
+            },
+        },
     ];
 
     useEffect(() => {
@@ -309,6 +353,9 @@ export const LiqSolicitarAprobacionPage = () => {
             suscribe = false;
         };
     }
+    const guardarDetalle = async () => {
+        hiddenModal();
+    }
     return (
         <ContentComponent>
             <PageHeader
@@ -365,8 +412,11 @@ export const LiqSolicitarAprobacionPage = () => {
                 title="Detalle de la Liquidacion"
                 onClose={hiddenModal}
                 show={isModal}
-                width={1000}
+                width={1200}
                 footer={[
+                    <Button className="primary-b" type="primary" onClick={guardarDetalle}>
+                        Guardar
+                    </Button>,
                     <Button className="primary-b" type="primary" onClick={hiddenModal}>
                         Salir
                     </Button>,
@@ -392,7 +442,11 @@ export const LiqSolicitarAprobacionPage = () => {
                     </Descriptions>
                     <Descriptions title="Datos Adicionales">
                         <Descriptions.Item label="Fecha Operación" span={1}>
-                            {formik.values.fechaOperacion}
+                            <DatePicker
+                                onChange={onChange}
+                                format={"DD/MM/YYYY"}
+                                disabledDate={disabledDate}
+                                size={'small'} />
                         </Descriptions.Item>
                         <Descriptions.Item label="TNM Op." span={1}>
                             {formik.values.tasaNominalMensual} %

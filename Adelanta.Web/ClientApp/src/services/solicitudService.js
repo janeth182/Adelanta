@@ -15,3 +15,6 @@ export const obtenerSolicitudDetalleLiquidacion = async (nroLiquidacion) => {
 export const crearSolicitudCapitalTrabajo = async (formData) => {
   return await formColeccion.post(`Solicitud/CrearSolicitudCapitalTrabajo`, formData);
 };
+export const eliminarSolicitud = async (IdSolicitud) => {
+  return await api.delete(`Solicitud/EliminarSolicitud/${IdSolicitud}`);
+};

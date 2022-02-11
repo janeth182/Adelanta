@@ -12,6 +12,9 @@ export const documentosActualizar = async (data) => {
 export const documentosEnviarCavali = async (data) => {
   return await formColeccion.post(`Documento/DocumentosEnviarCAVALI`, data);
 };
+export const documentosEnviarConformidadCavali = async (data) => {
+  return await formColeccion.post(`Documento/DocumentosEnviarConformityCavali`, data);
+};
 export const documentosActualizarEstado = async (data) => {
   return await formColeccion.post(`Documento/ActualizarEstado`, data);
 };

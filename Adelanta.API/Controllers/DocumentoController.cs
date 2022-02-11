@@ -110,6 +110,9 @@ namespace Adelanta.API.Controllers
                 {
                     await smtp.SendAsync(oMensajeBE);
                 }
+                var resultadoJsonEnviarCavali = await _documentoRepository.EnviarAnotacionCuenta(Json);
+                var response = await CavaliAPI.startAcv(resultadoJsonEnviarCavali).ConfigureAwait(false);
+                var resultado = await _documentoRepository.DocumentosActualizarAnotacionCuenta(Json, response);
                 return NoContent();
             }
             catch (Exception ex)
@@ -197,6 +200,27 @@ namespace Adelanta.API.Controllers
                 var resultadoJsonEnviarCavali = await _documentoRepository.EnviarCavali(Json);
                 var response = await CavaliAPI.addInvoiceXML(resultadoJsonEnviarCavali).ConfigureAwait(false);
                 var resultado = await _documentoRepository.DocumentosActualizarEnvioCavali(Json, response);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex}");
+            }
+        }
+        [HttpPost("/api/Documento/DocumentosEnviarConformityCavali")]
+        public async Task<IActionResult> DocumentosEnviarConformityCavali()
+        {
+            try
+            {
+                string Json = Request.Form["json"];
+                if (Json == null)
+                    return BadRequest();
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var resultadoJsonEnviarCavali = await _documentoRepository.EnviarConformidadCavali(Json);
+                var response = await CavaliAPI.addInvoiceConformity(resultadoJsonEnviarCavali).ConfigureAwait(false);
+                var resultado = await _documentoRepository.DocumentosActualizarEnvioConformidadCavali(Json, response);
                 return NoContent();
             }
             catch (Exception ex)

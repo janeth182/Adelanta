@@ -29,20 +29,20 @@ namespace Adelanta.API.Controllers
                 var files = Request.Form.Files;
                 var folderName = Path.Combine("Documentos");
                 var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
-                string [] JsonFiles = new string[files.Count];                
+                string[] JsonFiles = new string[files.Count];
                 if (files.Any(f => f.Length == 0))
                 {
                     return BadRequest();
                 }
                 foreach (var file in files)
                 {
-                    var path = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');      
+                    var path = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
                     var fullPath = Path.Combine(pathToSave, Path.GetFileName(path));
                     var dbPath = Path.Combine(folderName, Path.GetFileName(path));
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
-                    }                   
+                    }
                 }
                 SolicitudBE oSolicitudBE = new SolicitudBE();
                 oSolicitudBE.TipoOperacion = Request.Form["tipoOperacion"];
@@ -52,7 +52,7 @@ namespace Adelanta.API.Controllers
                 oSolicitudBE.RucAceptante = Request.Form["rucAceptante"];
                 oSolicitudBE.Moneda = Request.Form["moneda"];
                 oSolicitudBE.DocumentoJson = Request.Form["detalle"];
-                oSolicitudBE.Usuario = Request.Form["usuario"];                
+                oSolicitudBE.Usuario = Request.Form["usuario"];
                 var resultadoInsertar = await _solicitudRepository.CrearSolicitud(oSolicitudBE);
                 /*string[] aResultado = resultadoInsertar.Split('|');
                 oSolicitudBE.IdSolicitud = Convert.ToInt32(aResultado[1]);                
@@ -74,11 +74,11 @@ namespace Adelanta.API.Controllers
                 var resultado = await _solicitudRepository.ListarSolicitudes();
                 return Ok(JsonSerializer.Deserialize<dynamic>(resultado));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.grabarLog(ex);
                 return StatusCode(500, $"Internal server error: {ex}");
-            }       
+            }
         }
         [HttpGet("/api/Solicitud/ObtenerSolicitudDetalle/{IdSolicitud}")]
         public async Task<IActionResult> ObtenerSolicitudDetalle([FromRoute] int IdSolicitud)
@@ -124,7 +124,21 @@ namespace Adelanta.API.Controllers
             {
                 Log.grabarLog(ex);
                 return StatusCode(500, $"Internal server error: {ex}");
-            }        
+            }
+        }
+        [HttpDelete("/api/Solicitud/EliminarSolicitud/{IdSolicitud}")]
+        public async Task<IActionResult> EliminarSolicitud([FromRoute] int IdSolicitud)
+        {
+            try
+            {
+                await _solicitudRepository.EliminarSolicitud(IdSolicitud);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                Log.grabarLog(ex);
+                return StatusCode(500, $"Internal server error: {ex}");
+            }
         }
     }
 }

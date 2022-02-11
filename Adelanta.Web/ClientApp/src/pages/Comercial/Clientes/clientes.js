@@ -1,59 +1,63 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { PageHeader, Row, Col, Card, Table, Button, Space, message} from "antd";
+import { PageHeader, Row, Col, Card, Table, Button, Space, message } from "antd";
 import { EditOutlined, DeleteOutlined, PlusSquareOutlined } from "@ant-design/icons";
 import { ContentComponent } from "../../../components/layout/content";
 import { getColumnSearchProps } from "../../../components/table/configTable";
 import { useModal } from "../../../hooks/useModal";
 import { useMessageApi } from "../../../hooks/useMessage";
 import { MessageApi } from "../../../components/message/message";
-import { respuesta }from "../../../model/mocks/clientes";
+import { respuesta } from "../../../model/mocks/clientes";
 import { ExportCSV } from '../../../utils/excel';
+import { listarClientes } from "../../../services/clienteService";
+import { AuthContext } from "../../../context/authProvider";
 export const ClientesPage = () => {
+	const { logoutUser, user } = useContext(AuthContext);
 	const { isModal, showModal, hiddenModal } = useModal();
 	const { isMessage, addMessage, messageInfo } = useMessageApi();
 	const [page, setPage] = useState(1);
-	const [pageSize, setPageSize] = useState(10);	
-	const [dataUsuario, setDataUsuario] = useState([]);
-	const [loadingApi, setLoadingApi] = useState(false);	
+	const [pageSize, setPageSize] = useState(10);
+	const [dataCliente, setDataCliente] = useState([]);
+	const [loadingApi, setLoadingApi] = useState(false);
 	const history = useHistory();
+	const urlEdicion = `${process.env.REACT_APP_RUTA_SERVIDOR}comercial/editar-cliente/`;
 	const columns = [
-        {
+		{
 			title: "Nro",
 			dataIndex: "idCliente",
 			...getColumnSearchProps("idCliente"),
-		},	
+		},
 		{
 			title: "Nombre / Razón Social",
-			dataIndex: "nombre",
-			...getColumnSearchProps("nombre"),
-		},	       
-        {
-			title: "Dirección",
-			dataIndex: "direccion",
-			...getColumnSearchProps("direccion"),   	
+			dataIndex: "razonSocial",
+			...getColumnSearchProps("razonSocial"),
 		},
-        {
+		{
 			title: "RUC",
 			dataIndex: "ruc",
-			...getColumnSearchProps("ruc"),   	
+			...getColumnSearchProps("ruc"),
 		},
-        {
+		{
+			title: "Dirección Oficina",
+			dataIndex: "direccionOficina",
+			...getColumnSearchProps("direccionOficina"),
+		},
+		{
 			title: "Contacto",
-			dataIndex: "contacto",
-			...getColumnSearchProps("contacto"),   	
+			dataIndex: "nombreContacto",
+			...getColumnSearchProps("nombreContacto"),
 		},
-        {
+		{
 			title: "Telefono",
-			dataIndex: "telefono",
-			...getColumnSearchProps("telefono"),   	
+			dataIndex: "telefonoContacto",
+			...getColumnSearchProps("telefonoContacto"),
 		},
-        {
+		{
 			title: "Correo",
-			dataIndex: "correo",
-			...getColumnSearchProps("correo"),   	
+			dataIndex: "emailContacto",
+			...getColumnSearchProps("emailContacto"),
 		},
-        {
+		{
 			title: "Acción",
 			dataIndex: "actiion",
 			width: 100,
@@ -61,30 +65,37 @@ export const ClientesPage = () => {
 				return (
 					<>
 						<Button
-                            className="primary-b"
+							className="primary-b"
 							type="primary"
 							icon={<EditOutlined />}
 							onClick={() =>
-								console.log('ss')
+								history.push({ pathname: `${urlEdicion}${record.idCliente}`, state: record.idCliente })
 							}
-						></Button>												
+						></Button>
 					</>
 				);
 			},
-		},     		
+		},
 	];
-			
+
 	useEffect(() => {
+		cargarDatos();
+	}, []);
+
+	const confirm = async () => {
+		message.success('Se proceso correctamente.');
+	}
+	const cargarDatos = async () => {
 		let suscribe = true;
 		(async () => {
 			setLoadingApi(true);
 			try {
-				const rpta = respuesta;
-				if (suscribe) {
-                    console.log(rpta.data)
-                    handleFormatColumns(rpta.data);
-                    setLoadingApi(false);
-                }
+				const rpta = await listarClientes(user.usuario);
+				if (rpta.status === 200) {
+					console.log(rpta.data);
+					setDataCliente(rpta.data);
+					setLoadingApi(false);
+				}
 			} catch (error) {
 				setLoadingApi(false);
 				console.log(error.response);
@@ -93,19 +104,6 @@ export const ClientesPage = () => {
 		return () => {
 			suscribe = false;
 		};
-	}, []);
-
-	const handleFormatColumns = (dataArray = []) => {
-		const data = dataArray.reduce((ac, el) => {
-			ac.push({
-				...el
-			});
-			return ac;
-		}, []);
-		setDataUsuario(data);
-	};
-	const confirm = async () => {
-		message.success('Se proceso correctamente.');		
 	}
 	return (
 		<ContentComponent>
@@ -114,7 +112,7 @@ export const ClientesPage = () => {
 				className="site-page-header"
 				onBack={() => null}
 				title=""
-				style={{backgroundcolor:'#f0f2f5'}}
+				style={{ backgroundcolor: '#f0f2f5' }}
 			/>
 			<MessageApi
 				type={messageInfo.type}
@@ -129,24 +127,24 @@ export const ClientesPage = () => {
 						actions={[]}
 						extra={
 							<>
-							 <Space>
-								<Button								
-									className="primary-b"
-									type="primary"
-									icon={<PlusSquareOutlined  style={{ fontSize: '16px'}}/>}								
-									onClick={confirm}
-								>
-								Nuevo Cliente
-								</Button>
-                                <ExportCSV csvData={respuesta.data} fileName={'GeneracionArchivo'} />  
-							 </Space>							
-							</>						
+								<Space>
+									<Button
+										className="primary-b"
+										type="primary"
+										icon={<PlusSquareOutlined style={{ fontSize: '16px' }} />}
+										onClick={confirm}
+									>
+										Nuevo Cliente
+									</Button>
+									<ExportCSV csvData={respuesta.data} fileName={'GeneracionArchivo'} />
+								</Space>
+							</>
 						}
-					>	
+					>
 						<Table
 							loading={loadingApi}
 							columns={columns}
-							dataSource={dataUsuario}
+							dataSource={dataCliente}
 							size="middle"
 							pagination={{
 								current: page,
@@ -159,7 +157,7 @@ export const ClientesPage = () => {
 						/>
 					</Card>
 				</Col>
-			</Row>            
+			</Row>
 		</ContentComponent>
 	);
 };
