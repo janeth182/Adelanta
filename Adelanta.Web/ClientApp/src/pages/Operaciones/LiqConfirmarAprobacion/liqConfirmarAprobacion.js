@@ -143,12 +143,23 @@ export const LiqConfirmarAprobacionPage = () => {
             dataIndex: "fechaPago",
         },
         {
+            title: "Monto Pago",
+            dataIndex: "netoConfirmado",
+        },
+        {
             title: "F. resguardo",
             dataIndex: "fondoResguardo",
         },
         {
-            title: "Monto Pago",
-            dataIndex: "montoTotalVenta",
+            title: "Monto Neto",
+            dataIndex: "netoConfirmado",
+            render: (text, _, index) => {
+                return (
+                    <>
+                        <label>{_.netoConfirmado - _.fondoResguardo}</label>
+                    </>
+                );
+            },
         },
         {
             title: "Intereses",

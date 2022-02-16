@@ -37,9 +37,9 @@ export const CapitalTrabajoPage = () => {
     const [dataGastos, setDataGastos] = useState(0);
     const [dataTotalFacturar, setDataTotalFacturar] = useState(0);
     const [dataTotalDesembolsar, setDataTotalDesembolsar] = useState(0);
-    const [dataComisionCartaNotarial, setDataComisionCartaNotarial] = useState();
-    const [dataServicioCobranza, setDataServicioCobranza] = useState();
-    const [dataServicioCustodia, setDataServicioCustodia] = useState();
+    const [dataComisionCartaNotarial, setDataComisionCartaNotarial] = useState(0);
+    const [dataServicioCobranza, setDataServicioCobranza] = useState(0);
+    const [dataServicioCustodia, setDataServicioCustodia] = useState(0);
     const [dataIdSolicitud, setDataIdSolicitud] = useState();
     const [dataMoneda, setDataMoneda] = useState('PEN');
     const [dataTipo, setDataTipo] = useState('CB');
@@ -117,7 +117,7 @@ export const CapitalTrabajoPage = () => {
         const montoDescontar = dataTipo === 'CN' ? parseFloat(((360 * capitalTrabajo) + (360 * gatosSinIGV)) / (360 - (dias * (tasaMensual * 12) * 1.18))).toFixed(2) : 0;
         const interes = dataTipo === 'CN' ? parseFloat(montoDescontar * dias * ((tasaMensual * 12) / 360) * 1.18).toFixed(2) : parseFloat((+capitalTrabajo) * (((+tasaAnual) * 12) / 360) * dias * 1.18).toFixed(2);
         const totalFacturar = parseFloat((+interes) + (+gastos)).toFixed(2);
-        const totalDesembolsar = dataTipo === 'CN' ? dataCapitalTrabajo : parseFloat(capitalTrabajo + (+totalFacturar)).toFixed(2);
+        const totalDesembolsar = dataTipo === 'CN' ? parseFloat(capitalTrabajo).toFixed(2) : parseFloat(capitalTrabajo + (+totalFacturar)).toFixed(2);
         setDataIntereses(interes);
         setDataGastos(gastos);
         setDataFechaPago(startdate);
@@ -280,7 +280,7 @@ export const CapitalTrabajoPage = () => {
                                     </Form.Item>
                                     <Form.Item bordered={false}
                                         name={['solicitud', 'montoGarantia']}
-                                        label="Monto de la Garantia:"
+                                        label="Monto Capital de Trabajo:"
                                         onChange={ingresarMontoGarantia}
                                         rules={[
                                             {
